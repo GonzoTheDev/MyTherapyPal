@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "159382536980",
+    "project_id": "mytherapypal",
+    "storage_bucket": "mytherapypal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159382536980:android:fe2a494fc91b980f333801",
+        "android_client_info": {
+          "package_name": "com.example.my_therapy_pal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqtGFY94S4kHd0rfuhPSzxjkPhfjKHcjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
