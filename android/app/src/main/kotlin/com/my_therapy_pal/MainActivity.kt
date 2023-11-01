@@ -1,4 +1,4 @@
-package com.example.my_therapy_pal
+package com.my_therapy_pal
 
 import io.flutter.embedding.android.FlutterActivity
 
