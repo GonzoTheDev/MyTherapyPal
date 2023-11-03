@@ -63,19 +63,19 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCYGvhhUZWwWaDFZz8Aw03kAJxPLojDmN4',
-    appId: '1:159382536980:ios:61703fb25c78994e333801',
+    appId: '1:159382536980:ios:fda062a6a35c217a333801',
     messagingSenderId: '159382536980',
     projectId: 'mytherapypal',
     storageBucket: 'mytherapypal.appspot.com',
-    iosBundleId: 'com.example.myTherapyPal',
+    iosBundleId: 'com.myTherapyPal',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCYGvhhUZWwWaDFZz8Aw03kAJxPLojDmN4',
-    appId: '1:159382536980:ios:6e76b7d0b0b3b34a333801',
+    appId: '1:159382536980:ios:bed67e6e406d2f1f333801',
     messagingSenderId: '159382536980',
     projectId: 'mytherapypal',
     storageBucket: 'mytherapypal.appspot.com',
-    iosBundleId: 'com.example.myTherapyPal.RunnerTests',
+    iosBundleId: 'com.myTherapyPal.RunnerTests',
   );
 }
