@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
+// Main program function
 void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -13,12 +14,14 @@ void main() async{
 	runApp(MainApp());
   
 }
+
+// Create a user in firebase
 createUser(user, pass) async {
   try {
-  final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-    email: user,
-    password: pass,
-  );
+    final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: user,
+      password: pass,
+    );
 } on FirebaseAuthException catch (e) {
   if (e.code == 'weak-password') {
     print('The password provided is too weak.');
@@ -29,12 +32,16 @@ createUser(user, pass) async {
   print(e);
 }
 }
+
+// Login a user in firebase
 loginUser(user, pass) async {
   UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
     email: user,
     password: pass
   );
 }
+
+// Main app widget
 class MainApp extends StatelessWidget {
   const MainApp({Key? key}) : super(key: key);
 	@override
@@ -48,8 +55,9 @@ class MainApp extends StatelessWidget {
 			home: const Login(title: 'MyTherapyPal'),
 		);
 	}
-  
 }
+
+// Login widget
 class Login extends StatefulWidget {
   final String title;
   const Login({Key? key, required this.title}) : super(key: key);
@@ -152,7 +160,7 @@ class _LoginState extends State<Login> {
   }
 }
 
-
+// Notes page widget
 class NoteHomePage extends StatefulWidget {
   const NoteHomePage({super.key, required this.email, required this.title});
   final String email;
