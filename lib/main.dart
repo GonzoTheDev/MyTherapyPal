@@ -1,9 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
+FirebaseAuth auth = FirebaseAuth.instance;
+
+void main() async{
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 	runApp(MainApp());
+  
+}
+createUser(user, pass) async {
+  try {
+  final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    email: user,
+    password: pass,
+  );
+} on FirebaseAuthException catch (e) {
+  if (e.code == 'weak-password') {
+    print('The password provided is too weak.');
+  } else if (e.code == 'email-already-in-use') {
+    print('The account already exists for that email.');
+  }
+} catch (e) {
+  print(e);
+}
+}
+loginUser(user, pass) async {
+  UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+    email: user,
+    password: pass
+  );
 }
 class MainApp extends StatelessWidget {
   const MainApp({Key? key}) : super(key: key);
@@ -18,6 +48,7 @@ class MainApp extends StatelessWidget {
 			home: const Login(title: 'MyTherapyPal'),
 		);
 	}
+  
 }
 class Login extends StatefulWidget {
   final String title;
@@ -84,8 +115,10 @@ class _LoginState extends State<Login> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        loginUser(emailController.text, passwordController.text);
+                        User? user = FirebaseAuth.instance.currentUser;
                         // Navigate the user to the Home page
-                        if (emailController.text == "sbw92@outlook.com" && passwordController.text == "test") {
+                        if (user!= null) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -95,10 +128,11 @@ class _LoginState extends State<Login> {
                             )),
                           );
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          createUser(emailController.text, passwordController.text );
+                          /*ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Invalid Credentials')),
-                            );
+                            );*/
                         }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
