@@ -1,3 +1,5 @@
+import 'package:my_therapy_pal/main.dart';
+
 import 'register_account.dart';
 import 'auth_service.dart';
 import 'account_homepage.dart';
@@ -5,8 +7,7 @@ import 'package:flutter/material.dart';
 
 
 class Login extends StatefulWidget {
-  final String title;
-  const Login({Key? key, required this.title}) : super(key: key);
+  const Login({Key? key}) : super(key: key);
 
   @override
   _LoginState createState() => _LoginState();
@@ -21,13 +22,25 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
-        centerTitle: true,
+        title: Text(
+            const MainApp().title,
+            style: const TextStyle(color: Colors.white),
+          ),
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 10,
+              ),
+            const Text(
+                'Login',
+                style: TextStyle(color: Colors.black, fontSize: 20,),
+              ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 20,
+            ),
             SizedBox(
               width: MediaQuery.of(context).size.width / 2,
               child: TextField(
@@ -60,9 +73,7 @@ class _LoginState extends State<Login> {
                 if (message!.contains('Success')) {
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                              builder: (context) => const AccountHomePage(
-                                title: 'My Account',
-                            )),
+                      builder: (context) => const AccountHomePage()),
                   );
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -71,7 +82,7 @@ class _LoginState extends State<Login> {
                   ),
                 );
               },
-              child: const Text('Login'),
+              child: const Text('Login', style: TextStyle(color: Colors.white),),
             ),
             const SizedBox(
               height: 30.0,
@@ -84,7 +95,7 @@ class _LoginState extends State<Login> {
                   ),
                 );
               },
-              child: const Text('Register Account'),
+              child: const Text('Create New Account'),
             ),
           ],
         ),

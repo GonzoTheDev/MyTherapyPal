@@ -59,18 +59,19 @@ logoutUser() async {
 */
 // Main app widget
 class MainApp extends StatelessWidget {
+  final String title = 'MyTherapyPal';	
   const MainApp({Key? key}) : super(key: key);
 	@override
 	Widget build(BuildContext context) {
     return FlutterSizer(
       builder: (context, orientation, screenType) {
       return MaterialApp(
-        title: 'MyTherapyPal',
+        title: title,
         theme: ThemeData(
           primarySwatch: Colors.cyan,
           scaffoldBackgroundColor: Color.fromARGB(255, 238, 235, 235),
         ),
-        home: const Login(title: 'MyTherapyPal'),
+        home: const Login(),
       );
 	});
   }

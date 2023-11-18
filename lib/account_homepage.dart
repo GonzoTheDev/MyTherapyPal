@@ -1,23 +1,18 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/login.dart';
+import 'package:my_therapy_pal/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Notes page widget
 class AccountHomePage extends StatefulWidget {
-  const AccountHomePage({super.key, required this.title});
-  final String title;
+  const AccountHomePage({Key? key}) : super(key: key);
 	@override
 	_AccountHomePageState createState() => _AccountHomePageState();
 }
 class _AccountHomePageState extends State < AccountHomePage > {
 	final TextEditingController _noteController = TextEditingController();
 	final List < String > _notes = [];
-  
-  // Logout a user in firebase
-  logoutUser() async {
-    await FirebaseAuth.instance.signOut();
-  }
   
 	@override
 	void initState() {
@@ -54,17 +49,20 @@ class _AccountHomePageState extends State < AccountHomePage > {
 	Widget build(BuildContext context) {
 		return Scaffold(
 			appBar: AppBar(
-				title: const Text(
-            'MyTherapyPal',
-            style: TextStyle(color: Colors.white),
+				title: Text(
+            const MainApp().title,
+            style: const TextStyle(color: Colors.white),
           ),
 			),
 			body: Column( 
 				children: < Widget > [
-          Text(
-            widget.title,
-            style: TextStyle(fontSize: 20),
-          ),
+          SizedBox(
+              height: MediaQuery.of(context).size.height / 40,
+              ),
+          const Text(
+              'My Account',
+              style: TextStyle(color: Colors.black, fontSize: 20,),
+            ),
 					Expanded(
 						child: ListView.builder(
 							itemCount: _notes.length,
@@ -72,7 +70,7 @@ class _AccountHomePageState extends State < AccountHomePage > {
 								return ListTile(
 									title: Text(_notes[index]),
 									trailing: IconButton(
-										icon: Icon(Icons.delete),
+										icon: const Icon(Icons.delete),
 										onPressed: () => _deleteNote(index),
 									),
 								);
@@ -80,13 +78,13 @@ class _AccountHomePageState extends State < AccountHomePage > {
 						),
 					),
 					Padding(
-						padding: EdgeInsets.all(8.0),
+						padding: const EdgeInsets.all(8.0),
 						child: TextField(
 							controller: _noteController,
 							decoration: InputDecoration(
 								labelText: 'Add a new note',
 								suffixIcon: IconButton(
-									icon: Icon(Icons.add),
+									icon: const Icon(Icons.add),
 									onPressed: _addNote,
 								),
 							),
@@ -98,11 +96,11 @@ class _AccountHomePageState extends State < AccountHomePage > {
                 child: Center(
                   child: ElevatedButton(
                     onPressed: () {
-                          logoutUser();
+                          AuthService().logoutUser();
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    const Login(title: 'Login Page')),
+                                    const Login()),
                             (route) => false);
                         }, 
                     child: const Text('Logout', style: TextStyle(color: Colors.white),),
