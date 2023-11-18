@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:my_therapy_pal/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,10 +12,10 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-	runApp(MainApp());
-  
+	runApp(const MainApp());
 }
 
+/*
 passwordMatch(pwd1, pwd2) {
   if (pwd1 == pwd2) {
     return true;
@@ -56,7 +56,7 @@ loginUser(user, pass) async {
 logoutUser() async {
   await FirebaseAuth.instance.signOut();
 }
-
+*/
 // Main app widget
 class MainApp extends StatelessWidget {
   const MainApp({Key? key}) : super(key: key);
@@ -75,7 +75,7 @@ class MainApp extends StatelessWidget {
 	});
   }
 }
-
+/*
 // Login widget
 class Login extends StatefulWidget {
   final String title;
@@ -437,4 +437,4 @@ class _NoteHomePageState extends State < NoteHomePage > {
 		);
 	}
 }
-
+*/
