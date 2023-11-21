@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
+
+  var db = FirebaseFirestore.instance;
 
   // Logout a user in firebase
   logoutUser() async {
@@ -20,6 +23,9 @@ class AuthService {
     required String email,
     required String password,
     required String passwordConfirm,
+    required String fname,
+    required String sname,
+    required String userType,
   }) async {
     if (!passwordMatch(password, passwordConfirm)) {
       return 'Passwords do not match';
@@ -27,11 +33,26 @@ class AuthService {
       return 'Password must be at least 6 characters';
     }else{
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+
+        // Create a new user in firebase
+        UserCredential result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+
+        // Get the new users uid
+        User? user = result.user;
+        final uid = user!.uid;
+
+        // Add a new document with the new users uid set as the document ID
+        db.collection("profiles").doc(uid).set({
+          "fname": fname,
+          "sname": sname,
+          "userType": userType
+          });
+
         return 'Success';
+
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
           return 'The password provided is too weak.';

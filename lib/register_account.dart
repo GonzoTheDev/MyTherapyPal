@@ -3,6 +3,7 @@ import 'auth_service.dart';
 import 'login.dart';
 import 'package:flutter/material.dart';
 
+
 class RegisterAccount extends StatefulWidget {
   const RegisterAccount({Key? key}) : super(key: key);
 
@@ -14,6 +15,19 @@ class _RegisterAccountState extends State<RegisterAccount> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _passwordConfirmController = TextEditingController();
+  final TextEditingController _fnameController = TextEditingController();
+  final TextEditingController _snameController = TextEditingController();
+
+    // Initial Selected Value 
+  String dropdownvalue = '';    
+  
+  // List of items in our dropdown menu 
+  var items = [     
+    '',
+    'Patient', 
+    'Therapist', 
+    'Admin', 
+  ]; 
 
   @override
   Widget build(BuildContext context) {
@@ -74,12 +88,73 @@ class _RegisterAccountState extends State<RegisterAccount> {
             const SizedBox(
               height: 30.0,
             ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 2,
+              child: TextField(
+                controller: _fnameController,
+                decoration: const InputDecoration(
+                  hintText: 'First Name',
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width / 2,
+              child: TextField(
+                controller: _snameController,
+                decoration: const InputDecoration(
+                  hintText: 'Last Name',
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            const Text(
+              'Please select your user type: ',
+              style: TextStyle(color: Colors.black, fontSize: 20,),
+            ),
+            DropdownButton( 
+              
+              
+              // Initial Value 
+              value: dropdownvalue.isNotEmpty ? dropdownvalue : null, 
+                
+              // Down Arrow Icon 
+              icon: const Icon(Icons.keyboard_arrow_down),
+
+              style: const TextStyle(color: Colors.white),
+              dropdownColor: Colors.cyan,        
+                
+              // Array list of items 
+              items: items.map((String items) { 
+                return DropdownMenuItem( 
+                  value: items, 
+                  child: Text(items), 
+                ); 
+              }).toList(), 
+              // After selecting the desired option,it will 
+              // change button value to selected value 
+              onChanged: (String? newValue) {  
+                setState(() { 
+                  dropdownvalue = newValue!; 
+                }); 
+              }, 
+            ), 
+            const SizedBox(
+              height: 30.0,
+            ),
             ElevatedButton(
               onPressed: () async {
                 final message = await AuthService().registration(
                   email: _emailController.text,
                   password: _passwordController.text,
                   passwordConfirm: _passwordConfirmController.text,
+                  fname: _fnameController.text,
+                  sname: _snameController.text,
+                  userType: dropdownvalue,
                 );
                 if (message!.contains('Success')) {
                   Navigator.of(context).pushReplacement(
