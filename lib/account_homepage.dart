@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/login.dart';
@@ -12,39 +15,86 @@ class AccountHomePage extends StatefulWidget {
 }
 class _AccountHomePageState extends State < AccountHomePage > {
 	final TextEditingController _noteController = TextEditingController();
-	final List < String > _notes = [];
-  
+  final notes = <String, String>{};
+  final db = FirebaseFirestore.instance;
+  late String uid;
+  late String fname;
+  late String sname;
+  late String userType;
+  late String? email;
+
+  _getUser() async {
+    if (FirebaseAuth.instance.currentUser != null) {
+      uid = FirebaseAuth.instance.currentUser!.uid;
+      final doc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
+      fname = doc['fname'];
+      sname = doc['sname'];
+      userType = doc['userType'];
+      email = FirebaseAuth.instance.currentUser!.email;
+      db.collection("notes").where("uuid", isEqualTo: uid).get().then(
+        (querySnapshot) {
+          for (var docSnapshot in querySnapshot.docs) {
+            String note = docSnapshot['note'];
+            String noteId = docSnapshot.id;
+            setState(() {
+              notes[noteId] = note;
+            });
+          }
+        },
+        onError: (e) => print("Error completing: $e"),
+      );
+    }
+  }
+
 	@override
 	void initState() {
 		super.initState();
-		_loadNotes();
+    _getUser();
 	}
-	_loadNotes() async {
-		SharedPreferences prefs = await SharedPreferences.getInstance();
+	
+_saveNotes(newNote) async {
+  try {
+    final myNewDoc = await db.collection("notes").add({
+      "uuid": uid,
+      "note": newNote,
+      "timestamp": Timestamp.now()
+    });
+    return myNewDoc.id.toString();
+  } catch (e) {
+    print(e);
+    return null; // Handle the error appropriately, e.g., show a message to the user.
+  }
+}
+
+_addNote() async {
+  String newNote = _noteController.text;
+  if (newNote.isNotEmpty) {
+    final newNoteId = await _saveNotes(newNote);
+    if (newNoteId != null) {
+      setState(() {
+        notes[newNoteId] = newNote;
+      });
+      _noteController.clear();
+    }
+  }
+}
+
+	_deleteNote(String noteId) {
+    db.collection("notes").where("uuid", isEqualTo: uid).get().then(
+      (querySnapshot) {
+        for (var docSnapshot in querySnapshot.docs) {
+          if (docSnapshot.id == noteId) {
+            docSnapshot.reference.delete();
+          }
+        }
+      },
+      onError: (e) => print("Error completing: $e"),
+    );
 		setState(() {
-			_notes.addAll(prefs.getStringList('notes') ?? []);
+			notes.remove(noteId);
 		});
 	}
-	_saveNotes() async {
-		SharedPreferences prefs = await SharedPreferences.getInstance();
-		prefs.setStringList('notes', _notes);
-	}
-	_addNote() {
-		String newNote = _noteController.text;
-		if (newNote.isNotEmpty) {
-			setState(() {
-				_notes.add(newNote);
-			});
-			_noteController.clear();
-			_saveNotes();
-		}
-	}
-	_deleteNote(int index) {
-		setState(() {
-			_notes.removeAt(index);
-		});
-		_saveNotes();
-	}
+  
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
@@ -65,13 +115,13 @@ class _AccountHomePageState extends State < AccountHomePage > {
             ),
 					Expanded(
 						child: ListView.builder(
-							itemCount: _notes.length,
+							itemCount: notes.length,
 							itemBuilder: (context, index) {
 								return ListTile(
-									title: Text(_notes[index]),
+									title: Text(notes.values.elementAt(index)),
 									trailing: IconButton(
 										icon: const Icon(Icons.delete),
-										onPressed: () => _deleteNote(index),
+										onPressed: () => _deleteNote(notes.keys.elementAt(index)),
 									),
 								);
 							},
