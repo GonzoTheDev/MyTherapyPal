@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_therapy_pal/emotion_analysis.dart';
 
 import 'auth_service.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,7 @@ _saveNotes(newNote) async {
     return myNewDoc.id.toString();
   } catch (e) {
     print(e);
-    return null; // Handle the error appropriately, e.g., show a message to the user.
+    return null; 
   }
 }
 
@@ -115,17 +116,31 @@ _addNote() async {
             ),
 					Expanded(
 						child: ListView.builder(
-							itemCount: notes.length,
-							itemBuilder: (context, index) {
-								return ListTile(
-									title: Text(notes.values.elementAt(index)),
-									trailing: IconButton(
-										icon: const Icon(Icons.delete),
-										onPressed: () => _deleteNote(notes.keys.elementAt(index)),
-									),
-								);
-							},
-						),
+              itemCount: notes.length,
+              itemBuilder: (context, index) {
+                String inputText = notes.values.elementAt(index);
+                return FutureBuilder<String>(
+                  future: predictEmotion(inputText),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      String predictedEmotion = snapshot.data ?? 'Unknown Emotion';
+                      return ListTile(
+                        title: Text(notes.values.elementAt(index)),
+                        subtitle: Text('Emotion: $predictedEmotion'),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _deleteNote(notes.keys.elementAt(index)),
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
 					),
 					Padding(
 						padding: const EdgeInsets.all(8.0),
