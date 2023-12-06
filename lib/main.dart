@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_sizer/flutter_sizer.dart';
+import 'package:dcdg/dcdg.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 

@@ -41,6 +41,7 @@ dependencies:
   flutter_sizer: ^1.0.5
   cloud_firestore: ^4.13.1
   http: ^1.1.0
+  dcdg: ^4.1.0
 
 dev_dependencies:
   change_app_package_name: ^1.1.0

@@ -6,7 +6,6 @@ import 'auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/login.dart';
 import 'package:my_therapy_pal/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Notes page widget
 class AccountHomePage extends StatefulWidget {
