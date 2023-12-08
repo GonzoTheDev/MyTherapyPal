@@ -1,22 +1,29 @@
 # my_therapy_pal
 
+This is the main repository for the MyTherapyPal proof-of-concept prototype application. It consists of a flutter mobile & web user interface application with account registration & login functionality along with a note taking system connected to a primitive AI emotional sentiment analysis API, and the API itself, which is a REST API web service powered by Python Flask.
 
-A new Flutter project.
+# Run debug environment
 
+## Emotional Sentiment Analysis API
 
-## Getting Started
+### Create the new conda enviroment (assuming you have anaconda3 or equivelant installed)
+```bash
+conda env create -f environment.yml
+conda activate emotion_sentiment
+```
 
+### Start the flask server
+```bash
+cd emotional_sentiment_analysis
+python app.py
+```
 
-This project is a starting point for a Flutter application.
+## Flutter Application
 
+### Start the flutter application
+```bash
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
-
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Choose platform
+Choose either Chrome or Edge. Selecting Windows may require Visual Studio being installed.
