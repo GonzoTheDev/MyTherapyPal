@@ -1,4 +1,4 @@
-# my_therapy_pal
+# MyTherapyPal
 
 This is the main repository for the MyTherapyPal proof-of-concept prototype application. It consists of a flutter mobile & web user interface application with account registration & login functionality along with a note taking system connected to a primitive AI emotional sentiment analysis API, and the API itself, which is a REST API web service powered by Python Flask.
 
