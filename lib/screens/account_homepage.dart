@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:my_therapy_pal/services/emotion_analysis.dart';
-
+import 'package:my_therapy_pal/screens/chat.dart';
+import 'package:my_therapy_pal/widgets/nav-drawer.dart';
 import '../services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/screens/login.dart';
@@ -98,6 +98,7 @@ _addNote() async {
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
+      drawer: NavDrawer(),
 			appBar: AppBar(
 				title: Text(
             const MainApp().title,
@@ -114,33 +115,43 @@ _addNote() async {
               style: TextStyle(color: Colors.black, fontSize: 20,),
             ),
 					Expanded(
-						child: ListView.builder(
+            child: ListView.builder(
               itemCount: notes.length,
               itemBuilder: (context, index) {
-                String inputText = notes.values.elementAt(index);
-                return FutureBuilder<String>(
-                  future: predictEmotion(inputText),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      String predictedEmotion = snapshot.data ?? 'Unknown Emotion';
-                      return ListTile(
-                        title: Text(notes.values.elementAt(index)),
-                        subtitle: Text('Emotion: $predictedEmotion'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _deleteNote(notes.keys.elementAt(index)),
-                        ),
-                      );
-                    }
-                  },
+                // String inputText = notes.values.elementAt(index);
+                // You can remove the above line as well, as it's not needed now
+                return ListTile(
+                  title: Text(notes.values.elementAt(index)),
+                  // Commented out code related to predictedEmotion
+                  // FutureBuilder<String>(
+                  //   future: predictEmotion(inputText),
+                  //   builder: (context, snapshot) {
+                  //     if (snapshot.connectionState == ConnectionState.waiting) {
+                  //       return const CircularProgressIndicator();
+                  //     } else if (snapshot.hasError) {
+                  //       return Text('Error: ${snapshot.error}');
+                  //     } else {
+                  //       String predictedEmotion = snapshot.data ?? 'Unknown Emotion';
+                  //       return ListTile(
+                  //         title: Text(notes.values.elementAt(index)),
+                  //         subtitle: Text('Emotion: $predictedEmotion'),
+                  //         trailing: IconButton(
+                  //           icon: const Icon(Icons.delete),
+                  //           onPressed: () => _deleteNote(notes.keys.elementAt(index)),
+                  //         ),
+                  //       );
+                  //     }
+                  //   },
+                  // ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => _deleteNote(notes.keys.elementAt(index)),
+                  ),
                 );
               },
             ),
-					),
+          ),
+
 					Padding(
 						padding: const EdgeInsets.all(8.0),
 						child: TextField(
@@ -154,6 +165,22 @@ _addNote() async {
 							),
 						),
 					),
+            Padding(
+                padding:
+                    const EdgeInsets.only(top: 4, bottom: 8, left: 8, right: 8),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ChatScreen(),
+                  ),
+                );
+              },
+              child: const Text('Create New Account'),
+                  ),
+                ),
+              ),
           Padding(
                 padding:
                     const EdgeInsets.only(top: 4, bottom: 8, left: 8, right: 8),
