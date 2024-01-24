@@ -1,5 +1,5 @@
 import 'package:my_therapy_pal/main.dart';
-import 'auth_service.dart';
+import '../services/auth_service.dart';
 import 'login.dart';
 import 'package:flutter/material.dart';
 

@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:my_therapy_pal/emotion_analysis.dart';
+import 'package:my_therapy_pal/services/emotion_analysis.dart';
 
-import 'auth_service.dart';
+import '../services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:my_therapy_pal/login.dart';
+import 'package:my_therapy_pal/screens/login.dart';
 import 'package:my_therapy_pal/main.dart';
 
 // Notes page widget

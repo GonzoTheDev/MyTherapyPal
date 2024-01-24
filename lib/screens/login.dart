@@ -1,7 +1,7 @@
 import 'package:my_therapy_pal/main.dart';
 
 import 'register_account.dart';
-import 'auth_service.dart';
+import '../services/auth_service.dart';
 import 'account_homepage.dart';
 import 'package:flutter/material.dart';
 
