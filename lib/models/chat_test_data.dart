@@ -1,6 +1,7 @@
 import 'package:chatview/chatview.dart';
 
 class Data {
+  static const String chatID = '1';
   static const String profileImage = 'lib/assets/images/chatcbt.webp';
   static final messageList = [
     Message(

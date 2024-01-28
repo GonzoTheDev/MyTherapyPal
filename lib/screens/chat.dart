@@ -1,4 +1,7 @@
 import 'package:chatview/chatview.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_therapy_pal/models/chat_history.dart';
 import 'package:my_therapy_pal/models/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/models/chat_test_data.dart';
@@ -14,11 +17,54 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   AppTheme theme = LightTheme();
   bool isDarkTheme = false;
-  final currentUser = ChatUser(
-    id: '1',
-    name: 'Flutter',
-    profilePhoto: Data.profileImage,
-  );
+  final db = FirebaseFirestore.instance;
+  late String uid;
+  late String fname;
+  late String sname;
+  late String userType;
+  late String? email;
+  var chatList = [];
+
+  late ChatUser currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUsersChats();
+  }
+
+  _getUsersChats() async {
+    if (FirebaseAuth.instance.currentUser != null) {
+      uid = FirebaseAuth.instance.currentUser!.uid;
+      final doc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
+      fname = doc['fname'];
+      sname = doc['sname'];
+      userType = doc['userType'];
+      email = FirebaseAuth.instance.currentUser!.email;
+
+      // initialize the currentUser
+      currentUser = ChatUser(
+        id: uid,
+        name: '$fname $sname',
+        profilePhoto: Data.profileImage,
+      );
+
+      db.collection("chat").where("users", arrayContains: uid).get().then(
+        (querySnapshot) {
+          for (var docSnapshot in querySnapshot.docs) {
+            String chatId = docSnapshot.id;
+            chatList.add(Chat(
+                chatID: chatId,
+                users: docSnapshot['users'],
+              )
+            );
+          }
+        },
+        onError: (e) => print("Error completing: $e"),
+      );
+    }
+  }
+  
   final _chatController = ChatController(
     initialMessageList: Data.messageList,
     scrollController: ScrollController(),
