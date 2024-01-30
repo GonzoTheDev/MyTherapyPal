@@ -22,18 +22,18 @@ class _ChatScreenState extends State<ChatScreen> {
   late String fname;
   late String sname;
   late String userType;
+  late String photoURL;
   late String? email;
-  var chatList = [];
+  var messageList = [];
 
   late ChatUser currentUser;
 
   @override
   void initState() {
     super.initState();
-    _getUsersChats();
   }
 
-  _getUsersChats() async {
+  getChat(String chatID) async {
     if (FirebaseAuth.instance.currentUser != null) {
       uid = FirebaseAuth.instance.currentUser!.uid;
       final doc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
@@ -41,30 +41,56 @@ class _ChatScreenState extends State<ChatScreen> {
       sname = doc['sname'];
       userType = doc['userType'];
       email = FirebaseAuth.instance.currentUser!.email;
+      photoURL = doc['photoURL'];
 
       // initialize the currentUser
       currentUser = ChatUser(
         id: uid,
         name: '$fname $sname',
-        profilePhoto: Data.profileImage,
+        profilePhoto: photoURL,
       );
 
-      db.collection("chat").where("users", arrayContains: uid).get().then(
+      db.collection("messages").where("chatID", isEqualTo: chatID).get().then(
         (querySnapshot) {
           for (var docSnapshot in querySnapshot.docs) {
-            String chatId = docSnapshot.id;
-            chatList.add(Chat(
-                chatID: chatId,
-                users: docSnapshot['users'],
+            String messageID = docSnapshot.id;
+            String msgStatus = docSnapshot['status'];
+
+            if (msgStatus == 'delivered') {
+              messageList.add(Message(
+                id: messageID,
+                message: docSnapshot['message'],
+                createdAt: docSnapshot['timestamp'],
+                sendBy: docSnapshot['sender'], // userId of who sends the message
+                status: MessageStatus.delivered,
               )
-            );
+              );
+            } else if (msgStatus == 'read') {
+              messageList.add(Message(
+                id: messageID,
+                message: docSnapshot['message'],
+                createdAt: docSnapshot['timestamp'],
+                sendBy: docSnapshot['sender'], // userId of who sends the message
+                status: MessageStatus.read,
+              )
+              );
+            } else {
+              messageList.add(Message(
+                id: messageID,
+                message: docSnapshot['message'],
+                createdAt: docSnapshot['timestamp'],
+                sendBy: docSnapshot['sender'], // userId of who sends the message
+                status: MessageStatus.undelivered,
+              )
+              );
+            }
           }
         },
         onError: (e) => print("Error completing: $e"),
       );
     }
   }
-  
+
   final _chatController = ChatController(
     initialMessageList: Data.messageList,
     scrollController: ScrollController(),

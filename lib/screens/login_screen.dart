@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/main.dart';
-import 'register_account.dart';
+import 'register_screen.dart';
 import '../services/auth_service.dart';
-import 'account_homepage.dart';
+import 'dashboard_screen.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);

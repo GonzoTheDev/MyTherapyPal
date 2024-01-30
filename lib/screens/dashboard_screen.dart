@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_therapy_pal/screens/chat.dart';
+import 'package:my_therapy_pal/screens/chat_list_screen.dart';
 import 'package:my_therapy_pal/widgets/nav-drawer.dart';
 import '../services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:my_therapy_pal/screens/login.dart';
+import 'package:my_therapy_pal/screens/login_screen.dart';
 import 'package:my_therapy_pal/main.dart';
 
 // Notes page widget
@@ -173,11 +174,11 @@ _addNote() async {
                     onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const ChatScreen(),
+                    builder: (context) => ChatListScreen(),
                   ),
                 );
               },
-              child: const Text('Create New Account'),
+              child: const Text('Messages', style: TextStyle(color: Colors.white),),
                   ),
                 ),
               ),
