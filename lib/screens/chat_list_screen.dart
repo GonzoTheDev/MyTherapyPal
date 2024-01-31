@@ -2,6 +2,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_therapy_pal/main.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({Key? key}) : super(key: key);
@@ -19,7 +20,21 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages', style: TextStyle(color: Colors.white)),
+        title: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 0.0, right: 12.0),
+              child: Image.asset(
+                'lib/assets/images/logo.png', // Replace with the actual path to your logo image
+                height: 24, // Adjust the height as needed
+              ),
+            ),
+            Text(
+              const MainApp().title,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore

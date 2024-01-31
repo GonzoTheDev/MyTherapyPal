@@ -7,12 +7,14 @@ import 'package:flutter_sizer/flutter_sizer.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:fluid_bottom_nav_bar/fluid_bottom_nav_bar.dart';
 
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
 // Main program function
 void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -39,7 +41,7 @@ class MainApp extends StatelessWidget {
         ),
         title: title,
         theme: ThemeData(
-          primarySwatch: Colors.cyan,
+          primarySwatch: Colors.teal,
           scaffoldBackgroundColor: const Color.fromARGB(255, 238, 235, 235),
         ),
         home: AnimatedSplashScreen(

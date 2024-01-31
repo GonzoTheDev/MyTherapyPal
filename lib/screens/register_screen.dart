@@ -126,7 +126,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
               icon: const Icon(Icons.keyboard_arrow_down),
 
               style: const TextStyle(color: Colors.white),
-              dropdownColor: Colors.cyan,        
+              dropdownColor: Colors.teal,        
                 
               // Array list of items 
               items: items.map((String items) { 

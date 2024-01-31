@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
 
 class NavDrawer extends StatelessWidget {
+  const NavDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          const DrawerHeader(
-            decoration: BoxDecoration(
-                color: Colors.cyan,
+         DrawerHeader(
+            decoration: const BoxDecoration(
+                color: Colors.teal,
                 ),
-            child: Text(
-              'MyTherapyPal',
-              style: TextStyle(color: Colors.white, fontSize: 25),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 300,
+                    height: 137,
+                    child: Image.asset(
+                      'lib/assets/images/splash.png', // Adjust the path based on your actual file structure
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           ListTile(

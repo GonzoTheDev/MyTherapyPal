@@ -49,6 +49,7 @@ dependencies:
   responsive_framework: ^1.1.1
   animated_splash_screen: ^1.3.0
   page_transition: ^2.1.0
+  fluid_bottom_nav_bar: ^1.4.0
 
 
 dev_dependencies:
