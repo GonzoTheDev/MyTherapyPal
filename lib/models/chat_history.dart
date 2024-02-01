@@ -6,7 +6,6 @@ class Chat {
   final db = FirebaseFirestore.instance;
   final String chatID;
   final users = [];
-  static const String profileImage = 'lib/assets/images/chatcbt.webp';
 
   Chat({
     this.chatID = '', required users,
@@ -18,16 +17,37 @@ class Chat {
     db.collection("messages").where("chatID", isEqualTo: chatID).get().then(
         (querySnapshot) {
           for (var docSnapshot in querySnapshot.docs) {
-            String message = docSnapshot['message'];
-            String messageId = docSnapshot.id;
-            String sentBy = docSnapshot['sender'];
-            DateTime timestamp = docSnapshot['timestamp'];
-            messages.add(Message(
-              id: messageId,
-              message: message,
-              createdAt: timestamp,
-              sendBy: sentBy,
-            ));
+            String messageID = docSnapshot.id;
+            String msgStatus = docSnapshot['status'];
+
+            if (msgStatus == 'delivered') {
+              messages.add(Message(
+                id: messageID,
+                message: docSnapshot['message'],
+                createdAt: docSnapshot['timestamp'],
+                sendBy: docSnapshot['sender'], // userId of who sends the message
+                status: MessageStatus.delivered,
+              )
+              );
+            } else if (msgStatus == 'read') {
+              messages.add(Message(
+                id: messageID,
+                message: docSnapshot['message'],
+                createdAt: docSnapshot['timestamp'],
+                sendBy: docSnapshot['sender'], // userId of who sends the message
+                status: MessageStatus.read,
+              )
+              );
+            } else {
+              messages.add(Message(
+                id: messageID,
+                message: docSnapshot['message'],
+                createdAt: docSnapshot['timestamp'],
+                sendBy: docSnapshot['sender'], // userId of who sends the message
+                status: MessageStatus.undelivered,
+              )
+              );
+            }
           }
         },
         onError: (e) => print("Error completing: $e"),
@@ -48,4 +68,6 @@ class Chat {
       return null; 
     }
   }
+
+  
 }

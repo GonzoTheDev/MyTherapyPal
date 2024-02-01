@@ -35,6 +35,21 @@ class NavDrawer extends StatelessWidget {
             onTap: () => {Navigator.of(context).pop()},
           ),
           ListTile(
+            leading: const Icon(Icons.insert_chart),
+            title: const Text('Records'),
+            onTap: () => {Navigator.of(context).pop()},
+          ),
+          ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text('Messages'),
+            onTap: () => {Navigator.of(context).pop()},
+          ),
+          ListTile(
+            leading: const Icon(Icons.public),
+            title: const Text('Find a Therapist'),
+            onTap: () => {Navigator.of(context).pop()},
+          ),
+          ListTile(
             leading: const Icon(Icons.account_circle),
             title: const Text('Profile'),
             onTap: () => {Navigator.of(context).pop()},

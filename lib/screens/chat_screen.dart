@@ -8,7 +8,8 @@ import 'package:my_therapy_pal/models/chat_test_data.dart';
 
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  final String chatID;
+  const ChatScreen({Key? key, required  this.chatID,}) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -19,29 +20,51 @@ class _ChatScreenState extends State<ChatScreen> {
   bool isDarkTheme = false;
   final db = FirebaseFirestore.instance;
   late String uid;
+  late String otherUserID;
   late String fname;
   late String sname;
+  late String otherUserFname;
+  late String otherUserSname;
   late String userType;
+  late String otherUserType;
   late String photoURL;
+  late String otherUserPhotoURL;
   late String? email;
-  var messageList = [];
 
   late ChatUser currentUser;
+  late ChatUser otherUser;
+  late ChatController _chatController;
+  late Chat chat;
 
   @override
   void initState() {
+    getChat(widget.chatID);
     super.initState();
   }
 
-  getChat(String chatID) async {
+  Future<void> getChat(String chatID) async {
     if (FirebaseAuth.instance.currentUser != null) {
       uid = FirebaseAuth.instance.currentUser!.uid;
-      final doc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
-      fname = doc['fname'];
-      sname = doc['sname'];
-      userType = doc['userType'];
+      final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
+      fname = userProfileDoc['fname'];
+      sname = userProfileDoc['sname'];
+      userType = userProfileDoc['userType'];
       email = FirebaseAuth.instance.currentUser!.email;
-      photoURL = doc['photoURL'];
+      photoURL = userProfileDoc['photoURL'];
+
+      final chatDoc = await FirebaseFirestore.instance.collection('chat').doc(chatID).get();
+      var users = chatDoc['users'];
+      
+      if (users[0] == uid) {
+        otherUserID = users[1];
+      } else {
+        otherUserID = users[0];
+      }
+      final otherUserProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(otherUserID).get();
+      otherUserFname = otherUserProfileDoc['fname'];
+      otherUserSname = otherUserProfileDoc['sname'];
+      otherUserType = otherUserProfileDoc['userType'];
+      otherUserPhotoURL = otherUserProfileDoc['photoURL'];
 
       // initialize the currentUser
       currentUser = ChatUser(
@@ -50,73 +73,29 @@ class _ChatScreenState extends State<ChatScreen> {
         profilePhoto: photoURL,
       );
 
-      db.collection("messages").where("chatID", isEqualTo: chatID).get().then(
-        (querySnapshot) {
-          for (var docSnapshot in querySnapshot.docs) {
-            String messageID = docSnapshot.id;
-            String msgStatus = docSnapshot['status'];
+      // initialize the other user
+      otherUser = ChatUser(
+        id: otherUserID,
+        name: '$otherUserFname $otherUserSname',
+        profilePhoto: otherUserPhotoURL,
+      );
 
-            if (msgStatus == 'delivered') {
-              messageList.add(Message(
-                id: messageID,
-                message: docSnapshot['message'],
-                createdAt: docSnapshot['timestamp'],
-                sendBy: docSnapshot['sender'], // userId of who sends the message
-                status: MessageStatus.delivered,
-              )
-              );
-            } else if (msgStatus == 'read') {
-              messageList.add(Message(
-                id: messageID,
-                message: docSnapshot['message'],
-                createdAt: docSnapshot['timestamp'],
-                sendBy: docSnapshot['sender'], // userId of who sends the message
-                status: MessageStatus.read,
-              )
-              );
-            } else {
-              messageList.add(Message(
-                id: messageID,
-                message: docSnapshot['message'],
-                createdAt: docSnapshot['timestamp'],
-                sendBy: docSnapshot['sender'], // userId of who sends the message
-                status: MessageStatus.undelivered,
-              )
-              );
-            }
-          }
-        },
-        onError: (e) => print("Error completing: $e"),
+      // initialize the chat
+      chat = Chat(
+        chatID: chatID,
+        users: [currentUser, otherUser],
+      );
+
+      _chatController = ChatController(
+        initialMessageList: chat.messages.map((message) => Message.fromJson(message)).toList(),
+        scrollController: ScrollController(),
+        chatUsers: [
+          currentUser,
+          otherUser,
+        ],
       );
     }
   }
-
-  final _chatController = ChatController(
-    initialMessageList: Data.messageList,
-    scrollController: ScrollController(),
-    chatUsers: [
-      ChatUser(
-        id: '2',
-        name: 'Simform',
-        profilePhoto: Data.profileImage,
-      ),
-      ChatUser(
-        id: '3',
-        name: 'Jhon',
-        profilePhoto: Data.profileImage,
-      ),
-      ChatUser(
-        id: '4',
-        name: 'Mike',
-        profilePhoto: Data.profileImage,
-      ),
-      ChatUser(
-        id: '5',
-        name: 'Rich',
-        profilePhoto: Data.profileImage,
-      ),
-    ],
-  );
 
   void _showHideTypingIndicator() {
     _chatController.setTypingIndicator = !_chatController.showTypingIndicator;
@@ -124,6 +103,24 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: getChat(widget.chatID),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const Scaffold(
+            body: Center(
+              child: Text('Error loading chat'),
+            ),
+          );
+        }
     return Scaffold(
       body: ChatView(
         currentUser: currentUser,
@@ -147,9 +144,9 @@ class _ChatScreenState extends State<ChatScreen> {
         appBar: ChatViewAppBar(
           elevation: theme.elevation,
           backGroundColor: theme.appBarColor,
-          profilePicture: Data.profileImage,
+          profilePicture: otherUserPhotoURL,
           backArrowColor: theme.backArrowColor,
-          chatTitle: "ChatCBT",
+          chatTitle: "$otherUserFname $otherUserSname",
           chatTitleTextStyle: TextStyle(
             color: theme.appBarTitleTextStyle,
             fontWeight: FontWeight.bold,
@@ -320,13 +317,15 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+    );
+  }
 
   void _onSendTap(
     String message,
     ReplyMessage replyMessage,
     MessageType messageType,
   ) {
-    final id = int.parse(Data.messageList.last.id) + 1;
+    final id = int.parse(chat.messages.last.id) + 1;
     _chatController.addMessage(
       Message(
         id: id.toString(),

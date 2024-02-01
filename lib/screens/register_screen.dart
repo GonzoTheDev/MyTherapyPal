@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:my_therapy_pal/main.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
@@ -33,6 +34,14 @@ class _RegisterAccountState extends State<RegisterAccount> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: const SystemUiOverlayStyle(
+        // Status bar color
+        statusBarColor: Colors.teal, 
+        systemNavigationBarColor: Colors.teal,
+        // Status bar brightness (optional)
+        statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+        statusBarBrightness: Brightness.light, // For iOS (dark icons)
+        ),
         title: Text(
             const MainApp().title,
             style: const TextStyle(color: Colors.white),

@@ -1,12 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluid_bottom_nav_bar/fluid_bottom_nav_bar.dart';
-import 'package:my_therapy_pal/screens/chat_list_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
+import 'package:my_therapy_pal/services/auth_service.dart';
 import 'package:my_therapy_pal/widgets/nav_drawer.dart';
-import '../services/auth_service.dart';
 import 'package:my_therapy_pal/main.dart';
+import 'package:my_therapy_pal/widgets/dashboard.dart';
+import 'package:my_therapy_pal/widgets/chat_list.dart';
+import 'package:my_therapy_pal/widgets/records.dart';
+import 'package:my_therapy_pal/widgets/listings.dart';
+
 
 class AccountHomePage extends StatefulWidget {
   const AccountHomePage({Key? key}) : super(key: key);
@@ -16,109 +19,44 @@ class AccountHomePage extends StatefulWidget {
 }
 
 class _AccountHomePageState extends State<AccountHomePage> {
-  final TextEditingController _noteController = TextEditingController();
-  final notes = <String, String>{};
-  final db = FirebaseFirestore.instance;
-  late String uid;
-  late String fname;
-  late String sname;
-  late String userType;
-  late String? email;
-
-  _getUser() async {
-    if (FirebaseAuth.instance.currentUser != null) {
-      uid = FirebaseAuth.instance.currentUser!.uid;
-      final doc =
-          await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
-      fname = doc['fname'];
-      sname = doc['sname'];
-      userType = doc['userType'];
-      email = FirebaseAuth.instance.currentUser!.email;
-      db.collection("notes").where("uuid", isEqualTo: uid).get().then(
-        (querySnapshot) {
-          for (var docSnapshot in querySnapshot.docs) {
-            String note = docSnapshot['note'];
-            String noteId = docSnapshot.id;
-            setState(() {
-              notes[noteId] = note;
-            });
-          }
-        },
-        onError: (e) => print("Error completing: $e"),
-      );
-    }
-  }
+  
+  Widget? _child;
+  
 
   @override
   void initState() {
+    _child = const Dashboard();
     super.initState();
-    _getUser();
   }
 
-  _saveNotes(newNote) async {
-    try {
-      final myNewDoc = await db.collection("notes").add({
-        "uuid": uid,
-        "note": newNote,
-        "timestamp": Timestamp.now()
-      });
-      return myNewDoc.id.toString();
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  _addNote() async {
-    String newNote = _noteController.text;
-    if (newNote.isNotEmpty) {
-      final newNoteId = await _saveNotes(newNote);
-      if (newNoteId != null) {
-        setState(() {
-          notes[newNoteId] = newNote;
-        });
-        _noteController.clear();
-      }
-    }
-  }
-
-  _deleteNote(String noteId) {
-    db.collection("notes").where("uuid", isEqualTo: uid).get().then(
-      (querySnapshot) {
-        for (var docSnapshot in querySnapshot.docs) {
-          if (docSnapshot.id == noteId) {
-            docSnapshot.reference.delete();
-          }
-        }
-      },
-      onError: (e) => print("Error completing: $e"),
-    );
-    setState(() {
-      notes.remove(noteId);
-    });
-  }
-
-  void _handleNavigationChange(int index) {
-    setState(() {});
-
-    // Navigate to the corresponding screen based on the index
-    switch (index) {
-      case 1:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const ChatListScreen(),
-          ),
-        );
-        break;
-      case 2:
-        AuthService().logoutUser();
+  void logout() {
+    AuthService().logoutUser();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const Login()),
           (route) => false,
         );
-        break;
-      // Add cases for additional screens as needed
-    }
+  }
+
+  void _handleNavigationChange(int index) {
+    setState(() {
+      switch (index) {
+        case 0:
+          _child = const Dashboard();
+          break;
+        case 1:
+          _child = const Records();
+          break;
+        case 2:
+          _child = ChatList();
+          break;
+        case 3:
+          _child = const Listings();
+          break; 
+        case 4:
+          logout();
+          break;
+      }
+    });
   }
 
   @override
@@ -126,13 +64,21 @@ class _AccountHomePageState extends State<AccountHomePage> {
     return Scaffold(
       endDrawer: const NavDrawer(),
       appBar: AppBar(
+        systemOverlayStyle: const SystemUiOverlayStyle(
+        // Status bar color
+        statusBarColor: Colors.teal, 
+        systemNavigationBarColor: Colors.teal,
+        // Status bar brightness (optional)
+        statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+        statusBarBrightness: Brightness.light, // For iOS (dark icons)
+      ),
         title: Row(
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 0.0, right: 12.0),
               child: Image.asset(
-                'lib/assets/images/logo.png', // Replace with the actual path to your logo image
-                height: 24, // Adjust the height as needed
+                'lib/assets/images/logo.png', 
+                height: 24, 
               ),
             ),
             Text(
@@ -142,54 +88,30 @@ class _AccountHomePageState extends State<AccountHomePage> {
           ],
         ),
       ),
-      body: Column(
-        children: <Widget>[
-          SizedBox(
-            height: MediaQuery.of(context).size.height / 40,
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: notes.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(notes.values.elementAt(index)),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () =>
-                        _deleteNote(notes.keys.elementAt(index)),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _noteController,
-              decoration: InputDecoration(
-                labelText: 'Add a new note',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _addNote,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      body: _child,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(top: 8.0),
         child: FluidNavBar(
           icons: [
             FluidNavBarIcon(
               icon: Icons.home,
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.green,
               extras: {"label": "Home"},
+            ),
+            FluidNavBarIcon(
+              icon: Icons.insert_chart,
+              backgroundColor: Colors.blue,
+              extras: {"label": "Records"},
             ),
             FluidNavBarIcon(
               icon: Icons.message,
               backgroundColor: Colors.indigo,
               extras: {"label": "Messages"},
+            ),
+            FluidNavBarIcon(
+              icon: Icons.public,
+              backgroundColor: Colors.purple,
+              extras: {"label": "Therapist Search"},
             ),
             FluidNavBarIcon(
               icon: Icons.logout,
