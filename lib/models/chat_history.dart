@@ -2,72 +2,52 @@ import 'package:chatview/chatview.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Chat {
-  final messages = [];
-  final db = FirebaseFirestore.instance;
+  final FirebaseFirestore db = FirebaseFirestore.instance;
   final String chatID;
-  final users = [];
+  List<ChatUser> users; 
 
   Chat({
-    this.chatID = '', required users,
-  }) {
-    populateMessages();
-  }
-  
-  populateMessages() async {
-    db.collection("messages").where("chatID", isEqualTo: chatID).get().then(
-        (querySnapshot) {
-          for (var docSnapshot in querySnapshot.docs) {
-            String messageID = docSnapshot.id;
-            String msgStatus = docSnapshot['status'];
+    this.chatID = '',
+    required this.users,
+  });
 
-            if (msgStatus == 'delivered') {
-              messages.add(Message(
-                id: messageID,
-                message: docSnapshot['message'],
-                createdAt: docSnapshot['timestamp'],
-                sendBy: docSnapshot['sender'], // userId of who sends the message
-                status: MessageStatus.delivered,
-              )
-              );
-            } else if (msgStatus == 'read') {
-              messages.add(Message(
-                id: messageID,
-                message: docSnapshot['message'],
-                createdAt: docSnapshot['timestamp'],
-                sendBy: docSnapshot['sender'], // userId of who sends the message
-                status: MessageStatus.read,
-              )
-              );
-            } else {
-              messages.add(Message(
-                id: messageID,
-                message: docSnapshot['message'],
-                createdAt: docSnapshot['timestamp'],
-                sendBy: docSnapshot['sender'], // userId of who sends the message
-                status: MessageStatus.undelivered,
-              )
-              );
-            }
-          }
-        },
-        onError: (e) => print("Error completing: $e"),
-      );
-  }
+  Stream<List<Message>> get messagesStream => db.collection("messages")
+    .where("chatID", isEqualTo: chatID)
+    .orderBy("timestamp", descending: false)
+    .snapshots()
+    .map((querySnapshot) => querySnapshot.docs.map((docSnapshot) => Message(
+          id: docSnapshot.id,
+          message: docSnapshot.data()['message'] as String,
+          createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
+          sendBy: docSnapshot.data()['sender'] as String,
+          status: _getStatusFromString(docSnapshot.data()['status'] as String),
+        )).toList());
 
-  addMessage(String newMessage, String uuid) async {
+  Future<String?> addMessage(String newMessage, String uuid) async {
     try {
       final myNewDoc = await db.collection("messages").add({
         "chatID": chatID,
         "message": newMessage,
         "sender": uuid,
-        "timestamp": Timestamp.now()
+        "status": "delivered",
+        "timestamp": Timestamp.now(),
       });
-      return myNewDoc.id.toString();
+      return myNewDoc.id;
     } catch (e) {
       print(e);
-      return null; 
+      return null;
     }
   }
 
-  
+
+  MessageStatus _getStatusFromString(String status) {
+    switch (status) {
+      case 'delivered':
+        return MessageStatus.delivered;
+      case 'read':
+        return MessageStatus.read;
+      default:
+        return MessageStatus.undelivered;
+    }
+  }
 }

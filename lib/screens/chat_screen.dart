@@ -1,15 +1,15 @@
 import 'package:chatview/chatview.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:my_therapy_pal/models/chat_history.dart';
-import 'package:my_therapy_pal/models/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:my_therapy_pal/models/chat_test_data.dart';
-
+import 'package:my_therapy_pal/models/chat_history.dart'; // Adjust path as needed
+import 'package:my_therapy_pal/models/theme.dart'; // Adjust path as needed
+import 'dart:async'; // Import for StreamSubscription
 
 class ChatScreen extends StatefulWidget {
   final String chatID;
-  const ChatScreen({Key? key, required  this.chatID,}) : super(key: key);
+
+  const ChatScreen({Key? key, required this.chatID}) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -30,98 +30,128 @@ class _ChatScreenState extends State<ChatScreen> {
   late String photoURL;
   late String otherUserPhotoURL;
   late String? email;
-
   late ChatUser currentUser;
   late ChatUser otherUser;
   late ChatController _chatController;
+  bool _isChatControllerInitialized = false;
   late Chat chat;
+  bool isLoading = true; 
+  StreamSubscription<List<Message>>? _messagesSubscription;
+  final Set<String> _displayedMessagesIds = <String>{}; // Track displayed messages to prevent duplicates
+
 
   @override
   void initState() {
-    getChat(widget.chatID);
     super.initState();
-  }
-
-  Future<void> getChat(String chatID) async {
-    if (FirebaseAuth.instance.currentUser != null) {
-      uid = FirebaseAuth.instance.currentUser!.uid;
-      final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
-      fname = userProfileDoc['fname'];
-      sname = userProfileDoc['sname'];
-      userType = userProfileDoc['userType'];
-      email = FirebaseAuth.instance.currentUser!.email;
-      photoURL = userProfileDoc['photoURL'];
-
-      final chatDoc = await FirebaseFirestore.instance.collection('chat').doc(chatID).get();
-      var users = chatDoc['users'];
-      
-      if (users[0] == uid) {
-        otherUserID = users[1];
-      } else {
-        otherUserID = users[0];
-      }
-      final otherUserProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(otherUserID).get();
-      otherUserFname = otherUserProfileDoc['fname'];
-      otherUserSname = otherUserProfileDoc['sname'];
-      otherUserType = otherUserProfileDoc['userType'];
-      otherUserPhotoURL = otherUserProfileDoc['photoURL'];
-
-      // initialize the currentUser
-      currentUser = ChatUser(
-        id: uid,
-        name: '$fname $sname',
-        profilePhoto: photoURL,
-      );
-
-      // initialize the other user
-      otherUser = ChatUser(
-        id: otherUserID,
-        name: '$otherUserFname $otherUserSname',
-        profilePhoto: otherUserPhotoURL,
-      );
-
-      // initialize the chat
-      chat = Chat(
-        chatID: chatID,
-        users: [currentUser, otherUser],
-      );
-
-      _chatController = ChatController(
-        initialMessageList: chat.messages.map((message) => Message.fromJson(message)).toList(),
-        scrollController: ScrollController(),
-        chatUsers: [
-          currentUser,
-          otherUser,
-        ],
-      );
-    }
-  }
-
-  void _showHideTypingIndicator() {
-    _chatController.setTypingIndicator = !_chatController.showTypingIndicator;
+    initializeChat();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: getChat(widget.chatID),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
+  void dispose() {
+    _messagesSubscription?.cancel();
+    super.dispose();
+  }
 
-        if (snapshot.hasError) {
-          return const Scaffold(
-            body: Center(
-              child: Text('Error loading chat'),
-            ),
+  Future<void> initializeChat() async {
+    uid = FirebaseAuth.instance.currentUser!.uid;
+    final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
+    fname = userProfileDoc['fname'];
+    sname = userProfileDoc['sname'];
+    userType = userProfileDoc['userType'];
+    email = FirebaseAuth.instance.currentUser!.email;
+    photoURL = userProfileDoc['photoURL'];
+    final chatDoc = await FirebaseFirestore.instance.collection('chat').doc(widget.chatID).get();
+    var users = chatDoc['users'];
+    if (users[0] == uid) {
+      otherUserID = users[1];
+    } else {
+      otherUserID = users[0];
+    }
+    final otherUserProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(otherUserID).get();
+    otherUserFname = otherUserProfileDoc['fname'];
+    otherUserSname = otherUserProfileDoc['sname'];
+    otherUserType = otherUserProfileDoc['userType'];
+    otherUserPhotoURL = otherUserProfileDoc['photoURL'];
+    
+    currentUser = ChatUser(
+      id: uid,
+      name: '$fname $sname',
+      profilePhoto: photoURL,
+    );
+    otherUser = ChatUser(
+      id: otherUserID,
+      name: '$otherUserFname $otherUserSname',
+      profilePhoto: otherUserPhotoURL,
+    );
+
+    chat = Chat(
+      chatID: widget.chatID,
+      users: [currentUser, otherUser],
+    );
+
+    // Subscribe to the messages stream
+    _messagesSubscription = chat.messagesStream.listen((List<Message> messages) {
+      setState(() {
+        var newMessages = messages.where((msg) => !_displayedMessagesIds.contains(msg.id)).toList();
+        if (!_isChatControllerInitialized) {
+          _chatController = ChatController(
+            initialMessageList: newMessages,
+            scrollController: ScrollController(),
+            chatUsers: [currentUser, otherUser],
           );
+          _isChatControllerInitialized = true;
+        } else {
+          for (var msg in newMessages) {
+            _chatController.addMessage(msg);
+          }
         }
+        for (var msg in newMessages) {
+          _displayedMessagesIds.add(msg.id);
+        }
+        isLoading = false;
+      });
+    });
+
+    // Listen for typing status
+    FirebaseFirestore.instance.collection('chat').doc(widget.chatID).snapshots().listen((snapshot) {
+      var typingStatus = snapshot.data()?['typingStatus'];
+      if (typingStatus != null && typingStatus[otherUserID] == true) {
+        // Show typing indicator
+        setState(() {
+          _chatController.setTypingIndicator = true;
+        });
+      } else {
+        // Hide typing indicator
+        setState(() {
+          _chatController.setTypingIndicator = false;
+        });
+      }
+    });
+  }
+
+// Function to update the typing status of the current user
+void updateUserTypingStatus(bool isTyping) {
+  var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
+  String fieldPath = 'typingStatus.${FirebaseAuth.instance.currentUser!.uid}';
+  chatDocRef.update({fieldPath: isTyping});
+}
+
+// Function to show/hide the typing indicator
+void _showHideTypingIndicator() {
+    _chatController.setTypingIndicator = !_chatController.showTypingIndicator;
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
+      // Body of the chat screen
       body: ChatView(
         currentUser: currentUser,
         chatController: _chatController,
@@ -153,7 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
             fontSize: 18,
             letterSpacing: 0.25,
           ),
-          userStatus: "online",
+          userStatus: "offline",
           userStatusTextStyle: const TextStyle(color: Colors.grey),
           actions: [
             IconButton(
@@ -201,6 +231,7 @@ class _ChatScreenState extends State<ChatScreen> {
             onMessageTyping: (status) {
               /// Do with status
               debugPrint(status.toString());
+              updateUserTypingStatus(true);
             },
             compositionThresholdTime: const Duration(seconds: 1),
             textStyle: TextStyle(color: theme.textFieldTextColor),
@@ -239,7 +270,6 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             textStyle: TextStyle(color: theme.inComingChatBubbleTextColor),
             onMessageRead: (message) {
-              /// send your message reciepts to the other client
               debugPrint('Message Read');
             },
             senderNameTextStyle:
@@ -293,8 +323,8 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
         ),
-        profileCircleConfig: const ProfileCircleConfiguration(
-          profileImageUrl: Data.profileImage,
+        profileCircleConfig: ProfileCircleConfiguration(
+          profileImageUrl: currentUser.profilePhoto,
         ),
         repliedMessageConfig: RepliedMessageConfiguration(
           backgroundColor: theme.repliedMessageColor,
@@ -317,33 +347,22 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-    );
-  }
 
-  void _onSendTap(
+    
+
+Future<void> _onSendTap(
     String message,
-    ReplyMessage replyMessage,
+    ReplyMessage? replyMessage,
     MessageType messageType,
-  ) {
-    final id = int.parse(chat.messages.last.id) + 1;
-    _chatController.addMessage(
-      Message(
-        id: id.toString(),
-        createdAt: DateTime.now(),
-        message: message,
-        sendBy: currentUser.id,
-        replyMessage: replyMessage,
-        messageType: messageType,
-      ),
-    );
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _chatController.initialMessageList.last.setStatus =
-          MessageStatus.undelivered;
-    });
-    Future.delayed(const Duration(seconds: 1), () {
-      _chatController.initialMessageList.last.setStatus = MessageStatus.read;
-    });
+) async {
+  try { 
+    await chat.addMessage(message, currentUser.id);
+    updateUserTypingStatus(false); 
+  } catch (e) {
+    print("Error sending message: $e");
   }
+}
+
 
   void _onThemeIconTap() {
     setState(() {
@@ -356,4 +375,4 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
   }
-}
+  }

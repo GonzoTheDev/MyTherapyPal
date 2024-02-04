@@ -30,6 +30,7 @@ class MainApp extends StatelessWidget {
     return FlutterSizer(
       builder: (context, orientation, screenType) {
       return MaterialApp(
+        debugShowCheckedModeBanner: false,
         builder: (context, child) => ResponsiveBreakpoints.builder(
           child: child!,
           breakpoints: [

@@ -39,7 +39,6 @@ class _ChatListState extends State<ChatList> {
       for (var doc in chatSnapshot.docs) {
         var users = List<String>.from(doc['users']);
         if (users.contains('ai-mental-health-assistant')) {
-          print("Found chatbot chat ID: ${doc.id}");
           return doc.id; 
         }
       }
