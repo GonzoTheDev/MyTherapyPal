@@ -76,7 +76,7 @@ class _ChatScreenState extends State<ChatScreen> {
     currentUser = ChatUser(
       id: uid,
       name: '$fname $sname',
-      profilePhoto: photoURL,
+      profilePhoto: otherUserPhotoURL,
     );
     otherUser = ChatUser(
       id: otherUserID,
