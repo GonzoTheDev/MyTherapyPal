@@ -159,6 +159,10 @@ void _showHideTypingIndicator() {
         featureActiveConfig: const FeatureActiveConfig(
           lastSeenAgoBuilderVisibility: true,
           receiptsBuilderVisibility: true,
+          enableReactionPopup: false,
+          enableSwipeToSeeTime: true,
+          enableDoubleTapToLike: false,
+          enableSwipeToReply: false,
         ),
         chatViewState: ChatViewState.hasMessages,
         chatViewStateConfig: ChatViewStateConfiguration(
