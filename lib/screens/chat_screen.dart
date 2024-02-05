@@ -2,9 +2,9 @@ import 'package:chatview/chatview.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_therapy_pal/models/chat_history.dart'; // Adjust path as needed
-import 'package:my_therapy_pal/models/theme.dart'; // Adjust path as needed
-import 'dart:async'; // Import for StreamSubscription
+import 'package:my_therapy_pal/models/chat_history.dart'; 
+import 'package:my_therapy_pal/models/theme.dart'; 
+import 'dart:async'; 
 
 class ChatScreen extends StatefulWidget {
   final String chatID;
@@ -37,7 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
   late Chat chat;
   bool isLoading = true; 
   StreamSubscription<List<Message>>? _messagesSubscription;
-  final Set<String> _displayedMessagesIds = <String>{}; // Track displayed messages to prevent duplicates
+  final Set<String> _displayedMessagesIds = <String>{}; 
 
 
   @override
@@ -112,6 +112,8 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     });
 
+    
+
     // Listen for typing status
     FirebaseFirestore.instance.collection('chat').doc(widget.chatID).snapshots().listen((snapshot) {
       var typingStatus = snapshot.data()?['typingStatus'];
@@ -129,6 +131,31 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+// Function to update the reaction of a message
+Future<void> updateMessageReaction(String messageId, String reaction, String userId) async {
+    final documentReference = FirebaseFirestore.instance.collection('messages').doc(messageId);
+
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(documentReference);
+      if (!snapshot.exists) {
+        throw Exception("Message does not exist!");
+      }
+
+      List<dynamic> currentReactions = snapshot.get('reactions') ?? [];
+      List<dynamic> updatedReactions = List.from(currentReactions);
+
+      if (!updatedReactions.contains(reaction)) {
+        updatedReactions.add(reaction);
+      } else {
+        updatedReactions.remove(reaction);
+      }
+
+      transaction.update(documentReference, {'reactions': updatedReactions});
+    }).catchError((error) {
+      print("Failed to update reaction: $error");
+    });
+  }
+  
 // Function to update the typing status of the current user
 void updateUserTypingStatus(bool isTyping) {
   var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
