@@ -42,6 +42,7 @@ class MainApp extends StatelessWidget {
         ),
         title: title,
         theme: ThemeData(
+          useMaterial3: false,
           primarySwatch: Colors.teal,
           scaffoldBackgroundColor: const Color.fromARGB(255, 238, 235, 235),
         ),
