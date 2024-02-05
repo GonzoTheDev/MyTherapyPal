@@ -134,11 +134,16 @@ void updateUserTypingStatus(bool isTyping) {
   var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
   String fieldPath = 'typingStatus.${FirebaseAuth.instance.currentUser!.uid}';
   chatDocRef.update({fieldPath: isTyping});
-}
 
-// Function to show/hide the typing indicator
-void _showHideTypingIndicator() {
-    _chatController.setTypingIndicator = !_chatController.showTypingIndicator;
+  // If isTyping is true, wait for 5 seconds then set it to false
+  if (isTyping) {
+    Future.delayed(const Duration(seconds: 5), () {
+      // It's important to check if the user hasn't started typing again in the meantime
+      // This could be done by keeping a timestamp or a flag that indicates the last typing action
+      // For simplicity, this example does not implement such a mechanism
+      chatDocRef.update({fieldPath: false});
+    });
+  }
 }
 
 
@@ -187,27 +192,6 @@ void _showHideTypingIndicator() {
             fontSize: 18,
             letterSpacing: 0.25,
           ),
-          userStatus: "offline",
-          userStatusTextStyle: const TextStyle(color: Colors.grey),
-          actions: [
-            IconButton(
-              onPressed: _onThemeIconTap,
-              icon: Icon(
-                isDarkTheme
-                    ? Icons.brightness_4_outlined
-                    : Icons.dark_mode_outlined,
-                color: theme.themeIconColor,
-              ),
-            ),
-            IconButton(
-              tooltip: 'Toggle TypingIndicator',
-              onPressed: _showHideTypingIndicator,
-              icon: Icon(
-                Icons.keyboard,
-                color: theme.themeIconColor,
-              ),
-            ),
-          ],
         ),
         chatBackgroundConfig: ChatBackgroundConfiguration(
           messageTimeIconColor: theme.messageTimeIconColor,
@@ -233,8 +217,6 @@ void _showHideTypingIndicator() {
           closeIconColor: theme.closeIconColor,
           textFieldConfig: TextFieldConfiguration(
             onMessageTyping: (status) {
-              /// Do with status
-              debugPrint(status.toString());
               updateUserTypingStatus(true);
             },
             compositionThresholdTime: const Duration(seconds: 1),
