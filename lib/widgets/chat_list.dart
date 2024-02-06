@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/screens/chat_screen.dart';
+import 'package:intl/intl.dart';
 
 class ChatList extends StatefulWidget {
   const ChatList({Key? key}) : super(key: key);
@@ -29,6 +30,20 @@ class _ChatListState extends State<ChatList> {
     });
   }
 
+  // Helper function to format the timestamp
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inDays < 1) {
+      return DateFormat('HH:mm').format(timestamp); 
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else {
+      return DateFormat('MM/dd/yyyy').format(timestamp); 
+    }
+  }
+
   Future<String?> getChatbotChatId() async {
     try {
       QuerySnapshot chatSnapshot = await _firestore
@@ -53,22 +68,39 @@ class _ChatListState extends State<ChatList> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('chat')
-            .where('users', arrayContains: _currentUserId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching chats'));
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No chats found'));
-          }
+      stream: _firestore
+          .collection('chat')
+          .where('users', arrayContains: _currentUserId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error fetching chats'));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No chats found'));
+        }
 
-          var filteredChats = snapshot.data!.docs.where((doc) => doc.id != _aiChatId).toList(); // Filter out AI chat
+        var chats = snapshot.data!.docs
+            .where((doc) => doc.id != _aiChatId) // Filter out AI chat
+            .toList();
+
+        // Assuming 'lastMessage' contains 'unread' (bool) & 'timestamp' (Timestamp)
+        // Sort: Unread chats first, then by timestamp (newest first)
+        chats.sort((a, b) {
+          var aData = a['lastMessage'] as Map<String, dynamic>?;
+          var bData = b['lastMessage'] as Map<String, dynamic>?;
+          var aUnread = aData != null && aData['status'] == 'delivered'; // Assuming 'delivered' means unread
+          var bUnread = bData != null && bData['status'] == 'delivered';
+          if (aUnread == bUnread) { // If both are read or unread, sort by timestamp
+            var aTimestamp = aData?['timestamp']?.toDate() ?? DateTime.now();
+            var bTimestamp = bData?['timestamp']?.toDate() ?? DateTime.now();
+            return bTimestamp.compareTo(aTimestamp); // Newest first
+          }
+          return aUnread ? -1 : 1; // Unread first
+        });
 
           return Column(
             children: [
@@ -88,13 +120,29 @@ class _ChatListState extends State<ChatList> {
                   }
                 },
               ),
+              // Expanded ListView to display the chats
               Expanded(
                 child: ListView.builder(
-                  itemCount: filteredChats.length,
+                  itemCount: chats.length,
                   itemBuilder: (context, index) {
-                    var chatData = filteredChats[index];
+                    var chatData = chats[index];
                     var otherUserId = chatData['users'].firstWhere((u) => u != _currentUserId);
                     var chatID = chatData.id;
+
+                    // Extracting lastMessage details
+                    var lastMessage = chatData['lastMessage'] != null ? chatData['lastMessage'] as Map<String, dynamic> : null;
+                    var lastMessageText = lastMessage?['message'] ?? '';
+                    var lastMessageTimestamp = lastMessage?['timestamp'] != null ? (lastMessage!['timestamp'] as Timestamp).toDate() : DateTime.now();
+                    var lastMessageStatus = lastMessage?['status'] ?? '';
+                    var isUnread = lastMessageStatus == 'delivered'; // Assuming 'delivered' means unread
+                    late String timestampText;
+
+                    // Formatting timestamp
+                    if(isUnread){
+                      timestampText = "● ${_formatTimestamp(lastMessageTimestamp)}";
+                    } else {
+                      timestampText = _formatTimestamp(lastMessageTimestamp);
+                    }
 
                     return Padding(
                       padding: const EdgeInsets.only(top: 6.0),
@@ -127,7 +175,18 @@ class _ChatListState extends State<ChatList> {
                             leading: CircleAvatar(
                               backgroundImage: NetworkImage(otherUserProfilePic),
                             ),
-                            title: Text('$otherUserFname $otherUserSname'),
+                            title: Text(
+                              '$otherUserFname $otherUserSname',
+                              style: TextStyle(fontWeight: isUnread ? FontWeight.bold : FontWeight.normal),
+                              ),
+                            subtitle: Text(
+                              lastMessageText,
+                              style: TextStyle(fontWeight: isUnread ? FontWeight.bold : FontWeight.normal),
+                            ),
+                            trailing: Text(
+                              timestampText,
+                              style: TextStyle(fontWeight: isUnread ? FontWeight.bold : FontWeight.normal),
+                            ),
                             onTap: () {
                               Navigator.push(
                                 context,

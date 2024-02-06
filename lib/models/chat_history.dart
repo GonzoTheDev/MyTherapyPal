@@ -24,20 +24,77 @@ class Chat {
         )).toList());
 
   Future<String?> addMessage(String newMessage, String uuid) async {
+    // Start a Firestore batch
+    WriteBatch batch = db.batch();
+
     try {
-      final myNewDoc = await db.collection("messages").add({
+      // Reference to the new document in the "messages" collection
+      DocumentReference newMessageRef = db.collection("messages").doc();
+
+      // Prepare the new message data
+      Map<String, dynamic> messageData = {
         "chatID": chatID,
         "message": newMessage,
         "sender": uuid,
         "status": "delivered",
         "timestamp": Timestamp.now(),
-      });
-      return myNewDoc.id;
+      };
+
+      // Add the new message to the batch
+      batch.set(newMessageRef, messageData);
+
+      // Prepare the lastMessage update for the chat with the same details as the new message
+      Map<String, dynamic> lastMessageUpdate = {
+        "lastMessage": {
+          "lastMessageId": newMessageRef.id,
+          "message": newMessage,
+          "sender": uuid,
+          "timestamp": messageData["timestamp"],
+          "status": "delivered", // or messageData["status"] if you prefer to keep consistency
+        }
+      };
+
+      // Reference to the chat document in the "chat" collection
+      DocumentReference chatRef = db.collection("chat").doc(chatID);
+
+      // Update the chat document in the batch
+      batch.update(chatRef, lastMessageUpdate);
+
+      // Commit the batch write
+      await batch.commit();
+
+      // Return the new message document ID on success
+      return newMessageRef.id;
     } catch (e) {
       print(e);
       return null;
     }
   }
+
+
+  Future<void> updateMessageStatus(String messageId, String newStatus) async {
+    try {
+      // Update the message status in the messages collection
+      await db.collection("messages").doc(messageId).update({
+        "status": newStatus,
+      });
+
+      // Fetch the chat document to check if the message being updated is the last one sent
+      DocumentSnapshot chatDoc = await db.collection("chat").doc(chatID).get();
+      Map<String, dynamic>? chatData = chatDoc.data() as Map<String, dynamic>?;
+      Map<String, dynamic>? lastMessage = chatData?['lastMessage'] as Map<String, dynamic>?;
+      
+      if (lastMessage != null && lastMessage['lastMessageId'] == messageId) {
+        // The message being updated is the last message, so update the status in the lastMessage field of the chat document
+        await db.collection("chat").doc(chatID).update({
+          "lastMessage.status": newStatus,
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
 
 
   MessageStatus _getStatusFromString(String status) {
