@@ -256,7 +256,11 @@ void updateUserTypingStatus(bool isTyping) {
             ),
             textStyle: TextStyle(color: theme.inComingChatBubbleTextColor),
             onMessageRead: (message) {
-              debugPrint('Message Read');
+              debugPrint('Message Read: ${message.id}');
+              if (message.status != MessageStatus.read) {
+                chat.updateMessageStatus(message.id, 'read'); 
+              }
+              
             },
             senderNameTextStyle:
                 TextStyle(color: theme.inComingChatBubbleTextColor),
