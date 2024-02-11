@@ -1,20 +1,22 @@
 # MyTherapyPal
 
-This is the main repository for the MyTherapyPal proof-of-concept prototype application. It consists of a flutter mobile & web user interface application with account registration & login functionality along with a note taking system connected to a primitive AI emotional sentiment analysis API, and the API itself, which is a REST API web service powered by Python Flask.
+This is the main repository for the final MyTherapyPal application. It consists of a flutter mobile & web user interface application with account registration & login functionality, chat functionality and an AI mental health assistant chatbot, which is implemented using a REST API web service powered by Python Flask.
 
 # Run debug environment
 
-## Emotional Sentiment Analysis API
+## AI(LLM) Mental Health Assistant API
+
+The AI mental health assistant is using a 4-bit quantized Llama-2-13B model called TheBloke/Llama-2-13B-chat-GPTQ. The functionality of which is provided over flask API locally. This was developed using an NVidia 4060Ti 16GB graphics card with CUDA 12.3. There is a conda environment yaml file included to setup the environment. Below are the steps to set this up.
 
 ### Create the new conda enviroment (assuming you have anaconda3 or equivelant installed)
 ```bash
-conda env create -f environment.yml
-conda activate emotion_sentiment
+conda env create -f chatcbt_final.yml
+conda activate chatCBTQ
 ```
 
 ### Start the flask server
 ```bash
-cd emotional_sentiment_analysis
+cd chatCBT
 python app.py
 ```
 
@@ -26,4 +28,4 @@ flutter run
 ```
 
 ### Choose platform
-Choose either Chrome or Edge. Selecting Windows may require Visual Studio being installed.
+Choose either Chrome, Edge, Windows, Android (if connected to device or emulator) or iOS (if on a MacOS system with Xcode). Selecting Windows may require Visual Studio being installed.
