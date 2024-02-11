@@ -2,9 +2,9 @@ import 'package:chatview/chatview.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:my_therapy_pal/models/chat_history.dart'; // Adjust path as needed
-import 'package:my_therapy_pal/models/theme.dart'; // Adjust path as needed
-import 'dart:async'; // Import for StreamSubscription
+import 'package:my_therapy_pal/models/chat.dart'; 
+import 'package:my_therapy_pal/models/theme.dart';
+import 'dart:async'; 
 
 class ChatScreen extends StatefulWidget {
   final String chatID;
@@ -16,9 +16,15 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+
+  // Initialize theme attributes
   AppTheme theme = LightTheme();
   bool isDarkTheme = false;
+
+  // Initialize database instance
   final db = FirebaseFirestore.instance;
+
+  // Declare chat users attributes
   late String uid;
   late String otherUserID;
   late String fname;
@@ -32,27 +38,35 @@ class _ChatScreenState extends State<ChatScreen> {
   late String? email;
   late ChatUser currentUser;
   late ChatUser otherUser;
+
+  // Declare chat attributes and controller
+  late Chat chat;
   late ChatController _chatController;
   bool _isChatControllerInitialized = false;
-  late Chat chat;
-  bool isLoading = true; 
   StreamSubscription<List<Message>>? _messagesSubscription;
-  final Set<String> _displayedMessagesIds = <String>{}; // Track displayed messages to prevent duplicates
+  bool isLoading = true; 
+  final Set<String> _displayedMessagesIds = <String>{}; 
+  bool ai = false;
 
 
+  // Initialize the chat screen
   @override
   void initState() {
     super.initState();
     initializeChat();
   }
 
+  // Dispose of the chat screen
   @override
   void dispose() {
     _messagesSubscription?.cancel();
     super.dispose();
   }
 
+  // Function to initialize chat messages
   Future<void> initializeChat() async {
+
+    // Get the user's profile data
     uid = FirebaseAuth.instance.currentUser!.uid;
     final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
     fname = userProfileDoc['fname'];
@@ -60,6 +74,8 @@ class _ChatScreenState extends State<ChatScreen> {
     userType = userProfileDoc['userType'];
     email = FirebaseAuth.instance.currentUser!.email;
     photoURL = userProfileDoc['photoURL'];
+
+    // Get the users belonging to a chat and determine the other users ID
     final chatDoc = await FirebaseFirestore.instance.collection('chat').doc(widget.chatID).get();
     var users = chatDoc['users'];
     if (users[0] == uid) {
@@ -67,12 +83,20 @@ class _ChatScreenState extends State<ChatScreen> {
     } else {
       otherUserID = users[0];
     }
+
+    // Check if the other user is the AI chatbot, if so set ai to true
+    if (otherUserID == 'ai-mental-health-assistant') {
+      ai = true;
+    }
+
+    // Get the other user's profile data
     final otherUserProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(otherUserID).get();
     otherUserFname = otherUserProfileDoc['fname'];
     otherUserSname = otherUserProfileDoc['sname'];
     otherUserType = otherUserProfileDoc['userType'];
     otherUserPhotoURL = otherUserProfileDoc['photoURL'];
     
+    // Create the current user and other user objects
     currentUser = ChatUser(
       id: uid,
       name: '$fname $sname',
@@ -84,6 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
       profilePhoto: otherUserPhotoURL,
     );
 
+    // Create a chat object
     chat = Chat(
       chatID: widget.chatID,
       users: [currentUser, otherUser],
@@ -138,15 +163,19 @@ void updateUserTypingStatus(bool isTyping) {
   // If isTyping is true, wait for 5 seconds then set it to false
   if (isTyping) {
     Future.delayed(const Duration(seconds: 5), () {
-      // It's important to check if the user hasn't started typing again in the meantime
-      // This could be done by keeping a timestamp or a flag that indicates the last typing action
-      // For simplicity, this example does not implement such a mechanism
       chatDocRef.update({fieldPath: false});
     });
   }
 }
 
+// Function to update the typing status of the AI chatbot
+void updateAITypingStatus(bool isTyping) {
+  var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
+  String fieldPath = 'typingStatus.${"ai-mental-health-assistant"}';
+  chatDocRef.update({fieldPath: isTyping});
+}
 
+  // Build the chat screen
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -156,11 +185,14 @@ void updateUserTypingStatus(bool isTyping) {
     }
 
     return Scaffold(
-      // Body of the chat screen
       body: ChatView(
+
+        // ChatView configuration
         currentUser: currentUser,
         chatController: _chatController,
         onSendTap: _onSendTap,
+
+        // ChatView features configuration
         featureActiveConfig: const FeatureActiveConfig(
           lastSeenAgoBuilderVisibility: true,
           receiptsBuilderVisibility: true,
@@ -169,6 +201,8 @@ void updateUserTypingStatus(bool isTyping) {
           enableDoubleTapToLike: false,
           enableSwipeToReply: false,
         ),
+
+        // ChatView state & widget configuration
         chatViewState: ChatViewState.hasMessages,
         chatViewStateConfig: ChatViewStateConfiguration(
           loadingWidgetConfig: ChatViewStateWidgetConfiguration(
@@ -176,10 +210,14 @@ void updateUserTypingStatus(bool isTyping) {
           ),
           onReloadButtonTap: () {},
         ),
+
+        // ChatView typing indicator configuration
         typeIndicatorConfig: TypeIndicatorConfiguration(
           flashingCircleBrightColor: theme.flashingCircleBrightColor,
           flashingCircleDarkColor: theme.flashingCircleDarkColor,
         ),
+
+        // ChatView app bar configuration
         appBar: ChatViewAppBar(
           elevation: theme.elevation,
           backGroundColor: theme.appBarColor,
@@ -193,6 +231,8 @@ void updateUserTypingStatus(bool isTyping) {
             letterSpacing: 0.25,
           ),
         ),
+
+        // ChatView style configuration
         chatBackgroundConfig: ChatBackgroundConfiguration(
           messageTimeIconColor: theme.messageTimeIconColor,
           messageTimeTextStyle: TextStyle(color: theme.messageTimeTextColor),
@@ -204,6 +244,8 @@ void updateUserTypingStatus(bool isTyping) {
           ),
           backgroundColor: theme.backgroundColor,
         ),
+
+        // ChatView send message configuration
         sendMessageConfig: SendMessageConfiguration(
           imagePickerIconsConfig: ImagePickerIconsConfiguration(
             cameraIconColor: theme.cameraIconColor,
@@ -233,6 +275,8 @@ void updateUserTypingStatus(bool isTyping) {
             ),
           ),
         ),
+
+        // ChatView chat bubble configuration
         chatBubbleConfig: ChatBubbleConfiguration(
           outgoingChatBubbleConfig: ChatBubble(
             linkPreviewConfig: LinkPreviewConfiguration(
@@ -267,11 +311,15 @@ void updateUserTypingStatus(bool isTyping) {
             color: theme.inComingChatBubbleColor,
           ),
         ),
+
+        // ChatView reply popup configuration
         replyPopupConfig: ReplyPopupConfiguration(
           backgroundColor: theme.replyPopupColor,
           buttonTextStyle: TextStyle(color: theme.replyPopupButtonColor),
           topBorderColor: theme.replyPopupTopBorderColor,
         ),
+
+        // ChatView reaction popup configuration
         reactionPopupConfig: ReactionPopupConfiguration(
           shadow: BoxShadow(
             color: isDarkTheme ? Colors.black54 : Colors.grey.shade400,
@@ -279,6 +327,8 @@ void updateUserTypingStatus(bool isTyping) {
           ),
           backgroundColor: theme.reactionPopupColor,
         ),
+
+        // ChatView message configuration
         messageConfig: MessageConfiguration(
           messageReactionConfig: MessageReactionConfiguration(
             backgroundColor: theme.messageReactionBackGroundColor,
@@ -313,9 +363,13 @@ void updateUserTypingStatus(bool isTyping) {
             ),
           ),
         ),
+
+        // ChatView profile circle configuration
         profileCircleConfig: ProfileCircleConfiguration(
           profileImageUrl: currentUser.profilePhoto,
         ),
+
+        // ChatView replied message configuration
         repliedMessageConfig: RepliedMessageConfiguration(
           backgroundColor: theme.repliedMessageColor,
           verticalBarColor: theme.verticalBarColor,
@@ -339,21 +393,41 @@ void updateUserTypingStatus(bool isTyping) {
   }
 
     
-
+// Function to send a message
 Future<void> _onSendTap(
-    String message,
-    ReplyMessage? replyMessage,
-    MessageType messageType,
+
+  // Declare message variables
+  String message,
+  ReplyMessage? replyMessage,
+  MessageType messageType,
 ) async {
   try { 
+
+    // Send the message
     await chat.addMessage(message, currentUser.id);
-    updateUserTypingStatus(false); 
+
+    // If the message is sent by the AI chatbot, add the message to the chat
+    if(ai){
+      updateAITypingStatus(true);
+      await chat.addAIMessage(message, currentUser.id);
+    }
+
   } catch (e) {
     print("Error sending message: $e");
+  } finally {
+
+    // Update the typing status of the current user
+    updateUserTypingStatus(false);
+
+    // If the message is sent by the AI chatbot, update the typing status of the AI chatbot
+    if(ai){
+      updateAITypingStatus(false);
+    }
+
   }
 }
 
-
+  // Function to handle the theme icon tap (to be implemented later)
   void _onThemeIconTap() {
     setState(() {
       if (isDarkTheme) {
