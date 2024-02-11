@@ -51,6 +51,22 @@ class AuthService {
           "userType": userType
           });
 
+        // Add a new document to the chat collection for the new user to interact with the ai chatbot
+        db.collection("chat").doc(uid).set({
+          "lastMessage": {
+            "lastMessageId": "",
+            "message": "",
+            "sender": "",
+            "status": "",
+            "timestamp": "",
+          },
+          "typingStatus": {
+            "ai-mental-health-assistant": false,
+            uid: false,
+          },
+          "users": ["ai-mental-health-assistant", uid],
+        });
+
         return 'Success';
 
       } on FirebaseAuthException catch (e) {
