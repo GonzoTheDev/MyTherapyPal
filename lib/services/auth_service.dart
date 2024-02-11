@@ -44,11 +44,15 @@ class AuthService {
         User? user = result.user;
         final uid = user!.uid;
 
+        // Get the default profile picture
+        const profilePicture = 'lib/assets/images/default_profile_picture.jpg';
+
         // Add a new document with the new users uid set as the document ID
         db.collection("profiles").doc(uid).set({
           "fname": fname,
           "sname": sname,
-          "userType": userType
+          "userType": userType,
+          "photoURL": profilePicture
           });
 
         // Add a new document to the chat collection for the new user to interact with the ai chatbot
