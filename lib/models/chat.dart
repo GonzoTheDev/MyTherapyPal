@@ -3,21 +3,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:my_therapy_pal/services/encryption/AES/aes.dart';
+import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 class Chat {
 
   // Initialize the Firestore database instance
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
+  // Create a new instance of the AES encryption service
+  final aesKeyEncryptionService = AESKeyEncryptionService();
+
   // Define the properties of the Chat class
   final String chatID;
+  Uint8List aesKey;
   late String context;
   List<ChatUser> users; 
   List<dynamic>? conversationHistory;
   late bool ai = false;
 
   // Define the constructor
-  Chat({required this.chatID, required this.users, this.conversationHistory}) {
+  Chat({required this.chatID, required this.users, this.conversationHistory, required this.aesKey}) {
 
     // Initialize conversationHistory here if needed, or consider an async init method.
     loadContext().then((loadedContext) {
@@ -43,6 +50,7 @@ class Chat {
     }
   }
 
+
   // Method to load the context from a file
   Future<String> loadContext() async {
     const contextFilePath = 'lib/assets/documents/context.txt';
@@ -56,6 +64,7 @@ class Chat {
   }
 
   // Method for making a request to the LLM API
+  // Needs to be HTTPS for production
   Future<String> llmResponse(String text) async {
   try {
     final response = await http.post(
@@ -87,13 +96,28 @@ class Chat {
       .orderBy("timestamp", descending: true)
       .limit(10)
       .snapshots().listen((querySnapshot) {
-        List<Message> messages = querySnapshot.docs.map((docSnapshot) => Message(
+        List<Message> messages = querySnapshot.docs.map((docSnapshot) {
+        String encryptedMsg = docSnapshot.data()['message'];
+        String decryptedMessage = "";
+        try {
+          final utfToKey = encrypt.Key(aesKey);
+          Uint8List ivGen = aesKeyEncryptionService.generateIVFromDocId(docSnapshot.id);
+          final iv = encrypt.IV(ivGen);
+          decryptedMessage = AESEncryption(utfToKey, iv).decryptData(encryptedMsg);
+        } catch (e) {
+          // Handle decryption errors or leave encrypted if decryption fails
+          print("Error decrypting message: $e");
+          decryptedMessage = "[Encrypted message]";
+        }
+
+        return Message(
           id: docSnapshot.id,
-          message: docSnapshot.data()['message'] as String,
+          message: decryptedMessage,
           createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
-          sendBy: docSnapshot.data()['sender'] as String,
-          status: _getStatusFromString(docSnapshot.data()['status'] as String),
-        )).toList();
+          sendBy: docSnapshot.data()['sender'],
+          status: _getStatusFromString(docSnapshot.data()['status']),
+        );
+      }).toList();
 
         // Reverse to maintain chronological order
         messages = messages.reversed.toList();
@@ -111,13 +135,31 @@ class Chat {
     .where("chatID", isEqualTo: chatID)
     .orderBy("timestamp", descending: false)
     .snapshots()
-    .map((querySnapshot) => querySnapshot.docs.map((docSnapshot) => Message(
-          id: docSnapshot.id,
-          message: docSnapshot.data()['message'] as String,
-          createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
-          sendBy: docSnapshot.data()['sender'] as String,
-          status: _getStatusFromString(docSnapshot.data()['status'] as String),
-        )).toList());
+    .map((querySnapshot) => querySnapshot.docs.map((docSnapshot) {
+      
+      String encryptedMsg = docSnapshot.data()['message'];
+      String decryptedMessage = "";
+      
+      try {
+        final utfToKey = encrypt.Key(aesKey);
+        Uint8List ivGen = aesKeyEncryptionService.generateIVFromDocId(docSnapshot.id);
+        final iv = encrypt.IV(ivGen);
+        decryptedMessage = AESEncryption(utfToKey, iv).decryptData(encryptedMsg);
+      } catch (e) {
+        // Handle decryption errors or leave encrypted if decryption fails
+        print("Error decrypting message: $e");
+        decryptedMessage = "[Encrypted message]";
+      }
+
+      // Create and return the Message object with the decrypted message.
+      return Message(
+        id: docSnapshot.id,
+        message: decryptedMessage,
+        createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
+        sendBy: docSnapshot.data()['sender'],
+        status: _getStatusFromString(docSnapshot.data()['status']),
+      );
+    }).toList());
 
 
   // Method to add an ai message to the firebase database
@@ -127,12 +169,22 @@ class Chat {
     WriteBatch batch = db.batch();
 
     try {
+      
+        final utfToKey = encrypt.Key(aesKey);
 
         // Reference to the new document in the "messages" collection
         DocumentReference newMessageRef = db.collection("messages").doc();
 
         // Reference to the new document in the "messages" collection for the ai response
         DocumentReference newMessageRefAi = db.collection("messages").doc();
+
+        // Generate an IV from the document ID for the user message
+        Uint8List ivUserGen = aesKeyEncryptionService.generateIVFromDocId(newMessageRef.id);
+        final ivUser = encrypt.IV(ivUserGen);
+
+        // Generate an IV from the document ID for the ai response
+        Uint8List ivAiGen = aesKeyEncryptionService.generateIVFromDocId(newMessageRefAi.id);
+        final ivAi = encrypt.IV(ivAiGen);
 
         // Send the user's message and conversation history to the llmResponse function
         String llmRawResponse = await llmResponse(newMessage);
@@ -141,10 +193,13 @@ class Chat {
         Map<String, dynamic> llmParsedResponse = jsonDecode(llmRawResponse);
         String llmTextResponse = llmParsedResponse["llm_response"];
 
+        final encryptedAiMessageString = AESEncryption(utfToKey, ivAi).encryptData(llmTextResponse);
+        final encryptedUserMessageString = AESEncryption(utfToKey, ivUser).encryptData(newMessage);
+
         // Prepare the new message data with ai response
         Map<String, dynamic> messageDataAi = {
           "chatID": chatID,
-          "message": llmTextResponse,
+          "message": encryptedAiMessageString,
           "sender": "ai-mental-health-assistant",
           "status": "delivered",
           "timestamp": Timestamp.now(),
@@ -157,7 +212,7 @@ class Chat {
         Map<String, dynamic> lastMessageUpdate = {
           "lastMessage": {
             "lastMessageId": newMessageRef.id,
-            "message": newMessage,
+            "message": encryptedUserMessageString,
             "sender": uuid,
             "timestamp": messageDataAi["timestamp"],
             "status": "delivered",
@@ -196,10 +251,27 @@ class Chat {
         // Declare map to store the new message data
         Map<String, dynamic> messageData;
 
+        // Convert Message Ref ID String to Uint8List
+        //Uint8List msgRefID = Uint8List.fromList(utf8.encode(newMessageRef.id));
+        // Generate an IV from the document ID for the user message
+        Uint8List ivUserGen = aesKeyEncryptionService.generateIVFromDocId(newMessageRef.id);
+        final ivUser = encrypt.IV(ivUserGen);
+
+        // Convert the user's message to a Uint8List
+        //Uint8List userMessage = Uint8List.fromList(utf8.encode(newMessage));
+
+        // Encrypt the user's message with the AES key
+        //Uint8List encryptedUserMessage = aesEncryptionService.encrypt(userMessage, aesKey, msgRefID);
+        //String encryptedUserMessageBase64 = base64Encode(encryptedUserMessage);
+
+        final utfToKey = encrypt.Key(aesKey);
+
+        final encryptedUserMessageString = AESEncryption(utfToKey, ivUser).encryptData(newMessage);
+
         // Prepare the new message data
         messageData = {
           "chatID": chatID,
-          "message": newMessage,
+          "message": encryptedUserMessageString,
           "sender": uuid,
           "status": "delivered",
           "timestamp": Timestamp.now(),
@@ -212,7 +284,7 @@ class Chat {
         Map<String, dynamic> lastMessageUpdate = {
           "lastMessage": {
             "lastMessageId": newMessageRef.id,
-            "message": newMessage,
+            "message": encryptedUserMessageString,
             "sender": uuid,
             "timestamp": messageData["timestamp"],
             "status": "delivered",

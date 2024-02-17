@@ -1,10 +1,13 @@
+import 'dart:typed_data';
 import 'package:chatview/chatview.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/models/chat.dart'; 
 import 'package:my_therapy_pal/models/theme.dart';
-import 'dart:async'; 
+import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart'; 
 
 class ChatScreen extends StatefulWidget {
   final String chatID;
@@ -33,6 +36,10 @@ class _ChatScreenState extends State<ChatScreen> {
   late String otherUserSname;
   late String userType;
   late String otherUserType;
+  late String userRSAKey;
+  late String encryptedAESKey;
+  late Uint8List decryptedAESKey;
+  late String decryptedAESKeyString;
   late String photoURL;
   late String otherUserPhotoURL;
   late String? email;
@@ -75,13 +82,35 @@ class _ChatScreenState extends State<ChatScreen> {
     email = FirebaseAuth.instance.currentUser!.email;
     photoURL = userProfileDoc['photoURL'];
 
+    // Obtain shared preferences.
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    
+    // Get the users private RSA key from shared preferences
+    final String? privateKeyRSA = prefs.getString('privateKeyRSA');
+
     // Get the users belonging to a chat and determine the other users ID
     final chatDoc = await FirebaseFirestore.instance.collection('chat').doc(widget.chatID).get();
     var users = chatDoc['users'];
+    var keys = chatDoc['keys'];
     if (users[0] == uid) {
       otherUserID = users[1];
     } else {
       otherUserID = users[0];
+    }
+    if (keys[uid] != null) {
+      encryptedAESKey = keys[uid];
+    } else {
+      encryptedAESKey = '';
+    }
+
+    if(encryptedAESKey != ''){
+      decryptedAESKeyString = RSAEncryption().decrypt(key: privateKeyRSA, message: encryptedAESKey);
+      // Remove the brackets and split by comma
+      List<String> byteStrings = decryptedAESKeyString.substring(1, decryptedAESKeyString.length - 1).split(", ");
+      // Convert each substring to an integer and then to a Uint8List
+      decryptedAESKey = Uint8List.fromList(byteStrings.map((s) => int.parse(s)).toList());
+    }else{
+      decryptedAESKey = Uint8List(0);
     }
 
     // Check if the other user is the AI chatbot, if so set ai to true
@@ -112,6 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
     chat = Chat(
       chatID: widget.chatID,
       users: [currentUser, otherUser],
+      aesKey: decryptedAESKey,
     );
 
     // Subscribe to the messages stream

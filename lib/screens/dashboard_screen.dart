@@ -9,6 +9,7 @@ import 'package:my_therapy_pal/widgets/dashboard.dart';
 import 'package:my_therapy_pal/widgets/chat_list.dart';
 import 'package:my_therapy_pal/widgets/records.dart';
 import 'package:my_therapy_pal/widgets/listings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AccountHomePage extends StatefulWidget {
@@ -29,12 +30,22 @@ class _AccountHomePageState extends State<AccountHomePage> {
     super.initState();
   }
 
-  void logout() {
+  Future<void> logout() async {
+
+    // Logout the user from firebase authentication
     AuthService().logoutUser();
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const Login()),
-          (route) => false,
-        );
+
+    // Obtain shared preferences.
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Remove the users private key from shared preferences
+    await prefs.remove('privateKeyRSA');
+
+    // Send the user back to the login screen
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const Login()),
+      (route) => false,
+    );
   }
 
   void _handleNavigationChange(int index) {
@@ -47,7 +58,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
           _child = const Records();
           break;
         case 2:
-          _child = ChatList();
+          _child = const ChatList();
           break;
         case 3:
           _child = const Listings();
