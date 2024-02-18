@@ -28,8 +28,13 @@ pipe = pipeline(
 )
 
 # Function that takes the user prompt and conversation history (which includes context/task assignment) and returns the ai assistant response
-def process_response(user_prompt, conversation_history):
-    prompt_with_context = "\n".join(conversation_history + [f"Human: {user_prompt}", "Assistant:"])
+def process_response(username, user_prompt, conversation_history):
+    labeled_history = [f"{username if i % 2 == 0 else 'Assistant'}: {msg}" for i, msg in enumerate(conversation_history)]
+    prompt_with_context = "\n".join(labeled_history + [f"{username}: {user_prompt}", "Assistant:"])
+    
+    print(f"Prompt with context: {prompt_with_context}")
+    
+    # Assuming `pipe` is your model's prediction function
     generated_text = pipe(prompt_with_context)[0]['generated_text']
     assistant_response = generated_text.split("Assistant:")[-1].strip()
     return assistant_response

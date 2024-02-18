@@ -19,14 +19,17 @@ class Chat {
   final String chatID;
   Uint8List aesKey;
   late String context;
+  late String username;
   List<ChatUser> users; 
   List<dynamic>? conversationHistory;
   late bool ai = false;
 
   // Define the constructor
-  Chat({required this.chatID, required this.users, this.conversationHistory, required this.aesKey}) {
+  Chat({required this.chatID, required this.users, required this.username, this.conversationHistory, required this.aesKey}) {
 
-    // Initialize conversationHistory here if needed, or consider an async init method.
+    listenToMessages();
+    
+    // Initialize conversationHistory with context if necessary
     loadContext().then((loadedContext) {
 
       context = loadedContext;
@@ -75,6 +78,7 @@ class Chat {
       body: jsonEncode(<String, dynamic>{
         'text': text,
         'conversation_history': conversationHistory,
+        'username': username,
       }),
     );
 
@@ -92,7 +96,6 @@ class Chat {
   void listenToMessages() {
     db.collection("messages")
       .where("chatID", isEqualTo: chatID)
-      .where("sender", isNotEqualTo: "ai-mental-health-assistant")
       .orderBy("timestamp", descending: true)
       .limit(10)
       .snapshots().listen((querySnapshot) {
@@ -109,7 +112,7 @@ class Chat {
           print("Error decrypting message: $e");
           decryptedMessage = "[Encrypted message]";
         }
-
+        print("Decrypted Message in Stream: $decryptedMessage");	
         return Message(
           id: docSnapshot.id,
           message: decryptedMessage,
@@ -124,6 +127,8 @@ class Chat {
 
         // Ensure context is the first element, then append messages
         conversationHistory = [context] + messages.map((message) => message.message).toList();
+
+        print("Conversation history in Stream: $conversationHistory");	
 
       }, onError: (error) {
         print("Error listening to messages: $error");
@@ -251,18 +256,8 @@ class Chat {
         // Declare map to store the new message data
         Map<String, dynamic> messageData;
 
-        // Convert Message Ref ID String to Uint8List
-        //Uint8List msgRefID = Uint8List.fromList(utf8.encode(newMessageRef.id));
-        // Generate an IV from the document ID for the user message
         Uint8List ivUserGen = aesKeyEncryptionService.generateIVFromDocId(newMessageRef.id);
         final ivUser = encrypt.IV(ivUserGen);
-
-        // Convert the user's message to a Uint8List
-        //Uint8List userMessage = Uint8List.fromList(utf8.encode(newMessage));
-
-        // Encrypt the user's message with the AES key
-        //Uint8List encryptedUserMessage = aesEncryptionService.encrypt(userMessage, aesKey, msgRefID);
-        //String encryptedUserMessageBase64 = base64Encode(encryptedUserMessage);
 
         final utfToKey = encrypt.Key(aesKey);
 

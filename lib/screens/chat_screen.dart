@@ -142,6 +142,7 @@ class _ChatScreenState extends State<ChatScreen> {
       chatID: widget.chatID,
       users: [currentUser, otherUser],
       aesKey: decryptedAESKey,
+      username: fname,
     );
 
     // Subscribe to the messages stream

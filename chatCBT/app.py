@@ -10,7 +10,8 @@ def llm_api():
     data = request.get_json()
     input_text = data['text']
     context = data['conversation_history']
-    llm_response = process_response(input_text,  context)
+    username = data['username']
+    llm_response = process_response(username, input_text,  context)
     return jsonify({"llm_response": llm_response})
 
 if __name__ == '__main__':

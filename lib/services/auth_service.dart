@@ -1,11 +1,11 @@
 import 'dart:typed_data';
-
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_therapy_pal/services/encryption/AES/aes.dart';
 import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
 import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
+import 'package:my_therapy_pal/services/generate_chat.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -105,25 +105,15 @@ class AuthService {
           "IV": iv.bytes,
           });
 
-        // Add a new document to the chat collection for the new user to interact with the ai chatbot
-        db.collection("chat").doc(uid).set({
-          "lastMessage": {
-            "lastMessageId": "",
-            "message": "",
-            "sender": "",
-            "status": "",
-            "timestamp": "",
-          },
-          "typingStatus": {
-            "ai-mental-health-assistant": false,
-            uid: false,
-          },
-          "users": ["ai-mental-health-assistant", uid],
-          "keys": {
-            "ai-mental-health-assistant": encryptedAESKey,
-            uid: encryptedAESKey,
-          },
-        });
+        // Generate a chat with the ai chatbot
+        GenerateChat(
+          aesKey: aesKey,
+          encryptedAESKey: encryptedAESKey,
+          fname: fname,
+          uid: uid,
+          iv: iv.bytes,
+        ).generateAIChat();
+
 
         return 'Success';
 
