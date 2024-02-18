@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:my_therapy_pal/services/encryption/AES/aes.dart';
 import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:my_therapy_pal/services/generate_chat.dart';
 
 class Chat {
 
@@ -18,7 +19,7 @@ class Chat {
   // Define the properties of the Chat class
   final String chatID;
   Uint8List aesKey;
-  late String context;
+  String? chatContext;
   late String username;
   List<ChatUser> users; 
   List<dynamic>? conversationHistory;
@@ -26,15 +27,17 @@ class Chat {
 
   // Define the constructor
   Chat({required this.chatID, required this.users, required this.username, this.conversationHistory, required this.aesKey}) {
-
+    
+    // Listen for new messages in the chat
+    
     listenToMessages();
     
     // Initialize conversationHistory with context if necessary
     loadContext().then((loadedContext) {
 
-      context = loadedContext;
+      chatContext = loadedContext;
       // Initialize conversationHistory with context if necessary
-      conversationHistory ??= [context];
+      conversationHistory ??= [chatContext];
       
     }).catchError((error) {
       print("Error loading context: $error");
@@ -51,6 +54,11 @@ class Chat {
         ai = true;
       }
     }
+  }
+
+  void dispose() {
+    // Dispose of the stream
+    messagesStream.drain();
   }
 
 
@@ -96,6 +104,7 @@ class Chat {
   void listenToMessages() {
     db.collection("messages")
       .where("chatID", isEqualTo: chatID)
+      .where("active", isEqualTo: true)
       .orderBy("timestamp", descending: true)
       .limit(10)
       .snapshots().listen((querySnapshot) {
@@ -109,10 +118,9 @@ class Chat {
           decryptedMessage = AESEncryption(utfToKey, iv).decryptData(encryptedMsg);
         } catch (e) {
           // Handle decryption errors or leave encrypted if decryption fails
-          print("Error decrypting message: $e");
+          print("chat.dart:121: Error decrypting message: $e");
           decryptedMessage = "[Encrypted message]";
         }
-        print("Decrypted Message in Stream: $decryptedMessage");	
         return Message(
           id: docSnapshot.id,
           message: decryptedMessage,
@@ -126,9 +134,7 @@ class Chat {
         messages = messages.reversed.toList();
 
         // Ensure context is the first element, then append messages
-        conversationHistory = [context] + messages.map((message) => message.message).toList();
-
-        print("Conversation history in Stream: $conversationHistory");	
+        conversationHistory = [chatContext] + messages.map((message) => message.message).toList();
 
       }, onError: (error) {
         print("Error listening to messages: $error");
@@ -138,10 +144,10 @@ class Chat {
   // Firebase Stream for listening to new messages in the chat and adding them to the messages list
   Stream<List<Message>> get messagesStream => db.collection("messages")
     .where("chatID", isEqualTo: chatID)
+    .where("active", isEqualTo: true)
     .orderBy("timestamp", descending: false)
     .snapshots()
     .map((querySnapshot) => querySnapshot.docs.map((docSnapshot) {
-      
       String encryptedMsg = docSnapshot.data()['message'];
       String decryptedMessage = "";
       
@@ -152,7 +158,7 @@ class Chat {
         decryptedMessage = AESEncryption(utfToKey, iv).decryptData(encryptedMsg);
       } catch (e) {
         // Handle decryption errors or leave encrypted if decryption fails
-        print("Error decrypting message: $e");
+        print("chat.dart:161: Error decrypting message: $e");
         decryptedMessage = "[Encrypted message]";
       }
 
@@ -208,6 +214,7 @@ class Chat {
           "sender": "ai-mental-health-assistant",
           "status": "delivered",
           "timestamp": Timestamp.now(),
+          "active": true,
         };
 
         // Add the new message to the batch
@@ -221,6 +228,7 @@ class Chat {
             "sender": uuid,
             "timestamp": messageDataAi["timestamp"],
             "status": "delivered",
+            "active": true,
           }
         };
 
@@ -270,6 +278,7 @@ class Chat {
           "sender": uuid,
           "status": "delivered",
           "timestamp": Timestamp.now(),
+          "active": true,
         };
 
         // Add the new message to the batch
@@ -283,6 +292,7 @@ class Chat {
             "sender": uuid,
             "timestamp": messageData["timestamp"],
             "status": "delivered",
+            "active": true,
           }
         };
 
@@ -343,4 +353,17 @@ class Chat {
         return MessageStatus.undelivered;
     }
   }
+
+  // Method to generate a new ai chat room
+  Future<void> generateAIChat(String encryptedAESKey, String fname, String uid) async {
+    // Generate a chat with the ai chatbot
+        GenerateChat(
+          aesKey: aesKey,
+          encryptedAESKey: encryptedAESKey,
+          fname: fname,
+          uid: uid,
+        ).generateAIChat();
+  }
+
+  
 }

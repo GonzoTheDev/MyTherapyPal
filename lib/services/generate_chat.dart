@@ -10,7 +10,6 @@ class GenerateChat {
   final String uid;
   final Uint8List aesKey;
   final String encryptedAESKey;
-  final Uint8List iv;
 
   // Create a new instance of the firebase firestore
   var db = FirebaseFirestore.instance;
@@ -19,7 +18,7 @@ class GenerateChat {
   final aesKeyEncryptionService = AESKeyEncryptionService();
 
   // Constructor to initialise the user's data
-  GenerateChat({required this.aesKey, required this.encryptedAESKey, required this.fname, required this.uid, required this.iv});
+  GenerateChat({required this.aesKey, required this.encryptedAESKey, required this.fname, required this.uid});
 
   // Function to generate a chat with the ai chatbot
   Future<void> generateAIChat() async {
@@ -58,6 +57,7 @@ class GenerateChat {
             "ai-mental-health-assistant": encryptedAESKey,
             uid: encryptedAESKey,
           },
+          "active": true,
         });
 
         // Prepare the new message data
@@ -67,6 +67,7 @@ class GenerateChat {
           "sender": 'ai-mental-health-assistant',
           "status": "delivered",
           "timestamp": Timestamp.now(),
+          "active": true,
         };
 
         // Add the new message to the batch

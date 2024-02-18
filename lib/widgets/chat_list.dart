@@ -49,6 +49,7 @@ class _ChatListState extends State<ChatList> {
       QuerySnapshot chatSnapshot = await _firestore
           .collection('chat')
           .where('users', arrayContains: _currentUserId)
+          .where('active', isEqualTo: true)
           .get();
 
       for (var doc in chatSnapshot.docs) {
@@ -71,6 +72,7 @@ class _ChatListState extends State<ChatList> {
       stream: _firestore
           .collection('chat')
           .where('users', arrayContains: _currentUserId)
+          .where('active', isEqualTo: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

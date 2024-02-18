@@ -111,7 +111,6 @@ class AuthService {
           encryptedAESKey: encryptedAESKey,
           fname: fname,
           uid: uid,
-          iv: iv.bytes,
         ).generateAIChat();
 
 

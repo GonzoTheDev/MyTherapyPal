@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/models/chat.dart'; 
 import 'package:my_therapy_pal/models/theme.dart';
 import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
+import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
+import 'package:my_therapy_pal/services/generate_chat.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart'; 
 
@@ -27,6 +29,12 @@ class _ChatScreenState extends State<ChatScreen> {
   // Initialize database instance
   final db = FirebaseFirestore.instance;
 
+  // Create a new instance of the RSA encryption 
+  final rsaEncryption = RSAEncryption();
+
+  // Create a new instance of the AES encryption service
+  final aesKeyEncryptionService = AESKeyEncryptionService();
+
   // Declare chat users attributes
   late String uid;
   late String otherUserID;
@@ -36,7 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
   late String otherUserSname;
   late String userType;
   late String otherUserType;
-  late String userRSAKey;
+  late String userRSAPubKey;
   late String encryptedAESKey;
   late Uint8List decryptedAESKey;
   late String decryptedAESKeyString;
@@ -81,6 +89,7 @@ class _ChatScreenState extends State<ChatScreen> {
     userType = userProfileDoc['userType'];
     email = FirebaseAuth.instance.currentUser!.email;
     photoURL = userProfileDoc['photoURL'];
+    userRSAPubKey = userProfileDoc['publicRSAKey'];
 
     // Obtain shared preferences.
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -145,27 +154,39 @@ class _ChatScreenState extends State<ChatScreen> {
       username: fname,
     );
 
+    // Initialize _chatController safely
+    setState(() {
+      _chatController = ChatController(
+        initialMessageList: [], // Initialize with an empty list or appropriate default
+        scrollController: ScrollController(),
+        chatUsers: [currentUser, otherUser],
+      );
+      _isChatControllerInitialized = true;
+    });
+
     // Subscribe to the messages stream
     _messagesSubscription = chat.messagesStream.listen((List<Message> messages) {
-      setState(() {
-        var newMessages = messages.where((msg) => !_displayedMessagesIds.contains(msg.id)).toList();
-        if (!_isChatControllerInitialized) {
-          _chatController = ChatController(
-            initialMessageList: newMessages,
-            scrollController: ScrollController(),
-            chatUsers: [currentUser, otherUser],
-          );
-          _isChatControllerInitialized = true;
-        } else {
-          for (var msg in newMessages) {
-            _chatController.addMessage(msg);
+      if (mounted) {
+        setState(() {
+          var newMessages = messages.where((msg) => !_displayedMessagesIds.contains(msg.id)).toList();
+          if (!_isChatControllerInitialized) {
+            _chatController = ChatController(
+              initialMessageList: newMessages,
+              scrollController: ScrollController(),
+              chatUsers: [currentUser, otherUser],
+            );
+            _isChatControllerInitialized = true;
+          } else {
+            for (var msg in newMessages) {
+              _chatController.addMessage(msg);
+            }
           }
-        }
-        for (var msg in newMessages) {
-          _displayedMessagesIds.add(msg.id);
-        }
-        isLoading = false;
-      });
+          for (var msg in newMessages) {
+            _displayedMessagesIds.add(msg.id);
+          }
+          isLoading = false;
+        });
+      }
     });
 
     // Listen for typing status
@@ -173,14 +194,18 @@ class _ChatScreenState extends State<ChatScreen> {
       var typingStatus = snapshot.data()?['typingStatus'];
       if (typingStatus != null && typingStatus[otherUserID] == true) {
         // Show typing indicator
-        setState(() {
-          _chatController.setTypingIndicator = true;
-        });
+        if (mounted) {
+          setState(() {
+            _chatController.setTypingIndicator = true;
+          });
+        }
       } else {
         // Hide typing indicator
-        setState(() {
-          _chatController.setTypingIndicator = false;
-        });
+        if (mounted) {
+          setState(() {
+            _chatController.setTypingIndicator = false;
+          });
+        }
       }
     });
   }
@@ -204,6 +229,49 @@ void updateAITypingStatus(bool isTyping) {
   var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
   String fieldPath = 'typingStatus.${"ai-mental-health-assistant"}';
   chatDocRef.update({fieldPath: isTyping});
+}
+
+void _createNewAiChat() async {
+
+  // Before using `context` or calling `setState`, check if the widget is still mounted
+  if (!mounted) return;
+
+  // Disable the old AI chat by setting active to false
+  await db.collection("chat").doc(chat.chatID).update({
+    "active": false,
+  });
+
+  // Disable the old AI chat messages by setting active to false
+  await db.collection("messages").where('chatID', isEqualTo: chat.chatID).get().then((snapshot) {
+    for (DocumentSnapshot ds in snapshot.docs){
+      ds.reference.update({
+        "active": false,
+      });
+    }
+  });
+
+  // Generate an AES key for the ai chat room
+  final aesKey = aesKeyEncryptionService.generateAESKey(16);
+
+  // Encrypt the AES key with the public key
+  final encryptedAESKey = rsaEncryption.encrypt(
+    key: userRSAPubKey,
+    message: aesKey.toString(),
+  );
+
+  // Generate a new chat with the ai chatbot
+  // Implement GenerateChat method to handle AI chat generation and navigation logic
+  GenerateChat(
+    aesKey: aesKey,
+    encryptedAESKey: encryptedAESKey,
+    fname: fname,
+    uid: uid,
+  ).generateAIChat(); // Modify this method to return a boolean indicating success
+
+
+  if (mounted) {
+    Navigator.of(context).pop();
+  }
 }
 
   // Build the chat screen
@@ -261,6 +329,16 @@ void updateAITypingStatus(bool isTyping) {
             fontSize: 18,
             letterSpacing: 0.25,
           ),
+          actions: [
+            IconButton(
+              onPressed: () => _createNewAiChat(),
+              icon: Icon(
+                Icons.open_in_new,
+                color: theme.themeIconColor,
+              ),
+              tooltip: "Start a new ai chat.",
+            ),
+          ],
         ),
 
         // ChatView style configuration
@@ -424,50 +502,51 @@ void updateAITypingStatus(bool isTyping) {
   }
 
     
-// Function to send a message
-Future<void> _onSendTap(
+  // Function to send a message
+  Future<void> _onSendTap(
+    // Declare message variables
+    String message,
+    ReplyMessage? replyMessage,
+    MessageType messageType,
+  ) async {
+      try {
 
-  // Declare message variables
-  String message,
-  ReplyMessage? replyMessage,
-  MessageType messageType,
-) async {
-  try { 
+        // Send the message
+        await chat.addMessage(message, currentUser.id);
 
-    // Send the message
-    await chat.addMessage(message, currentUser.id);
+        // If the message is sent by the AI chatbot, add the message to the chat
+        if(ai){
+          updateAITypingStatus(true);
+          await chat.addAIMessage(message, currentUser.id);
+        }
 
-    // If the message is sent by the AI chatbot, add the message to the chat
-    if(ai){
-      updateAITypingStatus(true);
-      await chat.addAIMessage(message, currentUser.id);
+      } catch (e) {
+        print("Error sending message: $e");
+      } finally {
+
+        // Update the typing status of the current user
+        updateUserTypingStatus(false);
+
+        // If the message is sent by the AI chatbot, update the typing status of the AI chatbot
+        if(ai){
+          updateAITypingStatus(false);
+        }
+
+      }
     }
-
-  } catch (e) {
-    print("Error sending message: $e");
-  } finally {
-
-    // Update the typing status of the current user
-    updateUserTypingStatus(false);
-
-    // If the message is sent by the AI chatbot, update the typing status of the AI chatbot
-    if(ai){
-      updateAITypingStatus(false);
-    }
-
-  }
-}
 
   // Function to handle the theme icon tap (to be implemented later)
   void _onThemeIconTap() {
-    setState(() {
-      if (isDarkTheme) {
-        theme = LightTheme();
-        isDarkTheme = false;
-      } else {
-        theme = DarkTheme();
-        isDarkTheme = true;
-      }
-    });
+    if (mounted) {
+      setState(() {
+        if (isDarkTheme) {
+          theme = LightTheme();
+          isDarkTheme = false;
+        } else {
+          theme = DarkTheme();
+          isDarkTheme = true;
+        }
+      });
+    }
   }
-  }
+}
