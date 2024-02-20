@@ -9,6 +9,7 @@ import 'package:my_therapy_pal/widgets/dashboard.dart';
 import 'package:my_therapy_pal/widgets/chat_list.dart';
 import 'package:my_therapy_pal/widgets/records.dart';
 import 'package:my_therapy_pal/widgets/listings.dart';
+import 'package:my_therapy_pal/widgets/start_chat.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -23,7 +24,7 @@ class AccountHomePage extends StatefulWidget {
 class _AccountHomePageState extends State<AccountHomePage> {
   
   Widget? _child;
-  
+  bool _showFab = false;
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
 
   void _handleNavigationChange(int index) {
     setState(() {
+      _showFab = index == 2;
       switch (index) {
         case 0:
           _child = const Dashboard();
@@ -144,6 +146,18 @@ class _AccountHomePageState extends State<AccountHomePage> {
           ),
         ),
       ),
+      floatingActionButton: _showFab ? FloatingActionButton(
+        onPressed: () {
+          // Navigate to StartChat or the action you want to perform
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const StartChat()),
+          );
+        },
+        tooltip: 'Start new chat',
+        child: const Icon(Icons.add),
+      ) : null, // Hide FAB when not on ChatList
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
