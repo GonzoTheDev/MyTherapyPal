@@ -13,7 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class AccountHomePage extends StatefulWidget {
-  const AccountHomePage({Key? key}) : super(key: key);
+  final int initialIndex; 
+  const AccountHomePage({Key? key, this.initialIndex = 0}) : super(key: key);
 
   @override
   _AccountHomePageState createState() => _AccountHomePageState();
@@ -26,8 +27,8 @@ class _AccountHomePageState extends State<AccountHomePage> {
 
   @override
   void initState() {
-    _child = const Dashboard();
     super.initState();
+    _handleNavigationChange(widget.initialIndex);
   }
 
   Future<void> logout() async {
@@ -136,7 +137,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
               iconSelectedForegroundColor: Colors.white,
               barBackgroundColor: Colors.teal),
           scaleFactor: 1.5,
-          defaultIndex: 0,
+          defaultIndex: widget.initialIndex,
           itemBuilder: (icon, item) => Semantics(
             label: icon.extras!["label"],
             child: item,

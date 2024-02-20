@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
 from process_response import process_response
+from waitress import serve
 
 app = Flask(__name__)
 CORS(app)
@@ -15,5 +16,6 @@ def llm_api():
     return jsonify({"llm_response": llm_response})
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    serve(app, host='0.0.0.0', port=80)
+    #app.run(port=5000)
 

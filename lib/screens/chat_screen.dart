@@ -5,9 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/models/chat.dart'; 
 import 'package:my_therapy_pal/models/theme.dart';
+import 'package:my_therapy_pal/screens/dashboard_screen.dart';
 import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
 import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
 import 'package:my_therapy_pal/services/generate_chat.dart';
+import 'package:my_therapy_pal/widgets/chat_list.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart'; 
 
@@ -184,7 +186,6 @@ class _ChatScreenState extends State<ChatScreen> {
           for (var msg in newMessages) {
             _displayedMessagesIds.add(msg.id);
           }
-          isLoading = false;
         });
       }
     });
@@ -208,6 +209,12 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
     });
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
 // Function to update the typing status of the current user
@@ -232,6 +239,8 @@ void updateAITypingStatus(bool isTyping) {
 }
 
 void _createNewAiChat() async {
+
+  Future<String> aiChatId;
 
   // Before using `context` or calling `setState`, check if the widget is still mounted
   if (!mounted) return;
@@ -260,20 +269,38 @@ void _createNewAiChat() async {
   );
 
   // Generate a new chat with the ai chatbot
-  // Implement GenerateChat method to handle AI chat generation and navigation logic
-  GenerateChat(
+  aiChatId = GenerateChat(
     aesKey: aesKey,
     encryptedAESKey: encryptedAESKey,
     fname: fname,
     uid: uid,
-  ).generateAIChat(); // Modify this method to return a boolean indicating success
+  ).generateAIChat(); 
 
 
   if (mounted) {
-    Navigator.of(context).pop();
+    Navigator.pushAndRemoveUntil(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => FutureBuilder<String>(
+          future: aiChatId,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              return const AccountHomePage(initialIndex: 2);
+              //return ChatScreen(chatID: snapshot.data!);
+            }
+          },
+        ),
+          ),
+          (route) => false,
+        );
   }
 }
 
+  //builder: (context) => const AccountHomePage(initialIndex: 2), // Pass the initialIndex here
   // Build the chat screen
   @override
   Widget build(BuildContext context) {
