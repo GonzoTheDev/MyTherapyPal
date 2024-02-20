@@ -1,10 +1,15 @@
+import 'dart:typed_data';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/screens/chat_screen.dart';
 import 'package:intl/intl.dart';
-import 'package:my_therapy_pal/widgets/start_chat.dart';
+import 'package:my_therapy_pal/services/encryption/AES/aes.dart';
+import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
+import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatList extends StatefulWidget {
   const ChatList({Key? key}) : super(key: key);
@@ -18,6 +23,12 @@ class _ChatListState extends State<ChatList> {
   final FirebaseStorage storage = FirebaseStorage.instance;
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
   String? _aiChatId; // Store the AI chat ID
+
+  // Create a new instance of the RSA encryption 
+  final rsaEncryption = RSAEncryption();
+
+  // Create a new instance of the AES encryption service
+  final aesKeyEncryptionService = AESKeyEncryptionService();
 
   @override
   void initState() {
@@ -43,6 +54,35 @@ class _ChatListState extends State<ChatList> {
     } else {
       return DateFormat('MM/dd/yyyy').format(timestamp); 
     }
+  }
+
+  Future<Uint8List> _decryptAESKey(String encryptedAESKey) async {
+    // Decrypt the AES key using the user's private RSA key
+    final prefs = await SharedPreferences.getInstance();
+    final privateKeyRSA = prefs.getString('privateKeyRSA');
+    if (privateKeyRSA == null) {
+      throw 'Private key not found';
+    }
+    final decryptedAESKeyString = RSAEncryption().decrypt(key: privateKeyRSA, message: encryptedAESKey);
+      // Remove the brackets and split by comma
+      List<String> byteStrings = decryptedAESKeyString.substring(1, decryptedAESKeyString.length - 1).split(", ");
+      // Convert each substring to an integer and then to a Uint8List
+    final decryptedAESKey = Uint8List.fromList(byteStrings.map((s) => int.parse(s)).toList());
+    return decryptedAESKey;
+  }
+
+  String _decryptMessage(String encryptedMessage, Uint8List key, String messageID) {
+    String decryptedMessage;
+    try {
+          final utfToKey = encrypt.Key(key);
+          Uint8List ivGen = aesKeyEncryptionService.generateIVFromDocId(messageID);
+          final iv = encrypt.IV(ivGen);
+          decryptedMessage = AESEncryption(utfToKey, iv).decryptData(encryptedMessage);
+        } catch (e) {
+          // Handle decryption errors or leave encrypted if decryption fails
+          decryptedMessage = "[Encrypted message]";
+        }
+    return decryptedMessage;
   }
 
   Future<String?> getChatbotChatId() async {
@@ -86,12 +126,12 @@ class _ChatListState extends State<ChatList> {
           return const Center(child: Text('No chats found'));
         }
 
+        // Filter out the AI chat from the list of chats
         var chats = snapshot.data!.docs
-            .where((doc) => doc.id != _aiChatId) // Filter out AI chat
+            .where((doc) => doc.id != _aiChatId)
             .toList();
 
-        // Assuming 'lastMessage' contains 'unread' (bool) & 'timestamp' (Timestamp)
-        // Sort: Unread chats first, then by timestamp (newest first)
+        // Sort the chats by unread status and timestamp
         chats.sort((a, b) {
           var aData = a['lastMessage'] as Map<String, dynamic>?;
           var bData = b['lastMessage'] as Map<String, dynamic>?;
@@ -131,14 +171,33 @@ class _ChatListState extends State<ChatList> {
                     var chatData = chats[index];
                     var otherUserId = chatData['users'].firstWhere((u) => u != _currentUserId);
                     var chatID = chatData.id;
+                    var chatAESKey = chatData['keys'][_currentUserId];
+                    // Using FutureBuilder to handle the asynchronous decryption
+                  return FutureBuilder<Uint8List>(
+                    future: _decryptAESKey(chatAESKey),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const ListTile(
+                          leading: CircleAvatar(),
+                          title: Text('Decrypting...'),
+                        );
+                      } else if (snapshot.hasError) {
+                        return const ListTile(
+                          leading: CircleAvatar(),
+                          title: Text('Error decrypting'),
+                        );
+                      }
 
-                    // Extracting lastMessage details
-                    var lastMessage = chatData['lastMessage'] != null ? chatData['lastMessage'] as Map<String, dynamic> : null;
-                    var lastMessageText = lastMessage?['message'] ?? '';
-                    var lastMessageTimestamp = lastMessage?['timestamp'] != null ? (lastMessage!['timestamp'] as Timestamp).toDate() : DateTime.now();
-                    var lastMessageStatus = lastMessage?['status'] ?? '';
-                    var isUnread = lastMessageStatus == 'delivered'; // Assuming 'delivered' means unread
-                    late String timestampText;
+                      // Decryption successful
+                      var decryptedAESKey = snapshot.data!;
+                      var lastMessage = chatData['lastMessage'] != null ? chatData['lastMessage'] as Map<String, dynamic> : null;
+                      var lastMessageText = lastMessage?['message'] ?? '';
+                      var lastMessageTimestamp = lastMessage?['timestamp'] != null ? (lastMessage!['timestamp'] as Timestamp).toDate() : DateTime.now();
+                      var lastMessageStatus = lastMessage?['status'] ?? '';
+                      var isUnread = lastMessageStatus == 'delivered' && lastMessage?['sender'] != _currentUserId;
+                      var lastMessageID = lastMessage?['lastMessageId'] ?? '';
+                      var decryptedMessage = _decryptMessage(lastMessageText, decryptedAESKey, lastMessageID);
+                      var timestampText = _formatTimestamp(lastMessageTimestamp);
 
                     // Formatting timestamp
                     if(isUnread){
@@ -183,7 +242,7 @@ class _ChatListState extends State<ChatList> {
                               style: TextStyle(fontWeight: isUnread ? FontWeight.bold : FontWeight.normal),
                               ),
                             subtitle: Text(
-                              lastMessageText,
+                              decryptedMessage,
                               style: TextStyle(fontWeight: isUnread ? FontWeight.bold : FontWeight.normal),
                             ),
                             trailing: Text(
@@ -200,6 +259,7 @@ class _ChatListState extends State<ChatList> {
                         },
                       ),
                     );
+                  });
                   },
                 ),
               ),

@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/screens/dashboard_screen.dart';
 import 'package:my_therapy_pal/services/generate_chat.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
-import 'package:my_therapy_pal/services/encryption/AES/aes.dart';
 import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
 import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
 
