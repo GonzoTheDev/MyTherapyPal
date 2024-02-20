@@ -355,7 +355,7 @@ void _createNewAiChat() async {
             fontSize: 18,
             letterSpacing: 0.25,
           ),
-          actions: [
+          actions: ai ? [
             IconButton(
               onPressed: () => _createNewAiChat(),
               icon: Icon(
@@ -364,7 +364,7 @@ void _createNewAiChat() async {
               ),
               tooltip: "Start a new ai chat.",
             ),
-          ],
+          ] : [],
         ),
 
         // ChatView style configuration

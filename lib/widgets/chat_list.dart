@@ -135,14 +135,18 @@ class _ChatListState extends State<ChatList> {
         chats.sort((a, b) {
           var aData = a['lastMessage'] as Map<String, dynamic>?;
           var bData = b['lastMessage'] as Map<String, dynamic>?;
-          var aUnread = aData != null && aData['status'] == 'delivered'; // Assuming 'delivered' means unread
+          var aUnread = aData != null && aData['status'] == 'delivered'; 
           var bUnread = bData != null && bData['status'] == 'delivered';
-          if (aUnread == bUnread) { // If both are read or unread, sort by timestamp
+
+          // If both are read or unread, sort by timestamp
+          if (aUnread == bUnread) { 
             var aTimestamp = aData?['timestamp']?.toDate() ?? DateTime.now();
             var bTimestamp = bData?['timestamp']?.toDate() ?? DateTime.now();
             return bTimestamp.compareTo(aTimestamp); // Newest first
           }
-          return aUnread ? -1 : 1; // Unread first
+
+          // Return unread first
+          return aUnread ? -1 : 1; 
         });
 
           return Column(
