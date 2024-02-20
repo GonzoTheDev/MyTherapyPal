@@ -9,7 +9,6 @@ import 'package:my_therapy_pal/screens/dashboard_screen.dart';
 import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
 import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
 import 'package:my_therapy_pal/services/generate_chat.dart';
-import 'package:my_therapy_pal/widgets/chat_list.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart'; 
 
