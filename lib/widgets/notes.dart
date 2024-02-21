@@ -3,10 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Notes extends StatefulWidget {
-  const Notes({Key? key}) : super(key: key);
+  const Notes({super.key});
 
   @override
-  _NotesState createState() => _NotesState();
+  State<Notes> createState() => _NotesState();
 }
 
 class _NotesState extends State<Notes> {

@@ -12,10 +12,10 @@ import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatList extends StatefulWidget {
-  const ChatList({Key? key}) : super(key: key);
+  const ChatList({super.key});
 
   @override
-  _ChatListState createState() => _ChatListState();
+  State<ChatList> createState() => _ChatListState();
 }
 
 class _ChatListState extends State<ChatList> {

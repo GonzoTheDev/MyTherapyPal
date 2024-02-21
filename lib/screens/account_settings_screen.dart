@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 
 class ManageAccount extends StatefulWidget {
-  const ManageAccount({Key? key}) : super(key: key);
+  const ManageAccount({super.key});
 
   @override
-  _ManageAccount createState() => _ManageAccount();
+  State<ManageAccount> createState() => _ManageAccount();
 }
 
 class _ManageAccount extends State<ManageAccount> {

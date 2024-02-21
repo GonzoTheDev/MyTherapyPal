@@ -10,7 +10,7 @@ class StartChat extends StatefulWidget {
   const StartChat({super.key});
 
   @override
-  _StartChatState createState() => _StartChatState();
+  State<StartChat> createState() => _StartChatState();
 }
 
 class _StartChatState extends State<StartChat> {

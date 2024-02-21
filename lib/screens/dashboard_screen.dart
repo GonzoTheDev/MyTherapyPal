@@ -15,10 +15,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountHomePage extends StatefulWidget {
   final int initialIndex; 
-  const AccountHomePage({Key? key, this.initialIndex = 0}) : super(key: key);
+  const AccountHomePage({super.key, this.initialIndex = 0});
 
   @override
-  _AccountHomePageState createState() => _AccountHomePageState();
+  State<AccountHomePage> createState() => _AccountHomePageState();
 }
 
 class _AccountHomePageState extends State<AccountHomePage> {
