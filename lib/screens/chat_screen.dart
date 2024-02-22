@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ChatScreen extends StatefulWidget {
   final String chatID;
 
-  const ChatScreen({super.key, required this.chatID});
+  const ChatScreen({Key? key, required this.chatID}) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -538,7 +538,7 @@ void _createNewAiChat() async {
       try {
 
         // Send the message
-        await chat.addMessage(message, currentUser.id);
+        await chat.addMessage(message, currentUser.id, messageType);
 
         // If the message is sent by the AI chatbot, add the message to the chat
         if(ai){

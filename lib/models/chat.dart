@@ -93,10 +93,10 @@ class Chat {
     if (response.statusCode == 200) {
       return response.body;
     } else {
-      throw Exception('Failed to load response');
+      return 'Error: Failed to load response, status code: ${response.statusCode}, please try again.';
     }
   } catch (e) {
-    throw Exception('Failed to make a request: $e');
+    return 'Error: Failed to make a request: $e';
   }
 }
 
@@ -126,6 +126,7 @@ class Chat {
           createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
           sendBy: docSnapshot.data()['sender'],
           status: _getStatusFromString(docSnapshot.data()['status']),
+          messageType: MessageType.values[docSnapshot.data()['messageType']],
         );
       }).toList();
 
@@ -168,6 +169,7 @@ class Chat {
         createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
         sendBy: docSnapshot.data()['sender'],
         status: _getStatusFromString(docSnapshot.data()['status']),
+        messageType: MessageType.values[docSnapshot.data()['messageType']],
       );
     }).toList());
 
@@ -250,7 +252,7 @@ class Chat {
   }
 
   // Method to add a message to the firebase database
-  Future<String?> addMessage(String newMessage, String uuid) async {
+  Future<String?> addMessage(String newMessage, String uuid, MessageType messageType) async {
 
     // Start a Firestore batch
     WriteBatch batch = db.batch();
@@ -278,6 +280,7 @@ class Chat {
           "status": "delivered",
           "timestamp": Timestamp.now(),
           "active": true,
+          "messageType": messageType.index,
         };
 
         // Add the new message to the batch
@@ -292,6 +295,7 @@ class Chat {
             "timestamp": messageData["timestamp"],
             "status": "delivered",
             "active": true,
+            "messageType": messageType.index,
           }
         };
 

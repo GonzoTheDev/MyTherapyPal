@@ -59,7 +59,7 @@ class AuthService {
         final uid = user!.uid;
 
         // Get the default profile picture
-        const profilePicture = 'assets/images/default_profile_picture.jpg';
+        const profilePicture = 'https://firebasestorage.googleapis.com/v0/b/mytherapypal.appspot.com/o/240px-Placeholder_no_text.svg.png?alt=media';
 
         // generate RSA key pair
         final pair = rsaEncryption.generateRSAKeyPair();
