@@ -79,7 +79,7 @@ class Chat {
   Future<String> llmResponse(String text) async {
   try {
     final response = await http.post(
-      Uri.parse('http://78.17.62.185/llm_api'),
+      Uri.parse('https://llm.mytherapypal.ie/llm_api'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
