@@ -81,7 +81,7 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "lib/assets/images/logo.png"
+  image_path: "assets/images/logo.png"
 
 
 # The following section is specific to Flutter packages.
@@ -124,8 +124,8 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
   assets:
-    - lib/assets/images/
-    - lib/assets/documents/
+    - assets/images/
+    - assets/documents/
 
 
   

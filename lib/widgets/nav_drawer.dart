@@ -25,7 +25,7 @@ class NavDrawer extends StatelessWidget {
                     width: 300,
                     height: 137,
                     child: Image.asset(
-                      'lib/assets/images/splash.png', // Adjust the path based on your actual file structure
+                      'assets/images/splash.png', // Adjust the path based on your actual file structure
                       fit: BoxFit.contain,
                     ),
                   ),

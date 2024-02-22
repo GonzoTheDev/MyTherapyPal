@@ -59,7 +59,7 @@ class AuthService {
         final uid = user!.uid;
 
         // Get the default profile picture
-        const profilePicture = 'lib/assets/images/default_profile_picture.jpg';
+        const profilePicture = 'assets/images/default_profile_picture.jpg';
 
         // generate RSA key pair
         final pair = rsaEncryption.generateRSAKeyPair();

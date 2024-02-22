@@ -91,7 +91,7 @@ class MainApp extends StatelessWidget {
             splashIconSize: double.infinity,
             duration: 3000,
             splash: Image.asset(
-              'lib/assets/images/splash.png',
+              'assets/images/splash.png',
               width: 300, // Adjust the width according to your preference
               height: 300, // Adjust the height according to your preference
               fit: BoxFit.contain, // Adjust the BoxFit property as needed

@@ -91,7 +91,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
             Padding(
               padding: const EdgeInsets.only(left: 0.0, right: 12.0),
               child: Image.asset(
-                'lib/assets/images/logo.png', 
+                'assets/images/logo.png', 
                 height: 24, 
               ),
             ),

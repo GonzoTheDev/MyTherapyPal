@@ -64,7 +64,7 @@ class Chat {
 
   // Method to load the context from a file
   Future<String> loadContext() async {
-    const contextFilePath = 'lib/assets/documents/context.txt';
+    const contextFilePath = 'assets/documents/context.txt';
     try {
       final loadedContext = await rootBundle.loadString(contextFilePath);
       return loadedContext;

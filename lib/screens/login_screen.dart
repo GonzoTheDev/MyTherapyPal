@@ -53,7 +53,7 @@ class _LoginState extends State<Login> {
             Padding(
               padding: const EdgeInsets.only(left: 0.0, right: 12.0),
               child: Image.asset(
-                'lib/assets/images/logo.png', // Replace with the actual path to your logo image
+                'assets/images/logo.png', // Replace with the actual path to your logo image
                 height: 24, // Adjust the height as needed
               ),
             ),

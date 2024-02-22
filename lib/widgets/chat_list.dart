@@ -153,7 +153,7 @@ class _ChatListState extends State<ChatList> {
             children: [
               ListTile(
                 leading: const CircleAvatar(
-                  backgroundImage: AssetImage('lib/assets/images/chatcbt.webp'),
+                  backgroundImage: AssetImage('assets/images/chatcbt.webp'),
                 ),
                 title: const Text('AI Mental Health Assistant'),
                 onTap: () {
