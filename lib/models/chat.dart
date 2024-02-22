@@ -111,6 +111,7 @@ class Chat {
         List<Message> messages = querySnapshot.docs.map((docSnapshot) {
         String encryptedMsg = docSnapshot.data()['message'];
         String decryptedMessage = "";
+        MessageType messageType = docSnapshot.data()['messageType'] == null ? MessageType.text : MessageType.values[docSnapshot.data()['messageType']];
         try {
           final utfToKey = encrypt.Key(aesKey);
           Uint8List ivGen = aesKeyEncryptionService.generateIVFromDocId(docSnapshot.id);
@@ -126,7 +127,7 @@ class Chat {
           createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
           sendBy: docSnapshot.data()['sender'],
           status: _getStatusFromString(docSnapshot.data()['status']),
-          messageType: MessageType.values[docSnapshot.data()['messageType']],
+          messageType: messageType,
         );
       }).toList();
 
@@ -150,6 +151,9 @@ class Chat {
     .map((querySnapshot) => querySnapshot.docs.map((docSnapshot) {
       String encryptedMsg = docSnapshot.data()['message'];
       String decryptedMessage = "";
+      MessageType messageType = docSnapshot.data()['messageType'] == null ? MessageType.text : MessageType.values[docSnapshot.data()['messageType']];
+
+      // Decrypt the message
       
       try {
         final utfToKey = encrypt.Key(aesKey);
@@ -169,7 +173,7 @@ class Chat {
         createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
         sendBy: docSnapshot.data()['sender'],
         status: _getStatusFromString(docSnapshot.data()['status']),
-        messageType: MessageType.values[docSnapshot.data()['messageType']],
+        messageType: messageType,
       );
     }).toList());
 
