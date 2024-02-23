@@ -30,14 +30,33 @@ tasks.register("clean", Delete) {
 subprojects {
     afterEvaluate {
         if (project.hasProperty("android")) {
+            def keystoreProperties = new Properties()
+            def keystorePropertiesFile = rootProject.file('key.properties')
+            if (keystorePropertiesFile.exists()) {
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+            }
             android {
                 defaultConfig {
                     minSdkVersion 21
-                    targetSdkVersion 30
-                    versionCode 1
+                    targetSdkVersion 33
+                    versionCode 2
                     versionName "1.0"
                 }
+                signingConfigs {
+                    release {
+                        keyAlias keystoreProperties['keyAlias']
+                        keyPassword keystoreProperties['keyPassword']
+                        storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                        storePassword keystoreProperties['storePassword']
+                    }
+                }
+                buildTypes {
+                    release {
+                        signingConfig signingConfigs.release
+                    }
+                }
             }
+            
         }
     }
 }
