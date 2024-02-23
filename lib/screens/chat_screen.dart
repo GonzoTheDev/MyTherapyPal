@@ -245,21 +245,17 @@ void _createNewAiChat() async {
   if (!mounted) return;
 
   // Disable the old AI chat by setting active to false
-  await db.collection("chat").doc(chat.chatID).update({
-    "active": false,
-  });
+  await db.collection("chat").doc(chat.chatID).delete();
 
   // Disable the old AI chat messages by setting active to false
   await db.collection("messages").where('chatID', isEqualTo: chat.chatID).get().then((snapshot) {
     for (DocumentSnapshot ds in snapshot.docs){
-      ds.reference.update({
-        "active": false,
-      });
+      ds.reference.delete();
     }
   });
 
   // Generate an AES key for the ai chat room
-  final aesKey = aesKeyEncryptionService.generateAESKey(16);
+  final aesKey = aesKeyEncryptionService.generateAESKey(64);
 
   // Encrypt the AES key with the public key
   final encryptedAESKey = rsaEncryption.encrypt(

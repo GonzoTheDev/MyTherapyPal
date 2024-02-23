@@ -85,7 +85,7 @@ class AuthService {
         final encryptedRSAkey = await encryptRSA.encryptData(private);
         
         // Generate an AES key for the ai chat room
-        final aesKey = aesKeyEncryptionService.generateAESKey(16);
+        final aesKey = aesKeyEncryptionService.generateAESKey(64);
 
         // Encrypt the AES key with the public key
         final encryptedAESKey = rsaEncryption.encrypt(

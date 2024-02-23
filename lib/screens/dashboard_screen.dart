@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluid_bottom_nav_bar/fluid_bottom_nav_bar.dart';
 import 'package:flutter/services.dart';
+import 'package:my_therapy_pal/screens/admin/dashboard_screen.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
 import 'package:my_therapy_pal/services/auth_service.dart';
 import 'package:my_therapy_pal/widgets/nav_drawer.dart';
@@ -9,7 +12,6 @@ import 'package:my_therapy_pal/widgets/dashboard.dart';
 import 'package:my_therapy_pal/widgets/chat_list.dart';
 import 'package:my_therapy_pal/widgets/records.dart';
 import 'package:my_therapy_pal/widgets/listings.dart';
-import 'package:my_therapy_pal/widgets/start_chat.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -29,8 +31,27 @@ class _AccountHomePageState extends State<AccountHomePage> {
   @override
   void initState() {
     super.initState();
+    checkIsAdmin();
     _handleNavigationChange(widget.initialIndex);
   }
+
+  void checkIsAdmin() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
+      final userType = userProfileDoc.data()?['userType'];
+      if (userType == "Admin") {
+        setState(() {
+          _showFab = true;
+        });
+      } else {
+        setState(() {
+          _showFab = false;
+        });
+      }
+    }
+  }
+
 
   Future<void> logout() async {
 
@@ -52,7 +73,6 @@ class _AccountHomePageState extends State<AccountHomePage> {
 
   void _handleNavigationChange(int index) {
     setState(() {
-      _showFab = index == 2;
       switch (index) {
         case 0:
           _child = const Dashboard();
@@ -151,10 +171,10 @@ class _AccountHomePageState extends State<AccountHomePage> {
           // Navigate to StartChat or the action you want to perform
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const StartChat()),
+            MaterialPageRoute(builder: (context) => const AdminHomePage()),
           );
         },
-        tooltip: 'Start new chat',
+        tooltip: 'Go to Admin Dashboard',
         child: const Icon(Icons.add),
       ) : null, // Hide FAB when not on ChatList
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
