@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_therapy_pal/main.dart';
@@ -13,6 +14,13 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+
+  @override
+  void initState() {
+    super.initState();
+    checkLoginStatus();
+  }
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -35,6 +43,20 @@ class _LoginState extends State<Login> {
       }
     }
   }
+
+  void checkLoginStatus() async {
+
+    FirebaseAuth.instance
+    .authStateChanges()
+    .listen((User? user) {
+      if (user == null) {
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const AccountHomePage()),
+        );
+      }
+    });
+  }	
 
   @override
   Widget build(BuildContext context) {

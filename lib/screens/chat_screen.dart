@@ -382,10 +382,10 @@ void _createNewAiChat() async {
 
         // ChatView send message configuration
         sendMessageConfig: SendMessageConfiguration(
-          imagePickerIconsConfig: ImagePickerIconsConfiguration(
-            cameraIconColor: theme.cameraIconColor,
-            galleryIconColor: theme.galleryIconColor,
-          ),
+          allowRecordingVoice: false,
+          enableCameraImagePicker: false,
+          enableGalleryImagePicker: false,
+          sendButtonIcon: const Icon(Icons.send),
           replyMessageColor: theme.replyMessageColor,
           defaultSendButtonColor: theme.sendButtonColor,
           replyDialogColor: theme.replyDialogColor,
@@ -398,16 +398,6 @@ void _createNewAiChat() async {
             },
             compositionThresholdTime: const Duration(seconds: 1),
             textStyle: TextStyle(color: theme.textFieldTextColor),
-          ),
-          micIconColor: theme.replyMicIconColor,
-          voiceRecordingConfiguration: VoiceRecordingConfiguration(
-            backgroundColor: theme.waveformBackgroundColor,
-            recorderIconColor: theme.recordIconColor,
-            waveStyle: WaveStyle(
-              showMiddleLine: false,
-              waveColor: theme.waveColor ?? Colors.white,
-              extendWaveform: true,
-            ),
           ),
         ),
 
@@ -538,7 +528,7 @@ void _createNewAiChat() async {
       try {
 
         // Send the message
-        await chat.addMessage(message, currentUser.id, messageType);
+        await chat.addMessage(message, currentUser.id);
 
         // If the message is sent by the AI chatbot, add the message to the chat
         if(ai){

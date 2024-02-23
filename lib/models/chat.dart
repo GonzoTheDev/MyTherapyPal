@@ -111,7 +111,6 @@ class Chat {
         List<Message> messages = querySnapshot.docs.map((docSnapshot) {
         String encryptedMsg = docSnapshot.data()['message'];
         String decryptedMessage = "";
-        MessageType messageType = docSnapshot.data()['messageType'] == null ? MessageType.text : MessageType.values[docSnapshot.data()['messageType']];
         try {
           final utfToKey = encrypt.Key(aesKey);
           Uint8List ivGen = aesKeyEncryptionService.generateIVFromDocId(docSnapshot.id);
@@ -127,7 +126,6 @@ class Chat {
           createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
           sendBy: docSnapshot.data()['sender'],
           status: _getStatusFromString(docSnapshot.data()['status']),
-          messageType: messageType,
         );
       }).toList();
 
@@ -151,7 +149,6 @@ class Chat {
     .map((querySnapshot) => querySnapshot.docs.map((docSnapshot) {
       String encryptedMsg = docSnapshot.data()['message'];
       String decryptedMessage = "";
-      MessageType messageType = docSnapshot.data()['messageType'] == null ? MessageType.text : MessageType.values[docSnapshot.data()['messageType']];
 
       // Decrypt the message
       
@@ -161,8 +158,6 @@ class Chat {
         final iv = encrypt.IV(ivGen);
         decryptedMessage = AESEncryption(utfToKey, iv).decryptData(encryptedMsg);
       } catch (e) {
-        // Handle decryption errors or leave encrypted if decryption fails
-        print("chat.dart:161: Error decrypting message: $e");
         decryptedMessage = "[Encrypted message]";
       }
 
@@ -173,7 +168,6 @@ class Chat {
         createdAt: (docSnapshot.data()['timestamp'] as Timestamp).toDate(),
         sendBy: docSnapshot.data()['sender'],
         status: _getStatusFromString(docSnapshot.data()['status']),
-        messageType: messageType,
       );
     }).toList());
 
@@ -256,7 +250,7 @@ class Chat {
   }
 
   // Method to add a message to the firebase database
-  Future<String?> addMessage(String newMessage, String uuid, MessageType messageType) async {
+  Future<String?> addMessage(String newMessage, String uuid) async {
 
     // Start a Firestore batch
     WriteBatch batch = db.batch();
@@ -284,7 +278,6 @@ class Chat {
           "status": "delivered",
           "timestamp": Timestamp.now(),
           "active": true,
-          "messageType": messageType.index,
         };
 
         // Add the new message to the batch
@@ -299,7 +292,6 @@ class Chat {
             "timestamp": messageData["timestamp"],
             "status": "delivered",
             "active": true,
-            "messageType": messageType.index,
           }
         };
 

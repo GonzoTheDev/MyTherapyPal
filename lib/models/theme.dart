@@ -143,7 +143,7 @@ class DarkTheme extends AppTheme {
     Color repliedMessageColor = const Color(0xff9f85ff),
     Color closeIconColor = Colors.white,
     Color shareIconBackgroundColor = const Color(0xff383152),
-    Color sendButtonColor = Colors.white,
+    Color sendButtonColor = Colors.teal,
     Color cameraIconColor = const Color(0xff757575),
     Color galleryIconColor = const Color(0xff757575),
     Color recorderIconColor = const Color(0xff757575),
