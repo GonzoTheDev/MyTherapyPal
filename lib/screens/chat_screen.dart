@@ -255,7 +255,7 @@ void _createNewAiChat() async {
   });
 
   // Generate an AES key for the ai chat room
-  final aesKey = aesKeyEncryptionService.generateAESKey(64);
+  final aesKey = aesKeyEncryptionService.generateAESKey(32);
 
   // Encrypt the AES key with the public key
   final encryptedAESKey = rsaEncryption.encrypt(

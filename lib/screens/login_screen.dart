@@ -108,7 +108,7 @@ class _LoginState extends State<Login> {
                   child: TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(hintText: 'Email'),
-                    autofillHints: [AutofillHints.email],
+                    autofillHints: const [AutofillHints.email],
                     onFieldSubmitted: (value) {
                     if (_passwordController.text.isNotEmpty) {
                       _submitForm();
@@ -128,7 +128,7 @@ class _LoginState extends State<Login> {
                     controller: _passwordController,
                     obscureText: true,
                     decoration: const InputDecoration(hintText: 'Password'),
-                    autofillHints: [AutofillHints.password],
+                    autofillHints: const [AutofillHints.password],
                     onFieldSubmitted: (value) {
                       _submitForm();
                     },

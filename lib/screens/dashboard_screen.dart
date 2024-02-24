@@ -34,6 +34,12 @@ class _AccountHomePageState extends State<AccountHomePage> {
     checkIsAdmin();
     _handleNavigationChange(widget.initialIndex);
   }
+  
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
 
   void checkIsAdmin() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -41,13 +47,17 @@ class _AccountHomePageState extends State<AccountHomePage> {
       final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
       final userType = userProfileDoc.data()?['userType'];
       if (userType == "Admin") {
-        setState(() {
-          _showFab = true;
-        });
+        if(mounted) {
+          setState(() {
+            _showFab = true;
+          });
+        }
       } else {
-        setState(() {
-          _showFab = false;
-        });
+        if(mounted) {
+          setState(() {
+            _showFab = false;
+          });
+        }
       }
     }
   }

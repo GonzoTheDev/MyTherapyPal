@@ -66,6 +66,12 @@ class AuthService {
         final public = pair.publicKey;
         final private = pair.privateKey;
 
+        // Obtain shared preferences.
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        // Save users AES private key in shared preferences
+        await prefs.setString('privateKeyRSA', private);
+
         // Generate a random salt for the user
         final salt = rsaEncryption.generateRandomSalt();
         
@@ -84,9 +90,10 @@ class AuthService {
         // Encrypt the RSA private key with the password derived AES key
         final encryptedRSAkey = await encryptRSA.encryptData(private);
         
+        print("Generating AES key for AI Chat Room...");
         // Generate an AES key for the ai chat room
-        final aesKey = aesKeyEncryptionService.generateAESKey(64);
-
+        final aesKey = aesKeyEncryptionService.generateAESKey(32);
+        print("AES key generated...");
         // Encrypt the AES key with the public key
         final encryptedAESKey = rsaEncryption.encrypt(
           key: public,
