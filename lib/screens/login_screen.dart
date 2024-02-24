@@ -33,13 +33,17 @@ class _LoginState extends State<Login> {
         password: _passwordController.text,
       );
       if (message!.contains('Success')) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const AccountHomePage()),
-        );
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const AccountHomePage()),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        }
       }
     }
   }

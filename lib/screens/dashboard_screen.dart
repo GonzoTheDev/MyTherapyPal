@@ -12,6 +12,7 @@ import 'package:my_therapy_pal/widgets/dashboard.dart';
 import 'package:my_therapy_pal/widgets/chat_list.dart';
 import 'package:my_therapy_pal/widgets/records.dart';
 import 'package:my_therapy_pal/widgets/listings.dart';
+import 'package:my_therapy_pal/widgets/tasks.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -94,9 +95,12 @@ class _AccountHomePageState extends State<AccountHomePage> {
           _child = const ChatList();
           break;
         case 3:
-          _child = const Listings();
+          _child = const Tasks();
           break; 
         case 4:
+          _child = const Listings();
+          break; 
+        case 5:
           logout();
           break;
       }
@@ -139,27 +143,32 @@ class _AccountHomePageState extends State<AccountHomePage> {
           icons: [
             FluidNavBarIcon(
               icon: Icons.home,
-              backgroundColor: Colors.green,
+              backgroundColor: const Color(0xff6a32a5),
               extras: {"label": "Home"},
             ),
             FluidNavBarIcon(
               icon: Icons.insert_chart,
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xff0677ba),
               extras: {"label": "Records"},
             ),
             FluidNavBarIcon(
               icon: Icons.message,
-              backgroundColor: Colors.indigo,
+              backgroundColor: const Color(0xff62ca50),
               extras: {"label": "Messages"},
             ),
             FluidNavBarIcon(
+              icon: Icons.task_alt,
+              backgroundColor: const Color(0xffffd827),
+              extras: {"label": "Tasks"},
+            ),
+            FluidNavBarIcon(
               icon: Icons.public,
-              backgroundColor: Colors.purple,
+              backgroundColor: const Color(0xfff78c37),
               extras: {"label": "Therapist Search"},
             ),
             FluidNavBarIcon(
               icon: Icons.logout,
-              backgroundColor: Colors.red[800],
+              backgroundColor: const Color(0xffd42a34),
               extras: {"label": "Logout"},
             ),
           ],
