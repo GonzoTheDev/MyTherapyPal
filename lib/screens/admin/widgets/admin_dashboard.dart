@@ -7,7 +7,7 @@ class AdminDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text('Admin Dashboard'),
+        child: Text('Admin Dashboard Screen'),
       ),
     );
   }
