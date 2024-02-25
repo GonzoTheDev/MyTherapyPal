@@ -10,10 +10,18 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - run: flutter build web --web-renderer html --release
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v1
         with:
+            channel: 'dev'
+      - run: flutter pub get
+      - run: flutter config --enable-web
+      - run: flutter build web
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting --public build/web
+        env:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MYTHERAPYPAL }}'
           channelId: live
