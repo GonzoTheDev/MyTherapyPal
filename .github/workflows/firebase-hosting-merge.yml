@@ -14,6 +14,7 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
             channel: 'dev'
+      - run: flutter upgrade
       - run: flutter pub get
       - run: flutter config --enable-web
       - run: flutter build web
