@@ -22,41 +22,46 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Request permission for notifications
-  final messaging = FirebaseMessaging.instance;
 
-  final settings = await messaging.requestPermission(
-  alert: true,
-  announcement: false,
-  badge: true,
-  carPlay: false,
-  criticalAlert: false,
-  provisional: false,
-  sound: true,
-  );
+  // Request permission for notifications if supported
+  if (firebase.messaging.isSupported()) {
 
-  // Print permission status
-  if (kDebugMode) {
-    print('Permission granted: ${settings.authorizationStatus}');
+    final messaging = FirebaseMessaging.instance;
+
+    final settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+    );
+
+    // Print permission status
+    if (kDebugMode) {
+      print('Permission granted: ${settings.authorizationStatus}');
+    }
+    
+    // TODO: replace with your own VAPID key
+    const vapidKey = "BIo28pk5GfuPkYHfZ1du1i_cNJa2Vxw8JpNA5yt0OEtW_uKxMNfBfwBZ0bkpvA3FsSgV2YN_QurC2lkzi4gJ5Hw";
+
+    // use the registration token to send messages to users from your trusted server environment
+    String? token;
+
+    if (DefaultFirebaseOptions.currentPlatform == DefaultFirebaseOptions.web) {
+      token = await messaging.getToken(
+        vapidKey: vapidKey,
+      );
+    } else {
+      token = await messaging.getToken();
+    }
+
+    if (kDebugMode) {
+      print('Registration Token=$token');
+    }
   }
   
-  // TODO: replace with your own VAPID key
-  const vapidKey = "BIo28pk5GfuPkYHfZ1du1i_cNJa2Vxw8JpNA5yt0OEtW_uKxMNfBfwBZ0bkpvA3FsSgV2YN_QurC2lkzi4gJ5Hw";
-
-  // use the registration token to send messages to users from your trusted server environment
-  String? token;
-
-  if (DefaultFirebaseOptions.currentPlatform == DefaultFirebaseOptions.web) {
-    token = await messaging.getToken(
-      vapidKey: vapidKey,
-    );
-  } else {
-    token = await messaging.getToken();
-  }
-
-  if (kDebugMode) {
-    print('Registration Token=$token');
-  }
   // Run the app
 	runApp(const MainApp());
 
