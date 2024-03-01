@@ -23,10 +23,12 @@ void main() async{
   );
 
 
-  // Request permission for notifications if supported
-  if (firebase.messaging.isSupported()) {
+  final messaging = FirebaseMessaging.instance;
 
-    final messaging = FirebaseMessaging.instance;
+
+  // Request permission for notifications if supported
+  if (await messaging.isSupported()) {
+
 
     final settings = await messaging.requestPermission(
     alert: true,
@@ -43,7 +45,7 @@ void main() async{
       print('Permission granted: ${settings.authorizationStatus}');
     }
     
-    // TODO: replace with your own VAPID key
+    // Set vapid key
     const vapidKey = "BIo28pk5GfuPkYHfZ1du1i_cNJa2Vxw8JpNA5yt0OEtW_uKxMNfBfwBZ0bkpvA3FsSgV2YN_QurC2lkzi4gJ5Hw";
 
     // use the registration token to send messages to users from your trusted server environment
@@ -61,7 +63,7 @@ void main() async{
       print('Registration Token=$token');
     }
   }
-  
+
   // Run the app
 	runApp(const MainApp());
 
