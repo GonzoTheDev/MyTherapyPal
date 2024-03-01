@@ -22,7 +22,7 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-
+/*
   final messaging = FirebaseMessaging.instance;
 
 
@@ -63,7 +63,7 @@ void main() async{
       print('Registration Token=$token');
     }
   }
-
+*/
   // Run the app
 	runApp(const MainApp());
 
