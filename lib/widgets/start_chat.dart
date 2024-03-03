@@ -15,68 +15,112 @@ class StartChat extends StatefulWidget {
 
 class _StartChatState extends State<StartChat> {
   final _formKey = GlobalKey<FormState>();
-  final _userIdController = TextEditingController();
+  final _firstUserIdController = TextEditingController();
+  final _secondUserIdController = TextEditingController();
 
-  // Create a new instance of the firebase firestore
+  // Create a new instance of the Firebase Firestore
   var db = FirebaseFirestore.instance;
 
   // Create a new instance of the AES encryption service
   final aesKeyEncryptionService = AESKeyEncryptionService();
 
-  // Create a new instance of the RSA encryption 
+  // Create a new instance of the RSA encryption
   final rsaEncryption = RSAEncryption();
 
   // Get the user's profile data
-  final uid = FirebaseAuth.instance.currentUser!.uid;
-  
-  
+  //final uid = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void dispose() {
-    _userIdController.dispose();
+    _firstUserIdController.dispose();
+    _secondUserIdController.dispose();
     super.dispose();
   }
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-
       Future<String> chatId;
-      String ouid = _userIdController.text;
-
-      // Get the current user's public RSA key from the firestore
-      final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
-      final currentUserRSAPubKey = userProfileDoc['publicRSAKey'];
-
-      // Get the other user's public RSA key from the firestore
-      DocumentSnapshot userDoc = await db.collection("profiles").doc(ouid).get();
-      String otherUserRSAPubKey = userDoc.get("publicRSAKey");
-
-      // Generate an AES key for the ai chat room
-      final aesKey = aesKeyEncryptionService.generateAESKey(16);
-
-      // Encrypt the AES key with the current users public RSA key
-      final currentUserEncryptedAESKey = rsaEncryption.encrypt(
-        key: currentUserRSAPubKey,
-        message: aesKey.toString(),
-      );
-      // Encrypt the AES key with the current users public RSA key
-      final otherUserEncryptedAESKey = rsaEncryption.encrypt(
-        key: otherUserRSAPubKey,
-        message: aesKey.toString(),
-      );
-
-      // Generate a new chat with the ai chatbot
-      chatId = GenerateChat(
-        aesKey: aesKey,
-        encryptedAESKey: currentUserEncryptedAESKey,
-        uid: uid,
-      ).generateUserChat(ouid, otherUserEncryptedAESKey); 
+      bool isAIChatbot = false;
+      String firstUid = _firstUserIdController.text;
+      String secondUid = _secondUserIdController.text;
+      String firstUserRSAPubKey = "";
+      String secondUserRSAPubKey = "";
+      String targetUid = "";
+      String secondUserEncryptedAESKey = "";
 
       
+
+      if(firstUid == "ai-mental-health-assistant" || secondUid == "ai-mental-health-assistant") {
+
+        // Set the chatbot flag to true
+        isAIChatbot = true;
+
+        // Check which user is the AI chatbot
+        targetUid = firstUid != "ai-mental-health-assistant" ? firstUid : secondUid;
+
+        print("Target UID: $targetUid");
+
+        // Get the real user's public RSA key from Firestore
+        final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(targetUid).get();
+        firstUserRSAPubKey = userProfileDoc['publicRSAKey'];
+
+        print("User RSA Public Key: $firstUserRSAPubKey");
+
+      }else {
+
+        // Get the first user's public RSA key from Firestore
+      final userProfileDoc =
+        await FirebaseFirestore.instance.collection('profiles').doc(firstUid).get();
+        firstUserRSAPubKey = userProfileDoc['publicRSAKey'];
+
+        // Get the second user's public RSA key from Firestore
+      DocumentSnapshot userDoc =
+        await db.collection("profiles").doc(secondUid).get();
+        secondUserRSAPubKey = userDoc.get("publicRSAKey");
+
+      }
+      
+
+      // Generate an AES key for the chat room
+      final aesKey = aesKeyEncryptionService.generateAESKey(16);
+
+      print("AES key generated.");
+
+      // Encrypt the AES key with the current user's public RSA key
+      final firstUserEncryptedAESKey = rsaEncryption.encrypt(
+        key: firstUserRSAPubKey,
+        message: aesKey.toString(),
+      );
+
+      print("AES key encrypted.");
+
+      if(!isAIChatbot) {
+        // Encrypt the AES key with the other user's public RSA key
+          secondUserEncryptedAESKey = rsaEncryption.encrypt(
+          key: secondUserRSAPubKey,
+          message: aesKey.toString(),
+        );
+      }
+
+      // Generate a new chat
+      if(isAIChatbot) {
+        chatId = GenerateChat(
+          aesKey: aesKey,
+          encryptedAESKey: firstUserEncryptedAESKey,
+          uid: targetUid,
+        ).generateAIChat();
+      } else {
+      chatId = GenerateChat(
+        aesKey: aesKey,
+        encryptedAESKey: firstUserEncryptedAESKey,
+        uid: firstUid,
+      ).generateUserChat(secondUid, secondUserEncryptedAESKey);
+      }
+
       // If the chat is successfully created, navigate to the chat list
       if (mounted) {
         Navigator.pushAndRemoveUntil(
-          context, 
+          context,
           MaterialPageRoute(
             builder: (context) => FutureBuilder<String>(
               future: chatId,
@@ -90,14 +134,12 @@ class _StartChatState extends State<StartChat> {
                 }
               },
             ),
-              ),
-              (route) => false,
-            );
+          ),
+          (route) => false,
+        );
       }
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -111,9 +153,23 @@ class _StartChatState extends State<StartChat> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               TextFormField(
-                controller: _userIdController,
+                controller: _firstUserIdController,
                 decoration: const InputDecoration(
-                  labelText: 'User ID',
+                  labelText: 'First User ID',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a User ID';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _secondUserIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Second User ID',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
