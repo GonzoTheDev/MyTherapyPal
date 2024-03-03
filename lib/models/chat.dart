@@ -11,7 +11,7 @@ import 'package:my_therapy_pal/services/generate_chat.dart';
 class Chat {
 
   // Initialize the Firestore database instance
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  late FirebaseFirestore db;
 
   // Create a new instance of the AES encryption service
   final aesKeyEncryptionService = AESKeyEncryptionService();
@@ -26,10 +26,16 @@ class Chat {
   late bool ai = false;
 
   // Define the constructor
-  Chat({required this.chatID, required this.users, required this.username, this.conversationHistory, required this.aesKey}) {
+  Chat({required this.chatID, required this.users, required this.username, this.conversationHistory, required this.aesKey, FirebaseFirestore? db}) {
     
+    // Initialize the Firestore database instance
+    if(db != null) {
+      this.db = db;
+    } else {
+      this.db = FirebaseFirestore.instance;
+    }
+
     // Listen for new messages in the chat
-    
     listenToMessages();
     
     // Initialize conversationHistory with context if necessary
@@ -175,7 +181,7 @@ class Chat {
 
 
   // Method to add an ai message to the firebase database
-  Future<String?> addAIMessage(String newMessage, String uuid) async {
+  Future<String?> addAIMessage(String newMessage, String uuid, [String llmTestResponse = '']) async {
 
     // Start a Firestore batch
     WriteBatch batch = db.batch();
@@ -198,10 +204,16 @@ class Chat {
         Uint8List ivAiGen = aesKeyEncryptionService.generateIVFromDocId(newMessageRefAi.id);
         final ivAi = encrypt.IV(ivAiGen);
 
-        // Send the user's message and conversation history to the llmResponse function
-        String llmRawResponse = await llmResponse(newMessage);
+        // Initialize the raw LLM response
+        String llmRawResponse;
 
-        print("LLM Response: $llmRawResponse");
+        if(llmTestResponse != "") {
+          // If a test response is provided, use it instead of making a request to the LLM API
+          llmRawResponse = llmTestResponse;
+        }else{
+          // Send the user's message and conversation history to the llmResponse function
+          llmRawResponse = await llmResponse(newMessage);
+        }
 
         // Parse the JSON to access the llm_response text
         Map<String, dynamic> llmParsedResponse = jsonDecode(llmRawResponse);
