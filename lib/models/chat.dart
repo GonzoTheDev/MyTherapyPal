@@ -79,7 +79,7 @@ class Chat {
   Future<String> llmResponse(String text) async {
   try {
     final response = await http.post(
-      Uri.parse('https://llm.mytherapypal.ie/llm_api'),
+      Uri.parse('https://5059-2a0d-3344-83a-510-2494-bb05-e86e-4d7f.ngrok-free.app/llm_api'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -95,8 +95,10 @@ class Chat {
     } else {
       return 'Error: Failed to load response, status code: ${response.statusCode}, please try again.';
     }
-  } catch (e) {
-    return 'Error: Failed to make a request: $e';
+  } catch (e, stackTrace) {
+    print('Error: Failed to make a request: $e');
+    print('Stack trace: $stackTrace');
+    return 'Error: Failed to make a request.';
   }
 }
 
@@ -198,6 +200,8 @@ class Chat {
 
         // Send the user's message and conversation history to the llmResponse function
         String llmRawResponse = await llmResponse(newMessage);
+
+        print("LLM Response: $llmRawResponse");
 
         // Parse the JSON to access the llm_response text
         Map<String, dynamic> llmParsedResponse = jsonDecode(llmRawResponse);
