@@ -152,7 +152,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
                 Align(
                   alignment: Alignment.center,
                   child: Padding(
-                    padding: EdgeInsets.only(left: isSmallScreen ? 100 : 0),
+                    padding: EdgeInsets.only(left: isSmallScreen ? 200 : 0),
                     child: Text(
                       _appBarSubtitle, // The subtitle
                       style: const TextStyle(fontSize: 14, color: Colors.white),

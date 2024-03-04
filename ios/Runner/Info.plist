@@ -53,5 +53,8 @@
     <string>Used to demonstrate image picker plugin</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>This app requires Mic permission.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to your location when open to function properly.</string>
+
   </dict>
 </plist>
