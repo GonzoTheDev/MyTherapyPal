@@ -61,6 +61,8 @@ dependencies:
   asn1lib: ^1.5.2
   crypto: ^3.0.3
   firebase_messaging: ^14.7.16
+  google_maps_flutter: ^2.5.3
+  location: ^5.0.0
 
 dev_dependencies:
   change_app_package_name: ^1.1.0
