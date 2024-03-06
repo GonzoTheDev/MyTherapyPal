@@ -339,29 +339,57 @@ void _createNewAiChat() async {
         ),
 
         // ChatView app bar configuration
-        appBar: ChatViewAppBar(
-          elevation: theme.elevation,
-          backGroundColor: theme.appBarColor,
-          profilePicture: otherUserPhotoURL,
-          backArrowColor: theme.backArrowColor,
-          chatTitle: "$otherUserFname $otherUserSname",
-          chatTitleTextStyle: TextStyle(
-            color: theme.appBarTitleTextStyle,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            letterSpacing: 0.25,
-          ),
-          actions: ai ? [
-            IconButton(
-              onPressed: () => _createNewAiChat(),
-              icon: Icon(
-                Icons.open_in_new,
-                color: theme.themeIconColor,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight + 5),
+          child: AppBar(
+            elevation: theme.elevation,
+            backgroundColor: theme.appBarColor,
+            titleSpacing: 0, 
+            title: Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 2), 
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(otherUserPhotoURL),
+                    radius: 18, 
+                  ),
+                  const SizedBox(width: 8), 
+                  Text(
+                    "$otherUserFname $otherUserSname",
+                    style: TextStyle(
+                      color: theme.appBarTitleTextStyle,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      letterSpacing: 0.25,
+                    ),
+                  ),
+                ],
               ),
-              tooltip: "Start a new ai chat.",
             ),
-          ] : [],
+            leading: Padding(
+              padding: const EdgeInsets.only(top: 5, bottom: 2), 
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: theme.backArrowColor),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(top: 5, bottom: 2), 
+                child: ai ? IconButton(
+                  onPressed: () => _createNewAiChat(),
+                  icon: Icon(
+                    Icons.open_in_new,
+                    color: theme.themeIconColor,
+                  ),
+                  tooltip: "Start a new ai chat.",
+                ) : const SizedBox.shrink(), 
+              ),
+            ],
+          ),
         ),
+
 
         // ChatView style configuration
         chatBackgroundConfig: ChatBackgroundConfiguration(

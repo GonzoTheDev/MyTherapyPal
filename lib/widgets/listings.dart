@@ -1,9 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:my_therapy_pal/screens/chat_screen.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+
+import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
+import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
+import 'package:my_therapy_pal/services/generate_chat.dart';
 
 class Listings extends StatefulWidget {
   const Listings({super.key});
@@ -17,7 +23,17 @@ class _ListingsState extends State<Listings> {
   GoogleMapController? _mapController;
   LatLng? _currentUserLocation;
   final Map<String, double> _distances = {};
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
+  final currentUid = FirebaseAuth.instance.currentUser!.uid;
+
+  // Create a new instance of the Firebase Firestore
+  var db = FirebaseFirestore.instance;
+
+  // Create a new instance of the AES encryption service
+  final aesKeyEncryptionService = AESKeyEncryptionService();
+
+  // Create a new instance of the RSA encryption
+  final rsaEncryption = RSAEncryption();
 
   // Variables to keep track of selected and expanded listings' uids
   String? _expandedListingUid;
@@ -246,13 +262,60 @@ class _ListingsState extends State<Listings> {
     }
   }
 
+  Future<void> _startChat(String tuid) async {
+    String firstUid = currentUid;
+    String secondUid = tuid;
+
+    // Get the first user's public RSA key from Firestore
+    final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(firstUid).get();
+    String firstUserRSAPubKey = userProfileDoc['publicRSAKey'];
+
+    // Get the second user's public RSA key from Firestore
+    DocumentSnapshot userDoc = await db.collection("profiles").doc(secondUid).get();
+    String secondUserRSAPubKey = userDoc.get("publicRSAKey");
+
+    // Generate an AES key for the chat room
+    final aesKey = aesKeyEncryptionService.generateAESKey(16);
+
+    // Encrypt the AES key with the current user's public RSA key
+    final firstUserEncryptedAESKey = rsaEncryption.encrypt(
+      key: firstUserRSAPubKey,
+      message: aesKey.toString(),
+    );
+
+    // Encrypt the AES key with the second user's public RSA key
+    final secondUserEncryptedAESKey = rsaEncryption.encrypt(
+      key: secondUserRSAPubKey,
+      message: aesKey.toString(),
+    );
+
+    // Generate a new chat
+    String chatIdValue = await GenerateChat(
+      aesKey: aesKey,
+      encryptedAESKey: firstUserEncryptedAESKey,
+      uid: firstUid,
+    ).generateUserChat(secondUid, secondUserEncryptedAESKey);
+
+    // If the chat is successfully created, navigate to the chat list
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(chatID: chatIdValue),
+        ),
+      );
+    }
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           Expanded(
-            flex: 2,
+            flex: 5,
             child: GoogleMap(
               onMapCreated: (GoogleMapController controller) {
                 _mapController = controller;
@@ -302,7 +365,7 @@ class _ListingsState extends State<Listings> {
                   itemBuilder: (context, index) {
                     var therapist = data[index];
                     var therapistId = therapist.get('uid') as String;
-                    var distance = _distances[therapistId]?.toStringAsFixed(2) ?? 'Unknown distance';
+                    var distance = _distances[therapistId]?.toStringAsFixed(2) ?? 'N/A';
                     var isExpanded = _expandedListingUid == therapistId;
 
                     return ExpansionTile(
@@ -374,8 +437,7 @@ class _ListingsState extends State<Listings> {
                               const SizedBox(height: 10),
                               ElevatedButton(
                                 onPressed: () {
-                                  // Implement send message functionality
-                                  ('Send message button pressed for $therapistId');
+                                  _startChat(therapistId);
                                 },
                                 child: const Text('Send Message'),
                               ),

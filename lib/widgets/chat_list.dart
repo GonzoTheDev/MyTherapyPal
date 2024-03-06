@@ -105,6 +105,15 @@ class _ChatListState extends State<ChatList> {
       return null;
     }
   }
+  
+  Future<void> deleteChat(String chatId) async {
+    try {
+      // Delete chat from the chat collection
+      await _firestore.collection('chat').doc(chatId).delete();
+    } catch (e) {
+      print('Error deleting chat: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +151,7 @@ class _ChatListState extends State<ChatList> {
           if (aUnread == bUnread) { 
             var aTimestamp = aData?['timestamp']?.toDate() ?? DateTime.now();
             var bTimestamp = bData?['timestamp']?.toDate() ?? DateTime.now();
-            return bTimestamp.compareTo(aTimestamp); // Newest first
+            return bTimestamp.compareTo(aTimestamp);
           }
 
           // Return unread first
@@ -151,22 +160,26 @@ class _ChatListState extends State<ChatList> {
 
           return Column(
             children: [
-              ListTile(
-                leading: const CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/chatcbt.webp'),
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0), 
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundImage: AssetImage('assets/images/chatcbt.webp'),
+                  ),
+                  title: const Text('AI Mental Health Assistant'),
+                  onTap: () {
+                    if (_aiChatId != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(chatID: _aiChatId!),
+                        ),
+                      );
+                    }
+                  },
                 ),
-                title: const Text('AI Mental Health Assistant'),
-                onTap: () {
-                  if (_aiChatId != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(chatID: _aiChatId!),
-                      ),
-                    );
-                  }
-                },
               ),
+
               // Expanded ListView to display the chats
               Expanded(
                 child: ListView.builder(
@@ -176,7 +189,8 @@ class _ChatListState extends State<ChatList> {
                     var otherUserId = chatData['users'].firstWhere((u) => u != _currentUserId);
                     var chatID = chatData.id;
                     var chatAESKey = chatData['keys'][_currentUserId];
-                    // Using FutureBuilder to handle the asynchronous decryption
+
+                  // Using FutureBuilder to handle the asynchronous decryption
                   return FutureBuilder<Uint8List>(
                     future: _decryptAESKey(chatAESKey),
                     builder: (context, snapshot) {
@@ -192,7 +206,7 @@ class _ChatListState extends State<ChatList> {
                         );
                       }
 
-                      // Decryption successful
+                      // Setup chat variables
                       var decryptedAESKey = snapshot.data!;
                       var lastMessage = chatData['lastMessage'] != null ? chatData['lastMessage'] as Map<String, dynamic> : null;
                       var lastMessageText = lastMessage?['message'] ?? '';
@@ -202,6 +216,10 @@ class _ChatListState extends State<ChatList> {
                       var lastMessageID = lastMessage?['lastMessageId'] ?? '';
                       var decryptedMessage = _decryptMessage(lastMessageText, decryptedAESKey, lastMessageID);
                       var timestampText = _formatTimestamp(lastMessageTimestamp);
+
+                      if(decryptedMessage == "[Encrypted message]"){
+                        decryptedMessage = "";
+                      }
 
                     // Formatting timestamp
                     if(isUnread){
@@ -237,7 +255,34 @@ class _ChatListState extends State<ChatList> {
                           final otherUserSname = otherUserDoc['sname'];
                           final String otherUserProfilePic = otherUserDoc['photoURL'] ?? '';
 
-                          return ListTile(
+                          return GestureDetector(
+                          onLongPress: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Delete Chat'),
+                                  content: const Text('Are you sure you want to delete this chat?'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('Cancel'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop(); 
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: const Text('Delete'),
+                                      onPressed: () async {
+                                        await deleteChat(chatID);
+                                        Navigator.of(context).pop(); 
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          child: ListTile(
                             leading: CircleAvatar(
                               backgroundImage: NetworkImage(otherUserProfilePic),
                             ),
@@ -259,7 +304,7 @@ class _ChatListState extends State<ChatList> {
                                 MaterialPageRoute(builder: (context) => ChatScreen(chatID: chatID)),
                               );
                             },
-                          );
+                          ));
                         },
                       ),
                     );
