@@ -7,7 +7,8 @@ name: Deploy to Firebase Hosting on merge
     branches:
       - main
 jobs:
-  build_and_deploy:
+  build_web:
+    name: Build Flutter (web)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,8 +21,25 @@ jobs:
       - run: flutter pub upgrade
       - run: flutter config --enable-web
       - run: flutter build web --web-renderer html --release
+      - name: Archive Production Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: web-build
+          path: build/web
+  deploy_web:
+    name: Deploy Web to Firebase Hosting
+    needs: build_web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      - name: Download Artifact
+        uses: actions/download-artifact@master
+        with:
+          name: web-build
+          path: build/web
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@v13.4.0
+        uses: w9jds/firebase-action@master
         with:
           args: deploy --only hosting --public build/web
         env:
@@ -33,40 +51,55 @@ jobs:
     name: Build Flutter (Android)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '12.x'
-    - uses: subosito/flutter-action@v1
-      with:
-          channel: 'master'
-    - run: flutter pub get
-    - run: flutter build apk --target-platform android-arm,android-arm64 --split-per-abi
-    - run: flutter build appbundle --target-platform android-arm,android-arm64
-    - run: flutter build appbundle
-    - name: Upload APK
-      uses: actions/upload-artifact@master
-      with:
-        name: apk-build
-        path: build/app/outputs/apk/release
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "12.x"
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: "stable"
+        env:
+          KEY_JKS: ${{ secrets.RELEASE_KEYSTORE }}
+          SIGNING_KEY_ALIAS: ${{ secrets.ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.ALIAS_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Decode Keystore
+        run: |
+          echo "${{secrets.RELEASE_KEYSTORE}}" > release.keystore.asc
+          gpg -d --passphrase   "${{secrets.RELEASE_KEYSTORE_PASSPHRASE}}" - - batch    release.keystore.asc > android/key.jks
+      - name: Create key.properties
+        run: |
+          touch android/key.properties
+          echo "storePassword=<storePassword>
+          keyPassword=<keyPassword>
+          keyAlias=<keyAlias>
+          storeFile=../key.jks"  > ./android/key.properties
+      - name: Get dependencies
+        run: flutter pub get
+      - name: Build APK
+        run: flutter build apk
+      - uses: actions/upload-artifact@v1      
+        with:        
+          name: release-apk        
+          path: build/app/outputs/apk/release/app-release.apk
   beta_apk:
     name: Upload Android Beta to Firebase App Distribution
     needs: [build_apk]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Download Artifact
-      uses: actions/download-artifact@master
-      with:
-        name: apk-build
-    - name: Upload APK
-      uses: wzieba/Firebase-Distribution-Github-Action@v1.0.0
-      with:
-        appId: ${{secrets.FIREBASE_ANDROID_APPID}}
-        token: ${{secrets.FIREBASE_TOKEN}}
-        #2group: testers
-        file: app-release.aap
+      - uses: actions/checkout@v1
+      - name: set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Download Artifact
+        uses: actions/download-artifact@master
+        with:
+          name: release-apk
+      - name: Upload APK
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.2.1
+        with:
+          appId: ${{secrets.FIREBASE_ANDROID_APPID}}
+          token: ${{secrets.FIREBASE_TOKEN}}
+          #group: testers
+          file: app-release.apk
