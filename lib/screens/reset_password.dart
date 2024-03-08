@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:my_therapy_pal/main.dart';
-import '../services/auth_service.dart';
-import 'login_screen.dart';
 import 'package:flutter/material.dart';
 
 
@@ -27,9 +25,9 @@ class _ResetPasswordState extends State<ResetPassword> {
           statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
           statusBarBrightness: Brightness.light, // For iOS (dark icons)
         ),
-        title: Text(
-          const MainApp().title,
-          style: const TextStyle(color: Colors.white),
+        title: const Text(
+          MainApp.title,
+          style: TextStyle(color: Colors.white),
         ),
       ),
       body: Center(
@@ -47,7 +45,7 @@ class _ResetPasswordState extends State<ResetPassword> {
               height: MediaQuery.of(context).size.height / 20,
             ),
             SizedBox(
-              width: maxWidth / 1.2, // Set the width of the Container
+              width: maxWidth / 1.2, 
               child: Column(
                 children: [
                   TextField(

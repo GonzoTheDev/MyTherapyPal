@@ -79,10 +79,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
       endDrawer: const NavDrawer(),
       appBar: AppBar(
         systemOverlayStyle: const SystemUiOverlayStyle(
-        // Status bar color
         statusBarColor: Colors.teal, 
         systemNavigationBarColor: Colors.teal,
-        // Status bar brightness (optional)
         statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
         statusBarBrightness: Brightness.light, // For iOS (dark icons)
       ),
@@ -95,9 +93,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 height: 24, 
               ),
             ),
-            Text(
-              const MainApp().title,
-              style: const TextStyle(color: Colors.white),
+            const Text(
+              MainApp.title,
+              style: TextStyle(color: Colors.white),
             ),
           ],
         ),
@@ -148,7 +146,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
       floatingActionButton: _showFab ? FloatingActionButton(
         onPressed: () {
-          // Navigate to StartChat or the action you want to perform
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const StartChat()),
@@ -156,7 +153,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         },
         tooltip: 'Start new chat',
         child: const Icon(Icons.add),
-      ) : null, // Hide FAB when not on ChatList
+      ) : null, 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

@@ -42,9 +42,9 @@ class _RegisterAccountState extends State<RegisterAccount> {
                 height: 24,
               ),
             ),
-            Text(
-              const MainApp().title,
-              style: const TextStyle(color: Colors.white),
+            const Text(
+              MainApp.title,
+              style: TextStyle(color: Colors.white),
             ),
           ],
         ),
@@ -209,7 +209,6 @@ class _RegisterAccountState extends State<RegisterAccount> {
                       ),
                     ),
                     const SizedBox(height: 30.0),
-                    // Optionally add more widgets or logic as needed
                   ],
                 ),
               ),

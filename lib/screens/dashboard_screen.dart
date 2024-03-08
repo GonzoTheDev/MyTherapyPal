@@ -143,9 +143,9 @@ class _AccountHomePageState extends State<AccountHomePage> {
                         height: 24,
                       ),
                     ),
-                    Text(
-                      const MainApp().title,
-                      style: const TextStyle(color: Colors.white),
+                    const Text(
+                      MainApp.title,
+                      style: TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
