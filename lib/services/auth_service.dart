@@ -41,10 +41,24 @@ class AuthService {
     required String sname,
     required String userType,
   }) async {
-    if (!passwordMatch(password, passwordConfirm)) {
+    if (password != passwordConfirm) {
       return 'Passwords do not match';
-    }else if (password.length < 6) {
-      return 'Password must be at least 6 characters';
+    } 
+    // Check for minimum length of 8 characters
+    else if (password.length < 8) {
+      return 'Password must be at least 8 characters long';
+    } 
+    // Check for at least one uppercase letter
+    else if (!password.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain at least one capital letter';
+    } 
+    // Check for at least one number
+    else if (!password.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain at least one number';
+    } 
+    // Check for at least one symbol
+    else if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return 'Password must contain at least one symbol';
     }else{
       try {
 
