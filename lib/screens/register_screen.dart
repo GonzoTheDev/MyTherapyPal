@@ -27,11 +27,11 @@ class _RegisterAccountState extends State<RegisterAccount> {
     '',
     'Patient', 
     'Therapist', 
-    'Admin', 
   ]; 
 
   @override
   Widget build(BuildContext context) {
+    double maxWidth = MediaQuery.of(context).size.width > 414 ? 414 : MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: const SystemUiOverlayStyle(
@@ -61,8 +61,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
             SizedBox(
               height: MediaQuery.of(context).size.height / 20,
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
+            ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
               child: TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(hintText: 'Email'),
@@ -71,8 +71,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
             const SizedBox(
               height: 30.0,
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
+            ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
               child: TextField(
                 controller: _passwordController,
                 obscureText: true,
@@ -84,8 +84,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
             const SizedBox(
               height: 30.0,
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
+            ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
               child: TextField(
                 controller: _passwordConfirmController,
                 obscureText: true,
@@ -97,8 +97,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
             const SizedBox(
               height: 30.0,
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
+            ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
               child: TextField(
                 controller: _fnameController,
                 decoration: const InputDecoration(
@@ -109,8 +109,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
             const SizedBox(
               height: 30.0,
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
+            ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
               child: TextField(
                 controller: _snameController,
                 decoration: const InputDecoration(
@@ -126,7 +126,6 @@ class _RegisterAccountState extends State<RegisterAccount> {
               style: TextStyle(color: Colors.black, fontSize: 20,),
             ),
             DropdownButton( 
-              
               
               // Initial Value 
               value: dropdownvalue.isNotEmpty ? dropdownvalue : null, 
@@ -144,8 +143,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
                   child: Text(items), 
                 ); 
               }).toList(), 
-              // After selecting the desired option,it will 
-              // change button value to selected value 
+
+              // Change the value of dropdown 
               onChanged: (String? newValue) {  
                 setState(() { 
                   dropdownvalue = newValue!; 

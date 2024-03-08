@@ -64,6 +64,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    double maxWidth = MediaQuery.of(context).size.width > 414 ? 414 : MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: const SystemUiOverlayStyle(
@@ -107,8 +108,8 @@ class _LoginState extends State<Login> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 20,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
                   child: TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(hintText: 'Email'),
@@ -125,8 +126,8 @@ class _LoginState extends State<Login> {
                 const SizedBox(
                   height: 30.0,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
                   child: TextFormField(
                     focusNode: _passwordFocusNode,
                     controller: _passwordController,
