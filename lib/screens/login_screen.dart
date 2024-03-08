@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_therapy_pal/main.dart';
+import 'package:my_therapy_pal/screens/reset_password.dart';
 import 'register_screen.dart';
 import '../services/auth_service.dart';
 import 'dashboard_screen.dart';
@@ -49,18 +50,18 @@ class _LoginState extends State<Login> {
   }
 
   void checkLoginStatus() async {
-
     FirebaseAuth.instance
     .authStateChanges()
     .listen((User? user) {
       if (user == null) {
+        // User is not logged in
       } else {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const AccountHomePage()),
         );
       }
     });
-  }	
+  }  
 
   @override
   Widget build(BuildContext context) {
@@ -68,20 +69,18 @@ class _LoginState extends State<Login> {
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: const SystemUiOverlayStyle(
-        // Status bar color
-        statusBarColor: Colors.teal, 
-        systemNavigationBarColor: Colors.teal,
-        // Status bar brightness (optional)
-        statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-        statusBarBrightness: Brightness.light, // For iOS (dark icons)
+          statusBarColor: Colors.teal,
+          systemNavigationBarColor: Colors.teal,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
         ),
         title: Row(
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 0.0, right: 12.0),
               child: Image.asset(
-                'assets/images/logo.png', // Replace with the actual path to your logo image
-                height: 24, // Adjust the height as needed
+                'assets/images/logo.png',
+                height: 24,
               ),
             ),
             Text(
@@ -93,76 +92,127 @@ class _LoginState extends State<Login> {
       ),
       body: Center(
         child: AutofillGroup(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 10,
-                ),
-                const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.black, fontSize: 20),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 20,
-                ),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
-                  child: TextFormField(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 10,
+                  ),
+                  const Text(
+                    'Welcome',
+                    style: TextStyle(color: Colors.black, fontSize: 30),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Enter your login details to sign in.',
+                    style: TextStyle(color: Colors.black, fontSize: 15),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 20,
+                  ),
+                  TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(hintText: 'Email'),
+                    decoration: InputDecoration(
+                      hintText: 'Email',
+                      filled: true, 
+                      fillColor: Colors.grey[50], 
+                      border: OutlineInputBorder( 
+                        borderSide: const BorderSide(color: Colors.teal, width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
                     autofillHints: const [AutofillHints.email],
                     onFieldSubmitted: (value) {
-                    if (_passwordController.text.isNotEmpty) {
-                      _submitForm();
-                    } else {
-                      FocusScope.of(context).requestFocus(_passwordFocusNode);
-                    }
-                  },
+                      if (_passwordController.text.isNotEmpty) {
+                        _submitForm();
+                      } else {
+                        FocusScope.of(context).requestFocus(_passwordFocusNode);
+                      }
+                    },
                   ),
-                ),
-                const SizedBox(
-                  height: 30.0,
-                ),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
-                  child: TextFormField(
+                  const SizedBox(
+                    height: 30.0,
+                  ),
+                  TextFormField(
                     focusNode: _passwordFocusNode,
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: const InputDecoration(hintText: 'Password'),
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      filled: true, 
+                      fillColor: Colors.grey[50], 
+                      border: OutlineInputBorder( 
+                        borderSide: const BorderSide(color: Colors.teal, width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
                     autofillHints: const [AutofillHints.password],
                     onFieldSubmitted: (value) {
                       _submitForm();
                     },
                   ),
-                ),
-                const SizedBox(
-                  height: 30.0,
-                ),
-                ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(color: Colors.white),
+                  const SizedBox(
+                    height: 10.0,
                   ),
-                ),
-                const SizedBox(
-                  height: 30.0,
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const RegisterAccount(),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ResetPassword(),
+                            ),
+                          );
+                      },
+                      child: const Text('Forgot Password?'),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.0,
+                    child: ElevatedButton(
+                      onPressed: _submitForm,
+                      style: ButtonStyle(
+                        minimumSize: MaterialStateProperty.all<Size>(const Size(double.infinity, 36)),
                       ),
-                    );
-                  },
-                  child: const Text('Create New Account'),
-                ),
-              ],
+                      child: const Text(
+                        'SIGN IN',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30.0,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center, 
+                    children: [
+                      const Text(
+                        "Don't have an account?",
+                        style: TextStyle(color: Colors.black, fontSize: 15),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterAccount(),
+                            ),
+                          );
+                        },
+                        child: const Text('Create New Account'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -92,7 +92,7 @@ class MainApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: false,
           primarySwatch: Colors.teal,
-          scaffoldBackgroundColor: const Color.fromARGB(255, 238, 235, 235),
+          scaffoldBackgroundColor: Colors.white,
         ),
         home: AnimatedSplashScreen(
             splashIconSize: double.infinity,
