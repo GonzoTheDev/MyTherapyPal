@@ -21,7 +21,7 @@ jobs:
       - run: flutter config --enable-web
       - run: flutter build web --web-renderer html --release
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@master
+        uses: w9jds/firebase-action@v13.4.0
         with:
           args: deploy --only hosting --public build/web
         env:
