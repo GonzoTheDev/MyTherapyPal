@@ -125,17 +125,15 @@ jobs:
     - run: flutter build ios --release --no-codesign
     - name: Package IPA
       run: |
-        mkdir -p ios-build/Payload
-        cp -r build/ios/iphoneos/Runner.app ios-build/Payload/Runner.app
-        pushd ios-build
+        mkdir Payload
+        cp -r build/ios/iphoneos/Runner.app Payload/Runner.app
         zip -r Runner.ipa Payload
-        popd
       working-directory: .
     - name: Upload iPA
       uses: actions/upload-artifact@v2 
       with:
         name: ios-build
-        path: ios-build/Runner.ipa
+        path: Runner.ipa
   beta_ios:
     if: true
     name: Upload iOS Beta to Firebase App Distribution
