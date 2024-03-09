@@ -119,7 +119,6 @@ jobs:
           channel: 'stable'
     - run: flutter pub get
     - run: flutter clean
-    - run: pod install
     - run: flutter build ios --release --no-codesign
     - name: Upload iPA
       uses: actions/upload-artifact@master
