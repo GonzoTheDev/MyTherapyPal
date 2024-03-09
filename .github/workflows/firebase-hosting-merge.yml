@@ -66,7 +66,7 @@ jobs:
       - name: Decode Keystore
         run: |
           echo "${{secrets.RELEASE_KEYSTORE}}" > release.keystore.asc
-          gpg -d --passphrase   "${{secrets.RELEASE_KEYSTORE_PASSPHRASE}}" - - batch    release.keystore.asc > android/key.jks
+          gpg --batch --passphrase "${{secrets.RELEASE_KEYSTORE_PASSPHRASE}}" -d release.keystore.asc > android/key.jks
       - name: Create key.properties
         run: |
           touch android/key.properties
