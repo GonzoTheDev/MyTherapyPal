@@ -20,6 +20,11 @@ cd chatCBT
 python app.py
 ```
 
+### Start the reverse proxy in WSL (needs ngrok installed)
+```bash
+ngrok http http://localhost:5000
+```
+
 ## Flutter Application
 
 ### Start the flutter application

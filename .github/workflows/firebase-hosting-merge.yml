@@ -8,7 +8,7 @@ name: Deploy to Firebase Hosting on merge
       - main
 jobs:
   build_web:
-    name: Build Flutter (web)
+    name: Build Flutter (Web)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
