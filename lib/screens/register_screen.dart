@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_therapy_pal/main.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
 import '../services/auth_service.dart';
+import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
+import 'package:google_places_autocomplete_text_field/model/prediction.dart';
 
 class RegisterAccount extends StatefulWidget {
   const RegisterAccount({super.key});
@@ -13,12 +14,24 @@ class RegisterAccount extends StatefulWidget {
 }
 
 class _RegisterAccountState extends State<RegisterAccount> {
+  final _googleAPIKey = 'AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI';
+  final _proxyURL = 'https://mytherapypal.ie/';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _passwordConfirmController = TextEditingController();
   final TextEditingController _fnameController = TextEditingController();
   final TextEditingController _snameController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final List<String> _selectedDisciplines = [];
+  List<String> disciplines = ['Psychotherapy', 'Occupational Therapy', 'Speech Therapy'];
+  String ratesFrom = '0';
+  String ratesTo = '0';
+  List<String> rates = List.generate(21, (index) => (index * 10).toString());
+
+  
   String dropdownvalue = ''; 
   var items = ['', 'Patient', 'Therapist'];
 
@@ -49,17 +62,19 @@ class _RegisterAccountState extends State<RegisterAccount> {
           ],
         ),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+       child: Center(
         child: AutofillGroup(
           child: Container(
             constraints: BoxConstraints(maxWidth: maxWidth / 1.2),
             child: Form(
               key: _formKey,
-              child: SingleChildScrollView(
+              autovalidateMode: _autovalidateMode,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 20),
                     const Text(
                       'Create Account',
                       style: TextStyle(color: Colors.black, fontSize: 30),
@@ -172,6 +187,97 @@ class _RegisterAccountState extends State<RegisterAccount> {
                       hint: const Text("Select User Type"),
                     ),
                     const SizedBox(height: 30.0),
+                    if (dropdownvalue == 'Therapist') ...[
+                      GooglePlacesAutoCompleteTextFormField(
+                        textEditingController: _addressController,
+                        googleAPIKey: _googleAPIKey,
+                        decoration: const InputDecoration(
+                          hintText: 'Enter your address',
+                          labelText: 'Address',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
+                        proxyURL: _proxyURL,
+                        maxLines: 1,
+                        overlayContainer: (child) => Material(
+                          elevation: 1.0,
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(12),
+                          child: child,
+                        ),
+                        getPlaceDetailWithLatLng: (prediction) {
+                          print('placeDetails${prediction.lng}');
+                        },
+                        itmClick: (Prediction prediction) =>
+                            _addressController.text = prediction.description!,
+                      ),
+                      const SizedBox(height: 30.0),
+                      Wrap(
+                        children: disciplines.map((discipline) {
+                          return CheckboxListTile(
+                            title: Text(discipline),
+                            value: _selectedDisciplines.contains(discipline),
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  _selectedDisciplines.add(discipline);
+                                } else {
+                                  _selectedDisciplines.removeWhere((element) => element == discipline);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: const InputDecoration(
+                          hintText: 'Phone',
+                          // Additional InputDecoration configurations...
+                        ),
+                      ),
+                      DropdownButtonFormField(
+                        decoration: const InputDecoration(
+                          hintText: 'Rates From',
+                          // Additional InputDecoration configurations...
+                        ),
+                        value: ratesFrom,
+                        items: rates.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            ratesFrom = newValue!;
+                          });
+                        },
+                      ),
+                      DropdownButtonFormField(
+                        decoration: const InputDecoration(
+                          hintText: 'Rates To',
+                          // Additional InputDecoration configurations...
+                        ),
+                        value: ratesTo,
+                        items: rates.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            ratesTo = newValue!;
+                          });
+                        },
+                      ),
+                    ],
                     SizedBox(
                       width: double.infinity,
                       height: 50.0,
@@ -199,6 +305,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
                             ),
                           );
                         },
+                        
                         style: ButtonStyle(
                           minimumSize: MaterialStateProperty.all<Size>(const Size(double.infinity, 36)),
                         ),
@@ -209,6 +316,7 @@ class _RegisterAccountState extends State<RegisterAccount> {
                       ),
                     ),
                     const SizedBox(height: 30.0),
+
                   ],
                 ),
               ),
