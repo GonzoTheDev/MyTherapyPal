@@ -144,6 +144,8 @@ class AuthService {
 
           if(userType == "Therapist"){
             db.collection("listings").doc(uid).set({
+              "fname": fname,
+              "sname": sname,
               "address": address,
               "phone": phone,
               "disciplines": disciplines,
