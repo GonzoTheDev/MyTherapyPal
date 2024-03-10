@@ -8,7 +8,7 @@ name: Deploy to Firebase Hosting on merge
       - main
 jobs:
   build_web:
-    if: false
+    if: true
     name: Build Flutter (Web)
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +28,7 @@ jobs:
           name: web-build
           path: build/web
   deploy_web:
-    if: false
+    if: true
     name: Deploy Web to Firebase Hosting
     needs: build_web
     runs-on: ubuntu-latest
@@ -50,7 +50,7 @@ jobs:
           channelId: live
           projectId: mytherapypal
   build_apk:
-    if: false
+    if: true
     name: Build Flutter (Android)
     runs-on: ubuntu-latest
     steps:
@@ -86,7 +86,7 @@ jobs:
           name: release-apk        
           path: build/app/outputs/apk/release/app-release.apk
   beta_apk:
-    if: false
+    if: true
     name: Upload Android Beta to Firebase App Distribution
     needs: [build_apk]
     runs-on: ubuntu-latest
@@ -135,7 +135,8 @@ jobs:
         name: ios-build
         path: Runner.ipa
   beta_ios:
-    if: true
+    # Job disabled until apple developer account is available
+    if: false
     name: Upload iOS Beta to Firebase App Distribution
     needs: [build_ios]
     runs-on: ubuntu-latest
