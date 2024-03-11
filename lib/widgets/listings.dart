@@ -331,7 +331,7 @@ class _ListingsState extends State<Listings> {
           Expanded(
             flex: 3,
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('listings').snapshots(),
+              stream: FirebaseFirestore.instance.collection('listings').where('active', isEqualTo: true).snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
                   ('Snapshot has error: ${snapshot.error}');
