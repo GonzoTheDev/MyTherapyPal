@@ -25,13 +25,13 @@ class ManageListings extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(16.0), // Adjust padding as needed
+                padding: const EdgeInsets.all(16.0), 
                 child: Text(
                   'Manage Listings',
-                  style: Theme.of(context).textTheme.titleLarge, // Adjust the style as needed
+                  style: Theme.of(context).textTheme.titleLarge, 
                 ),
               ),
-              Expanded( // Wrap ListView.builder with Expanded to take the remaining space
+              Expanded( 
                 child: ListView.builder(
                 itemCount: data.size,
                 itemBuilder: (context, index) {
@@ -45,7 +45,7 @@ class ManageListings extends StatelessWidget {
                           data.docs[index]['active'] ? Icons.check : Icons.close,
                           color: data.docs[index]['active'] ? Colors.green : Colors.red,
                         ),
-                        const SizedBox(width: 20), // Spacing between icons
+                        const SizedBox(width: 20), 
                         const Text('Approved: '),
                         Icon(
                           data.docs[index]['approved'] ? Icons.check : Icons.close,
