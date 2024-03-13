@@ -9,20 +9,17 @@ import 'package:flutter_sizer/flutter_sizer.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 
-// Main program function
-void main() async{
-
-  // Initialize Firebase
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-/*
+  /*
   final messaging = FirebaseMessaging.instance;
 
 
@@ -64,52 +61,59 @@ void main() async{
     }
   }
 */
-  // Run the app
-	runApp(const MainApp());
 
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
+
+  runApp(MainApp(isFirstTime: isFirstTime));
+  if (isFirstTime) {
+    await prefs.setBool('isFirstTime', false);
+  }
 }
 
-// Main app widget
 class MainApp extends StatelessWidget {
-  final String title = 'MyTherapyPal';	
-  const MainApp({super.key});
-	@override
-	Widget build(BuildContext context) {
-    return FlutterSizer(
-      builder: (context, orientation, screenType) {
-      return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        builder: (context, child) => ResponsiveBreakpoints.builder(
-          child: child!,
-          breakpoints: [
-            const Breakpoint(start: 0, end: 450, name: MOBILE),
-            const Breakpoint(start: 451, end: 800, name: TABLET),
-            const Breakpoint(start: 801, end: 1920, name: DESKTOP),
-            const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
-          ],
-        ),
-        title: title,
-        theme: ThemeData(
-          useMaterial3: false,
-          primarySwatch: Colors.teal,
-          scaffoldBackgroundColor: const Color.fromARGB(255, 238, 235, 235),
-        ),
-        home: AnimatedSplashScreen(
+  final bool isFirstTime;
+  static const String title = 'MyTherapyPal';
+  const MainApp({super.key, required this.isFirstTime});
+
+  @override
+  Widget build(BuildContext context) {
+    Widget homeScreen = isFirstTime
+        ? AnimatedSplashScreen(
             splashIconSize: double.infinity,
             duration: 3000,
             splash: Image.asset(
               'assets/images/splash.png',
-              width: 300, // Adjust the width according to your preference
-              height: 300, // Adjust the height according to your preference
-              fit: BoxFit.contain, // Adjust the BoxFit property as needed
+              width: 300,
+              height: 300,
+              fit: BoxFit.contain,
             ),
             nextScreen: const Login(),
             splashTransition: SplashTransition.fadeTransition,
             pageTransitionType: PageTransitionType.fade,
-            backgroundColor: Colors.teal
-            )
-            
-      );
-	});
+            backgroundColor: Colors.teal)
+        : const Login();
+
+    return FlutterSizer(
+        builder: (context, orientation, screenType) {
+      return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          builder: (context, child) => ResponsiveBreakpoints.builder(
+                child: child!,
+                breakpoints: [
+                  const Breakpoint(start: 0, end: 450, name: MOBILE),
+                  const Breakpoint(start: 451, end: 800, name: TABLET),
+                  const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                  const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+                ],
+              ),
+          title: MainApp.title,
+          theme: ThemeData(
+            useMaterial3: false,
+            primarySwatch: Colors.teal,
+            scaffoldBackgroundColor: Colors.white,
+          ),
+          home: homeScreen);
+    });
   }
 }

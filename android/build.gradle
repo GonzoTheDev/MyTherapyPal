@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.9.22'
     repositories {
         google()
         mavenCentral()
@@ -42,19 +42,7 @@ subprojects {
                     versionCode 2
                     versionName "1.0"
                 }
-                signingConfigs {
-                    release {
-                        keyAlias keystoreProperties['keyAlias']
-                        keyPassword keystoreProperties['keyPassword']
-                        storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-                        storePassword keystoreProperties['storePassword']
-                    }
-                }
-                buildTypes {
-                    release {
-                        signingConfig signingConfigs.release
-                    }
-                }
+                
             }
             
         }

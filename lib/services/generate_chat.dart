@@ -145,7 +145,7 @@ class GenerateChat {
         await batch.commit();
 
 
-      return "success";
+      return newChatRef.id;
     } catch (e) {
       print("Error generating chat: $e");
       return "error";

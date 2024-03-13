@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluid_bottom_nav_bar/fluid_bottom_nav_bar.dart';
 import 'package:flutter/services.dart';
-import 'package:my_therapy_pal/screens/admin/widgets/admin_dashboard.dart';
-import 'package:my_therapy_pal/screens/admin/widgets/manage_chat_list.dart';
 import 'package:my_therapy_pal/screens/admin/widgets/manage_listings.dart';
 import 'package:my_therapy_pal/screens/admin/widgets/manage_messages.dart';
 import 'package:my_therapy_pal/screens/admin/widgets/manage_users.dart';
@@ -53,21 +51,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   void _handleNavigationChange(int index) {
     setState(() {
-      _showFab = index == 2;
+      _showFab = index == 1;
       switch (index) {
         case 0:
-          _child = const AdminDashboard();
-          break;
-        case 1:
           _child = const ManageUsers();
           break;
-        case 2:
-          _child = const ManageChatList();
-          break;
-        case 3:
+        case 1:
           _child = const ManageMessages();
-          break; 
-        case 4:
+          break;
+        case 2:
           _child = const ManageListings();
       }
     });
@@ -79,10 +71,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
       endDrawer: const NavDrawer(),
       appBar: AppBar(
         systemOverlayStyle: const SystemUiOverlayStyle(
-        // Status bar color
         statusBarColor: Colors.teal, 
         systemNavigationBarColor: Colors.teal,
-        // Status bar brightness (optional)
         statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
         statusBarBrightness: Brightness.light, // For iOS (dark icons)
       ),
@@ -95,9 +85,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 height: 24, 
               ),
             ),
-            Text(
-              const MainApp().title,
-              style: const TextStyle(color: Colors.white),
+            const Text(
+              MainApp.title,
+              style: TextStyle(color: Colors.white),
             ),
           ],
         ),
@@ -108,11 +98,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
         child: FluidNavBar(
           icons: [
             FluidNavBarIcon(
-              icon: Icons.home,
-              backgroundColor: Colors.green,
-              extras: {"label": "Admin Dashboard"},
-            ),
-            FluidNavBarIcon(
               icon: Icons.account_box,
               backgroundColor: Colors.blue,
               extras: {"label": "Manage Users"},
@@ -120,16 +105,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
             FluidNavBarIcon(
               icon: Icons.forum,
               backgroundColor: Colors.indigo,
-              extras: {"label": "Manage Chat List"},
+              extras: {"label": "Manage Messages"},
             ),
             FluidNavBarIcon(
               icon: Icons.message,
               backgroundColor: Colors.purple[800],
-              extras: {"label": "Manage Messages"},
-            ), 
-            FluidNavBarIcon(
-              icon: Icons.list,
-              backgroundColor: Colors.red[800],
               extras: {"label": "Manage Listings"},
             ),
           ],
@@ -148,7 +128,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
       floatingActionButton: _showFab ? FloatingActionButton(
         onPressed: () {
-          // Navigate to StartChat or the action you want to perform
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const StartChat()),
@@ -156,7 +135,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         },
         tooltip: 'Start new chat',
         child: const Icon(Icons.add),
-      ) : null, // Hide FAB when not on ChatList
+      ) : null, 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

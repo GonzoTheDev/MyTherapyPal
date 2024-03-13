@@ -25,7 +25,7 @@ class NavDrawer extends StatelessWidget {
                     width: 300,
                     height: 137,
                     child: Image.asset(
-                      'assets/images/splash.png', // Adjust the path based on your actual file structure
+                      'assets/images/splash.png', 
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -47,7 +47,7 @@ class NavDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.insert_chart),
-            title: const Text('Records'),
+            title: const Text('Statistics'),
             onTap: () => {
               Navigator.push(
                 context, 
@@ -70,13 +70,25 @@ class NavDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text('Tasks'),
+            onTap: () => {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(
+                  builder: (context) => const AccountHomePage(initialIndex: 3),
+                ),
+              ),
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.public),
             title: const Text('Find a Therapist'),
             onTap: () => {
               Navigator.push(
                 context, 
                 MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 3),
+                  builder: (context) => const AccountHomePage(initialIndex: 4),
                 ),
               ),
             },
@@ -124,7 +136,7 @@ class NavDrawer extends StatelessWidget {
               Navigator.push(
                 context, 
                 MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 4),
+                  builder: (context) => const AccountHomePage(initialIndex: 5),
                 ),
               ),
             },

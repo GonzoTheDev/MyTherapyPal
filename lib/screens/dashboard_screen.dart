@@ -28,6 +28,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
   
   Widget? _child;
   bool _showFab = false;
+  String _appBarSubtitle = "Home";
 
   @override
   void initState() {
@@ -83,28 +84,61 @@ class _AccountHomePageState extends State<AccountHomePage> {
   }
 
   void _handleNavigationChange(int index) {
-    setState(() {
-      switch (index) {
-        case 0:
-          _child = const Dashboard();
-          break;
-        case 1:
-          _child = const Records();
-          break;
-        case 2:
-          _child = const ChatList();
-          break;
-        case 3:
-          _child = const Tasks();
-          break; 
-        case 4:
-          _child = const Listings();
-          break; 
-        case 5:
-          logout();
-          break;
-      }
-    });
+    if (index == 5) {
+    // Show "are you sure" dialog before logging out
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog but not logout
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog and then logout
+                logout();
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+      setState(() {
+        switch (index) {
+          case 0:
+            _child = const Dashboard();
+            _appBarSubtitle = "Dashboard"; 
+            break;
+          case 1:
+            _child = const Records();
+            _appBarSubtitle = "Records"; 
+            break;
+          case 2:
+            _child = const ChatList();
+            _appBarSubtitle = "Messages"; 
+            break;
+          case 3:
+            _child = const Tasks();
+            _appBarSubtitle = "Tasks";
+            break;
+          case 4:
+            _child = const Listings();
+            _appBarSubtitle = "Therapist Listings";
+            break;
+          case 5:
+            logout();
+            break;
+        }
+      });
+    }
   }
 
   @override
@@ -113,29 +147,54 @@ class _AccountHomePageState extends State<AccountHomePage> {
       endDrawer: const NavDrawer(),
       appBar: AppBar(
         systemOverlayStyle: const SystemUiOverlayStyle(
-        // Status bar color
-        statusBarColor: Colors.teal, 
-        systemNavigationBarColor: Colors.teal,
-        // Status bar brightness (optional)
-        statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-        statusBarBrightness: Brightness.light, // For iOS (dark icons)
-      ),
-        title: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 0.0, right: 12.0),
-              child: Image.asset(
-                'assets/images/logo.png', 
-                height: 24, 
-              ),
-            ),
-            Text(
-              const MainApp().title,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
+          statusBarColor: Colors.teal,
+          systemNavigationBarColor: Colors.teal,
+          statusBarIconBrightness: Brightness.dark, // For Android
+          statusBarBrightness: Brightness.light, // For iOS
         ),
+        title: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            // Get the screen width
+            double screenWidth = MediaQuery.of(context).size.width;
+            // Determine if the screen is small
+            bool isSmallScreen = screenWidth < 800; 
+
+            return Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12.0),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        height: 24,
+                      ),
+                    ),
+                    const Text(
+                      MainApp.title,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: isSmallScreen ? 200 : 0),
+                    child: Text(
+                      _appBarSubtitle, // The subtitle
+                      style: const TextStyle(fontSize: 14, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        centerTitle: false,
       ),
+
+
       body: _child,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(top: 8.0),
