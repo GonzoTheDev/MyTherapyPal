@@ -84,33 +84,61 @@ class _AccountHomePageState extends State<AccountHomePage> {
   }
 
   void _handleNavigationChange(int index) {
-    setState(() {
-      switch (index) {
-        case 0:
-          _child = const Dashboard();
-          _appBarSubtitle = "Dashboard"; 
-          break;
-        case 1:
-          _child = const Records();
-          _appBarSubtitle = "Records"; 
-          break;
-        case 2:
-          _child = const ChatList();
-          _appBarSubtitle = "Messages"; 
-          break;
-        case 3:
-          _child = const Tasks();
-          _appBarSubtitle = "Tasks";
-          break;
-        case 4:
-          _child = const Listings();
-          _appBarSubtitle = "Therapist Listings";
-          break;
-        case 5:
-          logout();
-          break;
-      }
-    });
+    if (index == 5) {
+    // Show "are you sure" dialog before logging out
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog but not logout
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog and then logout
+                logout();
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+      setState(() {
+        switch (index) {
+          case 0:
+            _child = const Dashboard();
+            _appBarSubtitle = "Dashboard"; 
+            break;
+          case 1:
+            _child = const Records();
+            _appBarSubtitle = "Records"; 
+            break;
+          case 2:
+            _child = const ChatList();
+            _appBarSubtitle = "Messages"; 
+            break;
+          case 3:
+            _child = const Tasks();
+            _appBarSubtitle = "Tasks";
+            break;
+          case 4:
+            _child = const Listings();
+            _appBarSubtitle = "Therapist Listings";
+            break;
+          case 5:
+            logout();
+            break;
+        }
+      });
+    }
   }
 
   @override
