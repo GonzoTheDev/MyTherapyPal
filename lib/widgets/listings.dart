@@ -19,7 +19,7 @@ class Listings extends StatefulWidget {
 }
 
 class _ListingsState extends State<Listings> {
-  final Map<String, Marker> _markers = {};
+  Map<String, Marker> _markers = {};
   GoogleMapController? _mapController;
   LatLng? _currentUserLocation;
   final Map<String, double> _distances = {};
@@ -56,16 +56,12 @@ class _ListingsState extends State<Listings> {
     PermissionStatus permissionGranted;
     LocationData locationData;
 
-    // Create a custom marker icon for the user's current location
-    final markerIcon = await _createMarkerIconFromMaterialIcon(Icons.my_location, Colors.blue, 100);
-
 
     serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
       if (!serviceEnabled) {
         ('Service not enabled, defaulting to LatLng(0, 0)');
-        _currentUserLocation = const LatLng(0, 0); 
         return;
       }
     }
@@ -75,7 +71,6 @@ class _ListingsState extends State<Listings> {
       permissionGranted = await location.requestPermission();
       if (permissionGranted != PermissionStatus.granted) {
         ('Permission not granted, defaulting to LatLng(0, 0)');
-        _currentUserLocation = const LatLng(0, 0); 
         return;
       }
     }
@@ -85,77 +80,66 @@ class _ListingsState extends State<Listings> {
       ('Location data is null, defaulting to LatLng(0, 0)');
       _currentUserLocation = const LatLng(0, 0);
     } else {
+      setState(() {
       _currentUserLocation = LatLng(locationData.latitude!, locationData.longitude!);
-      
-      // Create a marker for the user's current location
-    final marker = Marker(
-      markerId: const MarkerId("userLocation"),
-      position: _currentUserLocation!,
-      infoWindow: const InfoWindow(title: "Your Location"),
-      icon: markerIcon, 
-    );
-
-    setState(() {
-      // Add the marker to the map
-      _markers["userLocation"] = marker;
-    });
+      _updateCameraPosition(_currentUserLocation!);
+      });
     }
   }
+
+  void _updateCameraPosition(LatLng position) {
+  if (_mapController != null) {
+    _mapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: position, zoom: 11.0),
+      ),
+    );
+  } else {
+    print('Map controller is not initialized.');
+  }
+}
 
   Future<void> _fetchAndSetMarkers() async {
     try {
-      final therapists = await FirebaseFirestore.instance.collection('listings').get();
+      final therapists = await FirebaseFirestore.instance.collection('listings').where('active', isEqualTo: true).where('approved', isEqualTo: true).get();
       final currentLocation = _currentUserLocation;
-      if (currentLocation == null) {
-        ('Current location is null, aborting fetchAndSetMarkers');
-        return; 
+
+      // New map for updated markers
+      Map<String, Marker> updatedMarkers = {};
+      // Retain the user's location marker if it exists
+      if (_markers.containsKey("userLocation")) {
+        updatedMarkers["userLocation"] = _markers["userLocation"]!;
       }
 
       Map<String, double> tempDistances = {};
-      setState(() {
-        _markers.clear();
-        for (final therapist in therapists.docs) {
-          final geoPoint = therapist['location'] as GeoPoint;
-          final therapistLocation = LatLng(geoPoint.latitude, geoPoint.longitude);
-          final distance = _calculateDistance(currentLocation, therapistLocation);
-          tempDistances[therapist['uid']] = distance;
+      for (final therapist in therapists.docs) {
+        final geoPoint = therapist['location'] as GeoPoint;
+        final therapistLocation = LatLng(geoPoint.latitude, geoPoint.longitude);
+        final distance = _calculateDistance(currentLocation!, therapistLocation);
+        tempDistances[therapist['uid']] = distance;
 
-          final marker = Marker(
-            markerId: MarkerId(therapist['uid']),
-            position: therapistLocation,
-            infoWindow: InfoWindow(
-              title: "${therapist['fname']} ${therapist['sname']}",
-              snippet: therapist['disciplines'].join(', '),
-            ),
-            onTap: () {
-              _selectListing(therapist['uid']);
-            },
-          );
-          _markers[therapist['uid']] = marker;
-        }
+        final marker = Marker(
+          markerId: MarkerId(therapist['uid']),
+          position: therapistLocation,
+          infoWindow: InfoWindow(
+            title: "${therapist['fname']} ${therapist['sname']}",
+            snippet: therapist['disciplines'].join(', '),
+          ),
+          onTap: () {
+            _selectListing(therapist['uid']);
+          },
+        );
+        updatedMarkers[therapist['uid']] = marker;
+      }
+
+      setState(() {
+        _markers = updatedMarkers;
         _distances.addAll(tempDistances);
       });
-      ('Markers and distances updated');
+      print('Markers and distances updated');
     } catch (e) {
-      ('Error fetching and setting markers: $e');
+      print('Error fetching and setting markers: $e');
     }
-  }
-
-  // Convert the my_location icon into a BitmapDescriptor
-  Future<BitmapDescriptor> _createMarkerIconFromMaterialIcon(IconData iconData, Color color, int size) async {
-
-    final pictureRecorder = ui.PictureRecorder();
-    final canvas = Canvas(pictureRecorder);
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    final iconStr = String.fromCharCode(iconData.codePoint);
-    textPainter.text = TextSpan(text: iconStr, style: TextStyle(fontSize: size.toDouble(), fontFamily: iconData.fontFamily, color: color));
-    textPainter.layout();
-    textPainter.paint(canvas, Offset.zero);
-    final picture = pictureRecorder.endRecording();
-    final image = await picture.toImage(size, size);
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-
-    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
 
   double _calculateDistance(LatLng start, LatLng end) {
@@ -175,25 +159,7 @@ class _ListingsState extends State<Listings> {
   double _degreesToRadians(degrees) {
     return degrees * math.pi / 180;
   }
-
-  void _setCurrentLocation() async {
-    final currentLocation = _currentUserLocation;
-    if (_mapController == null) {
-      ('Map controller is null, cannot set current location');
-    } else if (currentLocation == null) {
-      ('Current location is null, cannot set current location');
-    } else {
-      _mapController!.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: currentLocation,
-            zoom: 12.0,
-          ),
-        ),
-      );
-      ('Camera updated to current location');
-    }
-  }
+  
 
   void _selectListing(String uid) {
     // Check if there's a previously selected listing and revert its icon
@@ -205,7 +171,7 @@ class _ListingsState extends State<Listings> {
     }
 
     // Update the selected listing's marker icon
-    _updateMarkerIcon(uid, BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue));
+    _updateMarkerIcon(uid, BitmapDescriptor.defaultMarkerWithHue(182.0));
 
     // Track the currently selected listing
     _selectedListingUid = uid;
@@ -241,7 +207,7 @@ class _ListingsState extends State<Listings> {
     } else {
       _mapController!.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(target: newPosition, zoom: 14.0),
+          CameraPosition(target: newPosition, zoom: 11.0),
         ),
       );
       ('Camera updated to selected listing position');
@@ -311,6 +277,10 @@ class _ListingsState extends State<Listings> {
 
   @override
   Widget build(BuildContext context) {
+      final currentLocation = _currentUserLocation;
+      final currentUserLocation = currentLocation != null
+          ? LatLng(currentLocation.latitude, currentLocation.longitude)
+          : const LatLng(0, 0);
     return Scaffold(
       body: Column(
         children: [
@@ -319,11 +289,12 @@ class _ListingsState extends State<Listings> {
             child: GoogleMap(
               onMapCreated: (GoogleMapController controller) {
                 _mapController = controller;
-                _setCurrentLocation();
               },
-              initialCameraPosition: const CameraPosition(
-                target: LatLng(53.34564797276651, -6.267732624686331), 
-                zoom: 10,
+              myLocationEnabled: true, 
+              myLocationButtonEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target: currentUserLocation,
+                zoom: 11,
               ),
               markers: _markers.values.toSet(),
             ),
@@ -331,7 +302,7 @@ class _ListingsState extends State<Listings> {
           Expanded(
             flex: 3,
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('listings').where('active', isEqualTo: true).snapshots(),
+              stream: FirebaseFirestore.instance.collection('listings').where('active', isEqualTo: true).where('approved', isEqualTo: true).snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
                   ('Snapshot has error: ${snapshot.error}');
