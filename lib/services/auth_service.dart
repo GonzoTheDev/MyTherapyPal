@@ -40,6 +40,14 @@ class AuthService {
     required String fname,
     required String sname,
     required String userType,
+    String? address,
+    String? phone,
+    List<String>? disciplines,
+    String? ratesFrom,
+    String? ratesTo,
+    bool? isTherapistListingEnabled,
+    required double latitude,
+    required double longitude,
   }) async {
     if (password != passwordConfirm) {
       return 'Passwords do not match';
@@ -60,6 +68,14 @@ class AuthService {
     else if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
       return 'Password must contain at least one symbol';
     }else{
+      if(userType == "Therapist"){
+        if(address == null){
+          return 'Address is required';
+        }
+        else if(disciplines == null){
+          return 'At least one discipline is required';
+        }
+      }
       try {
 
         // Create a new user in firebase
@@ -125,6 +141,22 @@ class AuthService {
           "encryptedRSAKey": encryptedRSAkey,
           "IV": iv.bytes,
           });
+
+          if(userType == "Therapist"){
+            db.collection("listings").doc(uid).set({
+              "fname": fname,
+              "sname": sname,
+              "address": address,
+              "phone": phone,
+              "disciplines": disciplines,
+              "ratesFrom": ratesFrom,
+              "ratesTo": ratesTo,
+              "active": isTherapistListingEnabled,
+              "location": GeoPoint(latitude, longitude),
+              "uid": uid,
+              "pic_url": "https://firebasestorage.googleapis.com/v0/b/mytherapypal.appspot.com/o/240px-Placeholder_no_text.svg.png?alt=media",
+            });
+          }
 
         // Generate a chat with the ai chatbot
         GenerateChat(

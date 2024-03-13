@@ -33,7 +33,7 @@ class RSAEncryption {
 
   generateRSAKeyPair() {
     print("Generating RSA key pair...");
-    final rsaKeypair = RSAKeypair.fromRandom(keySize: 4096);
+    final rsaKeypair = RSAKeypair.fromRandom();
     print("RSA key pair generated...");
     return (
       publicKey: rsaKeypair.publicKey.toPEM(),

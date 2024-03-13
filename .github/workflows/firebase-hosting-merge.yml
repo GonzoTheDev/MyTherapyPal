@@ -21,7 +21,7 @@ jobs:
       - run: flutter pub get
       - run: flutter pub upgrade
       - run: flutter config --enable-web
-      - run: flutter build web --web-renderer html --release
+      - run: flutter build web --web-renderer canvaskit --release
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
         with:
@@ -50,7 +50,7 @@ jobs:
           channelId: live
           projectId: mytherapypal
   build_apk:
-    if: false
+    if: true
     name: Build Flutter (Android)
     runs-on: ubuntu-latest
     steps:
@@ -86,7 +86,7 @@ jobs:
           name: release-apk        
           path: build/app/outputs/apk/release/app-release.apk
   beta_apk:
-    if: false
+    if: true
     name: Upload Android Beta to Firebase App Distribution
     needs: [build_apk]
     runs-on: ubuntu-latest

@@ -88,7 +88,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
       switch (index) {
         case 0:
           _child = const Dashboard();
-          _appBarSubtitle = "Home"; 
+          _appBarSubtitle = "Dashboard"; 
           break;
         case 1:
           _child = const Records();

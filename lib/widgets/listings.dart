@@ -398,7 +398,7 @@ class _ListingsState extends State<Listings> {
                                         const SizedBox(height: 5), 
                                         Row(children: [
                                           const Text('Rates: ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                          Text('${therapist['rates']}', style: const TextStyle(fontSize: 14))
+                                          Text('€${therapist['ratesFrom']}-${therapist['ratesTo']}', style: const TextStyle(fontSize: 14))
                                         ]),
                                       ],
                                     ),
