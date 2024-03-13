@@ -171,7 +171,7 @@ class _ListingsState extends State<Listings> {
     }
 
     // Update the selected listing's marker icon
-    _updateMarkerIcon(uid, BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue));
+    _updateMarkerIcon(uid, BitmapDescriptor.defaultMarkerWithHue(182.0));
 
     // Track the currently selected listing
     _selectedListingUid = uid;
