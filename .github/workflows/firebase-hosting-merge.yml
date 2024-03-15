@@ -8,6 +8,7 @@ name: Deploy to Firebase Hosting on merge
       - main
 jobs:
   test_flutter:
+    name: Unit & Widget Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -51,7 +52,7 @@ jobs:
           name: web-build
           path: build/web
       - name: Deploy to Firebase
-        uses: w9jds/firebase-action@master
+        uses: w9jds/firebase-action@v13.5.0
         with:
           args: deploy --only hosting --public build/web
         env:
