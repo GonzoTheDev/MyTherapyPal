@@ -295,8 +295,6 @@ void _createNewAiChat() async {
   }
 }
 
-  //builder: (context) => const AccountHomePage(initialIndex: 2), // Pass the initialIndex here
-  // Build the chat screen
   @override
   Widget build(BuildContext context) {
     if (isLoading) {

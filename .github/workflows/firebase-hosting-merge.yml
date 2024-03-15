@@ -7,9 +7,19 @@ name: Deploy to Firebase Hosting on merge
     branches:
       - main
 jobs:
+  test_flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'master'
+      - run: flutter pub get
+      - run: flutter test
   build_web:
     if: true
     name: Build Flutter (Web)
+    needs: test_flutter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -52,6 +62,7 @@ jobs:
   build_apk:
     if: true
     name: Build Flutter (Android)
+    needs: test_flutter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -109,6 +120,7 @@ jobs:
   build_ios:
     if: false
     name: Build Flutter (iOS)
+    needs: test_flutter
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1

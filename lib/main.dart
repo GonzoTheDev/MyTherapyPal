@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:my_therapy_pal/services/auth_service.dart';
+import 'package:provider/provider.dart';
 import 'config/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_sizer/flutter_sizer.dart';
@@ -65,9 +67,24 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
-  runApp(MainApp(isFirstTime: isFirstTime));
+  runApp(MyApp(isFirstTime: isFirstTime));
   if (isFirstTime) {
     await prefs.setBool('isFirstTime', false);
+  }
+}
+
+class MyApp extends StatelessWidget {
+  final bool isFirstTime;
+  static const String title = 'MyTherapyPal';
+  
+  const MyApp({super.key, required this.isFirstTime});
+
+  @override
+  Widget build(BuildContext context) {
+    return Provider<AuthService>(
+      create: (_) => AuthService(),
+      child: MainApp(isFirstTime: isFirstTime),
+    );
   }
 }
 

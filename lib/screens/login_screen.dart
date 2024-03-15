@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_therapy_pal/main.dart';
 import 'package:my_therapy_pal/screens/reset_password.dart';
+import 'package:provider/provider.dart';
 import 'register_screen.dart';
 import '../services/auth_service.dart';
 import 'dashboard_screen.dart';
@@ -29,7 +30,9 @@ class _LoginState extends State<Login> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final message = await AuthService().login(
+      // Access AuthService from Provider
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final message = await authService.login(
         email: _emailController.text,
         password: _passwordController.text,
       );
@@ -48,6 +51,7 @@ class _LoginState extends State<Login> {
       }
     }
   }
+
 
   void checkLoginStatus() async {
     FirebaseAuth.instance
@@ -193,11 +197,14 @@ class _LoginState extends State<Login> {
                     height: 30.0,
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center, 
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        "Don't have an account?",
-                        style: TextStyle(color: Colors.black, fontSize: 15),
+                      const Flexible(
+                        child: Text(
+                          "Don't have an account?",
+                          style: TextStyle(color: Colors.black, fontSize: 15),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       TextButton(
                         onPressed: () {
@@ -210,7 +217,8 @@ class _LoginState extends State<Login> {
                         child: const Text('Create New Account'),
                       ),
                     ],
-                  ),
+                  )
+
                 ],
               ),
             ),
