@@ -156,6 +156,7 @@ class AuthService {
               "approved": false,
               "uid": uid,
               "pic_url": "https://firebasestorage.googleapis.com/v0/b/mytherapypal.appspot.com/o/240px-Placeholder_no_text.svg.png?alt=media",
+              "clients": [],
             });
           }
 
