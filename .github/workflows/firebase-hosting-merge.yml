@@ -186,7 +186,7 @@ jobs:
       - run: flutter pub get
       - run: flutter pub upgrade
       - run: flutter config --enable-macos-desktop
-      - run: flutter build macos --release --no-codesign
+      - run: flutter build macos --release 
       - name: Create DMG
         run: |
           echo "Install create-dmg"
