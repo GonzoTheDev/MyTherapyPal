@@ -213,7 +213,7 @@ jobs:
         uses: actions/upload-artifact@v2 
         with:
           name: macos_build
-          path: my_therapy_pal.dmg
+          path: ${{ env.MACOS_APP_RELEASE_PATH }}/my_therapy_pal.dmg
         env:
           MACOS_APP_RELEASE_PATH: ${{ env.MACOS_APP_RELEASE_PATH }}
   beta_macos:
