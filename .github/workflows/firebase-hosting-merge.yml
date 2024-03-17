@@ -194,17 +194,17 @@ jobs:
           if [ -d "${{ env.MACOS_APP_RELEASE_PATH }}" ]; then
             cd "${{ env.MACOS_APP_RELEASE_PATH }}"
             create-dmg \
-              --volname "MyTherapyPal" \
+              --volname "my_therapy_pal" \
               --window-pos 200 120 \
               --window-size 800 529 \
               --icon-size 130 \
               --text-size 14 \
-              --icon "MyTherapyPal.app" 260 250 \
-              --hide-extension "MyTherapyPal.app" \
+              --icon "my_therapy_pal.app" 260 250 \
+              --hide-extension "my_therapy_pal.app" \
               --app-drop-link 540 250 \
               --hdiutil-quiet \
-              "MyTherapyPal.dmg" \
-              "MyTherapyPal.app"
+              "my_therapy_pal.dmg" \
+              "my_therapy_pal.app"
           else
             echo "Directory ${$MACOS_APP_RELEASE_PATH} does not exist."
             exit 1
