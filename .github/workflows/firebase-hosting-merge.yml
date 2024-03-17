@@ -119,7 +119,7 @@ jobs:
           token: ${{secrets.FIREBASE_TOKEN}}
           file: app-release.apk
   build_ios:
-    if: false
+    if: true
     name: Build Flutter (iOS)
     needs: test_flutter
     runs-on: macOS-latest
@@ -169,3 +169,44 @@ jobs:
         appId: ${{secrets.FIREBASE_IOS_APPID}}
         token: ${{secrets.FIREBASE_TOKEN}}
         file: Runner.ipa
+  build_macos:
+    if: true
+    name: Build Flutter (macOS)
+    needs: test_flutter
+    runs-on: macos-latest
+    env:
+      MACOS_APP_RELEASE_PATH: build/macos/Build/Products/Release
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - run: flutter clean
+      - run: flutter upgrade
+      - run: flutter pub get
+      - run: flutter pub upgrade
+      - run: flutter config --enable-macos-desktop
+      - run: flutter build macos --release --no-codesign
+      - name: Create DMG
+        run: |
+          echo "Install create-dmg"
+          brew install create-dmg
+          cd $MACOS_APP_RELEASE_PATH
+          create-dmg \
+            --volname "MyTherapyPal" \
+            --window-pos 200 120 \
+            --window-size 800 529 \
+            --icon-size 130 \
+            --text-size 14 \
+            --icon "MyTherapyPal.app" 260 250 \
+            --hide-extension "MyTherapyPal.app" \
+            --app-drop-link 540 250 \
+            --hdiutil-quiet \
+            "MyTherapyPal.dmg" \
+            "MyTherapyPal.app"
+        working-directory: $MACOS_APP_RELEASE_PATH
+      - name: Upload DMG
+        uses: actions/upload-artifact@v2
+        with:
+          name: macos-build
+          path: $MACOS_APP_RELEASE_PATH/MyTherapyPal.dmg
