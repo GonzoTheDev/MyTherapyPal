@@ -191,22 +191,45 @@ jobs:
         run: |
           echo "Install create-dmg"
           brew install create-dmg
-          cd "/Users/runner/${{ env.MACOS_APP_RELEASE_PATH }}"
-          create-dmg \
-            --volname "MyTherapyPal" \
-            --window-pos 200 120 \
-            --window-size 800 529 \
-            --icon-size 130 \
-            --text-size 14 \
-            --icon "MyTherapyPal.app" 260 250 \
-            --hide-extension "MyTherapyPal.app" \
-            --app-drop-link 540 250 \
-            --hdiutil-quiet \
-            "MyTherapyPal.dmg" \
-            "MyTherapyPal.app"
-        working-directory: ${{ env.MACOS_APP_RELEASE_PATH }}
-      - name: Upload DMG
-        uses: actions/upload-artifact@v2
-        with:
-          name: macos-build
-          path: ${{ env.MACOS_APP_RELEASE_PATH }}/MyTherapyPal.dmg
+          if [ -d "${{ env.MACOS_APP_RELEASE_PATH }}" ]; then
+            cd "${{ env.MACOS_APP_RELEASE_PATH }}"
+            create-dmg \
+              --volname "MyTherapyPal" \
+              --window-pos 200 120 \
+              --window-size 800 529 \
+              --icon-size 130 \
+              --text-size 14 \
+              --icon "MyTherapyPal.app" 260 250 \
+              --hide-extension "MyTherapyPal.app" \
+              --app-drop-link 540 250 \
+              --hdiutil-quiet \
+              "MyTherapyPal.dmg" \
+              "MyTherapyPal.app"
+          else
+            echo "Directory ${$MACOS_APP_RELEASE_PATH} does not exist."
+            exit 1
+          fi
+        env:
+          MACOS_APP_RELEASE_PATH: ${{ env.MACOS_APP_RELEASE_PATH }}
+  beta_macos:
+    # Job disabled until apple developer account is available
+    if: false
+    name: Upload macOS Beta to Firebase App Distribution
+    needs: [build_macos]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Download Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: macos-build
+    - name: Upload DMG
+      uses: wzieba/Firebase-Distribution-Github-Action@v1.7.0
+      with:
+        appId: ${{secrets.FIREBASE_MACOS_APPID}}
+        token: ${{secrets.FIREBASE_TOKEN}}
+        file: MyTherapyPal.dmg
