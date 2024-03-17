@@ -173,7 +173,7 @@ jobs:
     if: true
     name: Build Flutter (macOS)
     needs: test_flutter
-    runs-on: macos-latest
+    runs-on: macOS-latest
     env:
       MACOS_APP_RELEASE_PATH: build/macos/Build/Products/Release
     steps:
@@ -191,7 +191,7 @@ jobs:
         run: |
           echo "Install create-dmg"
           brew install create-dmg
-          cd $MACOS_APP_RELEASE_PATH
+          cd "${{ env.MACOS_APP_RELEASE_PATH }}"
           create-dmg \
             --volname "MyTherapyPal" \
             --window-pos 200 120 \
@@ -204,9 +204,9 @@ jobs:
             --hdiutil-quiet \
             "MyTherapyPal.dmg" \
             "MyTherapyPal.app"
-        working-directory: $MACOS_APP_RELEASE_PATH
+        working-directory: ${{ env.MACOS_APP_RELEASE_PATH }}
       - name: Upload DMG
         uses: actions/upload-artifact@v2
         with:
           name: macos-build
-          path: $MACOS_APP_RELEASE_PATH/MyTherapyPal.dmg
+          path: ${{ env.MACOS_APP_RELEASE_PATH }}/MyTherapyPal.dmg
