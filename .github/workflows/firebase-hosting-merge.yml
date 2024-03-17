@@ -191,7 +191,7 @@ jobs:
         run: |
           echo "Install create-dmg"
           brew install create-dmg
-          cd "${{ env.MACOS_APP_RELEASE_PATH }}"
+          cd "Users/runner/${{ env.MACOS_APP_RELEASE_PATH }}"
           create-dmg \
             --volname "MyTherapyPal" \
             --window-pos 200 120 \
