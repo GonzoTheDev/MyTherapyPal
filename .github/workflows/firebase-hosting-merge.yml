@@ -187,6 +187,16 @@ jobs:
       - run: flutter pub upgrade
       - run: flutter config --enable-macos-desktop
       - run: flutter build macos --release 
+      - name: Codesign executable
+        run: |
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security list-keychains -s ~/Library/Keychains/build.keychain
+          security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/build.keychain
+          codesign --force --deep --sign $MACOS_CERTIFICATE_ID $MACOS_APP_RELEASE_PATH/my_therapy_pal.app
+        
       - name: Create DMG
         run: |
           echo "Install create-dmg"
@@ -216,6 +226,8 @@ jobs:
           path: ${{ env.MACOS_APP_RELEASE_PATH }}/my_therapy_pal.dmg
         env:
           MACOS_APP_RELEASE_PATH: ${{ env.MACOS_APP_RELEASE_PATH }}
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
   beta_macos:
     # Job disabled until apple developer account is available
     if: false
