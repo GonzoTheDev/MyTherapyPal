@@ -89,6 +89,7 @@
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {
+            useColorEmoji: true,
             appRunner.runApp();
           });
         }
