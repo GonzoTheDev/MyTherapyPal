@@ -88,8 +88,7 @@
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            useColorEmoji: true,
+          engineInitializer.initializeEngine({useColorEmoji: true,}).then(function(appRunner) {
             appRunner.runApp();
           });
         }

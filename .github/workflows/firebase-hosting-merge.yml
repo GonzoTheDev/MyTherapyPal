@@ -181,22 +181,24 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-      - run: flutter clean
-      - run: flutter upgrade
-      - run: flutter pub get
-      - run: flutter pub upgrade
-      - run: flutter config --enable-macos-desktop
-      - run: flutter build macos --release 
-      - name: Codesign macOS Executable
+      - name: Build Executable
         run: |
+          flutter clean
+          flutter upgrade
+          flutter pub get
+          flutter pub upgrade
+          flutter config --enable-macos-desktop
+          flutter build macos --release 
+      - name: Codesign Executable
+        run: |
+          set -x
           echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p $MACOS_CERTIFICATE_PWD build.keychain
-          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CERTIFICATE_PWD build.keychain
-          /usr/bin/codesign --force --deep -s $MACOS_IDENTITY ./$MACOS_APP_RELEASE_PATH/my_therapy_pal.app
-        
+          codesign --force --deep -s $MACOS_IDENTITY ./$MACOS_APP_RELEASE_PATH/my_therapy_pal.app
       - name: Create DMG
         run: |
           echo "Install create-dmg"
