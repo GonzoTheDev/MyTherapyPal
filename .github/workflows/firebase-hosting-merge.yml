@@ -11,6 +11,11 @@ jobs:
     if: false
     name: Run all jobs
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      - name: Run all jobs
+        run: echo "Run all jobs"
   test_flutter:
     name: Unit & Widget Tests
     needs: run_all
