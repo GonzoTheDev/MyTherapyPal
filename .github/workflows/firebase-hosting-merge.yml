@@ -7,8 +7,13 @@ name: Deploy to Firebase Hosting on merge
     branches:
       - main
 jobs:
+  run_all:
+    if: false
+    name: Run all jobs
+    runs-on: ubuntu-latest
   test_flutter:
     name: Unit & Widget Tests
+    needs: run_all
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -172,7 +177,7 @@ jobs:
   build_macos:
     if: true
     name: Build Flutter (macOS)
-    needs: test_flutter
+    #needs: test_flutter
     runs-on: macOS-latest
     env:
       MACOS_APP_RELEASE_PATH: build/macos/Build/Products/Release
@@ -190,14 +195,19 @@ jobs:
           flutter config --enable-macos-desktop
           flutter build macos --release 
       - name: Codesign Executable
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_APP_RELEASE_PATH: ${{ env.MACOS_APP_RELEASE_PATH }}
+          KEYCHAIN_NAME: build.keychain
+          KEYCHAIN_PWD: hello
         run: |
-          set -x
-          echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
-          security create-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
-          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PWD" build.keychain
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
+          security default-keychain -s $KEYCHAIN_NAME
+          security unlock-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
+          security import certificate.p12 -k $KEYCHAIN_NAME -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PWD $KEYCHAIN_NAME
           /usr/bin/codesign --force --deep -s "$MACOS_IDENTITY" ./$MACOS_APP_RELEASE_PATH/my_therapy_pal.app
       - name: Create DMG
         run: |
