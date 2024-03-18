@@ -20,6 +20,10 @@ class _DashboardState extends State<Dashboard> {
   }
 
   bool showTick = false; 
+  bool viewMore = false;
+  String selectedMood = '';
+  Color selectedMoodColour = Colors.black;
+  String selectedMoodEmoji = '';
 
   // Define the text controllers for the note title and text
   final TextEditingController _noteTitleController = TextEditingController();
@@ -29,11 +33,29 @@ class _DashboardState extends State<Dashboard> {
   String userFirstName = 'User';
   // Define the list of emojis and their associated feelings
   final List<Map<String, dynamic>> moods = [
-    {'emoji': '😁', 'mood': 'Very Happy'},
-    {'emoji': '🙂', 'mood': 'Happy'},
-    {'emoji': '😐', 'mood': 'Indifferent'},
-    {'emoji': '🙁', 'mood': 'Sad'},
-    {'emoji': '😢', 'mood': 'Very Sad'},
+    {'emoji': '😁', 'mood': 'Very Happy', 'color': const Color.fromARGB(255, 0, 102, 4)}, 
+    {'emoji': '🙂', 'mood': 'Happy', 'color': const Color.fromARGB(255, 49, 192, 61)}, 
+    {'emoji': '😌', 'mood': 'Calm', 'color': const Color.fromARGB(255, 35, 184, 134)}, 
+    {'emoji': '😢', 'mood': 'Very Sad', 'color': const Color.fromARGB(255, 44, 36, 116)}, 
+    {'emoji': '🙁', 'mood': 'Sad', 'color': const Color.fromARGB(255, 63, 80, 179)},
+    {'emoji': '😰', 'mood': 'Anxious', 'color': const Color.fromARGB(255, 180, 101, 194)}, 
+    {'emoji': '😎', 'mood': 'Cool', 'color': const Color.fromARGB(255, 231, 140, 36)}, 
+    {'emoji': '😜', 'mood': 'Silly', 'color': const Color.fromARGB(255, 220, 57, 111)}, 
+    {'emoji': '😐', 'mood': 'Indifferent', 'color': const Color(0xFF9E9E9E)}, 
+    {'emoji': '😥', 'mood': 'Disappointed', 'color': const Color(0xFF64B5F6)}, 
+    {'emoji': '😓', 'mood': 'Stressed', 'color': const Color(0xFF9C27B0)}, 
+    {'emoji': '😨', 'mood': 'Scared', 'color': const Color(0xFF546E7A)}, 
+    {'emoji': '😳', 'mood': 'Embarrassed', 'color': const Color(0xFFF48FB1)}, 
+    {'emoji': '😱', 'mood': 'Shocked', 'color': const Color(0xFF7C4DFF)}, 
+    {'emoji': '😠', 'mood': 'Angry', 'color': const Color(0xFFD32F2F)}, 
+    {'emoji': '😡', 'mood': 'Very Angry', 'color': const Color(0xFFB71C1C)}, 
+    {'emoji': '😴', 'mood': 'Sleepy', 'color': const Color(0xFFB39DDB)}, 
+    {'emoji': '😪', 'mood': 'Tired', 'color': const Color(0xFF607D8B)}, 
+    {'emoji': '🤤', 'mood': 'Hungry', 'color': const Color.fromARGB(255, 112, 86, 84)}, 
+    {'emoji': '🤢', 'mood': 'Nauseous', 'color': const Color.fromARGB(255, 153, 219, 77)}, 
+    {'emoji': '🤒', 'mood': 'Sick', 'color': const Color(0xFFCDDC39)}, 
+    {'emoji': '🤮', 'mood': 'Very Sick', 'color': const Color(0xFF4CAF50)}, 
+    {'emoji': '🤕', 'mood': 'Hurt', 'color': const Color.fromARGB(255, 163, 57, 18)}, 
   ];
 
   // Helper function to get the greeting based on the time of day
@@ -171,8 +193,7 @@ class _DashboardState extends State<Dashboard> {
           return const Text("Error loading notes...");
         }
         if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
+          return const SizedBox(
             child: Text(
               "You haven't added any notes yet. Tap 'Add a note' to get started!",
               style: TextStyle(color: Colors.grey, fontSize: 16),
@@ -267,78 +288,130 @@ class _DashboardState extends State<Dashboard> {
 
     @override
     Widget build(BuildContext context) {
+      double screenWidth = MediaQuery.of(context).size.width;
+      bool isLargeScreen = screenWidth > 800;
+      int columns = isLargeScreen ? 5 : 3;
       double maxWidth = MediaQuery.of(context).size.width > 414 ? 414 : MediaQuery.of(context).size.width;
       var greeting = _getGreeting();
       return Scaffold(
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              const SizedBox(
-                height: 20.0,
-              ),
               Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text('How are you feeling?', style: Theme.of(context).textTheme.titleLarge),
-              ),
-              Visibility(
-                visible: !showTick, 
-                replacement: const Center(
-                  child: Icon(Icons.check_circle, color: Colors.green, size: 60), 
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: moods.map((mood) => MouseRegion(
-                    cursor: SystemMouseCursors.click, 
-                    child: GestureDetector(
-                      onTap: () {
-                        addMoodToFirebase(mood['emoji']);
-                        setState(() => showTick = true);
-                        Timer(const Duration(seconds: 1), () => setState(() => showTick = false)); 
-                      },
-                      child: Text(mood['emoji'], style: const TextStyle(fontSize: 24)),
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1, vertical: 20), 
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20.0),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('$greeting, $userFirstName!', style: Theme.of(context).textTheme.titleLarge),
                     ),
-                  )).toList(),
-                ),
-              ),
-              const SizedBox(
-                height: 40.0,
-              ),
-              const Divider(
-                        color: Colors.grey,
-                        thickness: 1,
-                        indent: 60,
-                        endIndent: 60,
+                    Visibility(
+                      visible: !showTick,
+                      replacement: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min, 
+                          children: [
+                            const Icon(Icons.check_circle, color: Colors.green, size: 60),
+                            if (selectedMood.isNotEmpty) 
+                              Text(selectedMood, style: const TextStyle(fontSize: 24,)),
+                          ],
+                        ),
                       ),
-              const SizedBox(
-                height: 40.0,
-              ),
-              Text('$greeting, $userFirstName!', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(
-                height: 20.0,
-              ),
-              Container(
-                constraints: BoxConstraints(maxWidth: maxWidth / 2),
-                child: 
-              SizedBox(
-                width: double.infinity/2,
-                height: 50.0,
-                child: ElevatedButton(
-                  onPressed: _showAddNoteDialog,
-                  style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all<Size>(const Size(double.infinity, 36)),
-                  ),
-                  child: const Text(
-                    'Add a note',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          childAspectRatio: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount: viewMore ? moods.length : isLargeScreen ? 10 : 6, 
+                        itemBuilder: (context, index) {
+                          final mood = moods[index];
+                          return MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () {
+                                addMoodToFirebase(mood['emoji']);
+                                setState(() {
+                                  showTick = true;
+                                  selectedMood = mood['mood'];
+                                  selectedMoodColour = mood['color'];
+                                  selectedMoodEmoji = mood['emoji'];
+                                });
+                                Timer(const Duration(seconds: 1), () => setState(() => showTick = false));
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: mood['color'],
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text(mood['emoji'], style: const TextStyle(fontSize: 24)),
+                                    Flexible(child: Text(mood['mood'], overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white))),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Visibility(
+                      visible: !showTick,
+                      child: ElevatedButton(
+                        onPressed: () => setState(() => viewMore = !viewMore),
+                        child: Text(viewMore ? 'View Less' : 'View More'),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 40.0,
+                    ),
+                    const Divider(
+                              color: Colors.grey,
+                              thickness: 1,
+                              indent: 60,
+                              endIndent: 60,
+                            ),
+                    const SizedBox(
+                      height: 40.0,
+                    ),
+                    Text('$greeting, $userFirstName!', style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(
+                      height: 20.0,
+                    ),
+                    Container(
+                      constraints: BoxConstraints(maxWidth: maxWidth / 2),
+                      child: 
+                      SizedBox(
+                        width: double.infinity/2,
+                        height: 50.0,
+                        child: ElevatedButton(
+                          onPressed: _showAddNoteDialog,
+                          style: ButtonStyle(
+                            minimumSize: MaterialStateProperty.all<Size>(const Size(double.infinity, 36)),
+                          ),
+                          child: const Text(
+                            'Add a note',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 60.0,
+                    ),
+                    _buildNotesTimeline(),
+                  ],
                 ),
               ),
-              ),
-              const SizedBox(
-                height: 60.0,
-              ),
-              _buildNotesTimeline(),
             ],
+            
           ),
         ),
       );

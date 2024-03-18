@@ -10,7 +10,7 @@ import 'package:my_therapy_pal/widgets/nav_drawer.dart';
 import 'package:my_therapy_pal/main.dart';
 import 'package:my_therapy_pal/widgets/dashboard.dart';
 import 'package:my_therapy_pal/widgets/chat_list.dart';
-import 'package:my_therapy_pal/widgets/records.dart';
+import 'package:my_therapy_pal/widgets/reports.dart';
 import 'package:my_therapy_pal/widgets/listings.dart';
 import 'package:my_therapy_pal/widgets/tasks.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -118,8 +118,8 @@ class _AccountHomePageState extends State<AccountHomePage> {
             _appBarSubtitle = "Dashboard"; 
             break;
           case 1:
-            _child = const Records();
-            _appBarSubtitle = "Records"; 
+            _child = const Reports();
+            _appBarSubtitle = "Reports"; 
             break;
           case 2:
             _child = const ChatList();
@@ -208,7 +208,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
             FluidNavBarIcon(
               icon: Icons.insert_chart,
               backgroundColor: const Color(0xff0677ba),
-              extras: {"label": "Records"},
+              extras: {"label": "Reports"},
             ),
             FluidNavBarIcon(
               icon: Icons.message,
