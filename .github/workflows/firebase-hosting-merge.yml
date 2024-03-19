@@ -139,10 +139,14 @@ jobs:
       with:
         java-version: '12.x'
     - name: Install Apple Certificate
-      uses: apple-actions/import-codesign-certs@v1
-      with:
-        p12-file-base64: ${{ secrets.IOS_CERTIFICATE }}
-        p12-password: ${{ secrets.IOS_CERTIFICATE_PWD }}
+      run: |
+        echo ${{ secrets.IOS_CERTIFICATE }} | base64 --decode > certificate.p12
+        security create-keychain -p password build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p password build.keychain
+        security import certificate.p12 -k build.keychain -P ${{ secrets.IOS_CERTIFICATE_PWD }} -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple: -s -k password build.keychain
+      
     - name: Install Provisioning Profile
       env:
         PROVISIONING_CERTIFICATE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
