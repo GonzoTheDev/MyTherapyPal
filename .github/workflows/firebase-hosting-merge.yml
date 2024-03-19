@@ -213,7 +213,8 @@ jobs:
           security unlock-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
           security import certificate.p12 -k $KEYCHAIN_NAME -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PWD $KEYCHAIN_NAME
-          /usr/bin/codesign --force --deep -s "$MACOS_IDENTITY" ./$MACOS_APP_RELEASE_PATH/my_therapy_pal.app
+          security find-identity -v
+          /usr/bin/codesign --force --deep -s $MACOS_IDENTITY ./$MACOS_APP_RELEASE_PATH/my_therapy_pal.app
       - name: Create DMG
         run: |
           echo "Install create-dmg"
