@@ -8,7 +8,7 @@ name: Deploy to Firebase Hosting on merge
       - main
 jobs:
   run_all:
-    if: false
+    if: true
     name: Run all jobs
     runs-on: ubuntu-latest
     steps:
@@ -138,6 +138,21 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '12.x'
+    - name: Install Apple Certificate
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.IOS_CERTIFICATE }}
+        p12-password: ${{ secrets.IOS_CERTIFICATE_PWD }}
+    - name: Install Provisioning Profile
+      env:
+        PROVISIONING_CERTIFICATE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+      run: |
+        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+    
+        echo -n "$PROVISIONING_CERTIFICATE_BASE64" | base64 --decode --output $PP_PATH
+    
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
     - uses: subosito/flutter-action@v1
       with:
           channel: 'stable'
@@ -146,20 +161,21 @@ jobs:
     - run: flutter pub get
     - run: flutter pub upgrade
     - run: flutter build ios --release --no-codesign
-    - name: Package IPA
+    - name: Build resolve Swift dependencies
+      run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release
+    - name: Build xArchive
       run: |
-        mkdir Payload
-        cp -r build/ios/iphoneos/Runner.app Payload/Runner.app
-        zip -r Runner.ipa Payload
+        xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release DEVELOPMENT_TEAM=V4969Q592K -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=d28776da-2d3b-41ab-abe1-0d377798f6b5 clean archive CODE_SIGN_IDENTITY="iPhone Distribution: Shane Buckley (V4969Q592K)"
+    - name: Export IPA
+      run: xcodebuild -exportArchive -archivePath build-output/app.xcarchive -exportPath build-output/ios -exportOptionsPlist ios/ExportOptions.plist
       working-directory: .
-    - name: Upload iPA
+    - name: Upload IPA
       uses: actions/upload-artifact@v2 
       with:
         name: ios-build
-        path: Runner.ipa
+        path: build-output/ios
   beta_ios:
-    # Job disabled until apple developer account is available
-    if: false
+    if: true
     name: Upload iOS Beta to Firebase App Distribution
     needs: [build_ios]
     runs-on: ubuntu-latest
@@ -182,7 +198,7 @@ jobs:
   build_macos:
     if: true
     name: Build Flutter (macOS)
-    #needs: test_flutter
+    needs: test_flutter
     runs-on: macOS-latest
     env:
       MACOS_APP_RELEASE_PATH: build/macos/Build/Products/Release
@@ -240,7 +256,7 @@ jobs:
       - name: Upload DMG
         uses: actions/upload-artifact@v2 
         with:
-          name: macos_build
+          name: macos-build
           path: ${{ env.MACOS_APP_RELEASE_PATH }}/my_therapy_pal.dmg
         env:
           MACOS_APP_RELEASE_PATH: ${{ env.MACOS_APP_RELEASE_PATH }}
@@ -248,8 +264,7 @@ jobs:
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
           MACOS_IDENTITY: ${{secrets.MACOS_IDENTITY}} 
   beta_macos:
-    # Job disabled until apple developer account is available
-    if: false
+    if: true
     name: Upload macOS Beta to Firebase App Distribution
     needs: [build_macos]
     runs-on: ubuntu-latest
