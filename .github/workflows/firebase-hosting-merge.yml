@@ -8,7 +8,7 @@ name: Deploy to Firebase Hosting on merge
       - main
 jobs:
   run_all:
-    if: true
+    if: false
     name: Run all jobs
     runs-on: ubuntu-latest
     steps:
@@ -131,7 +131,7 @@ jobs:
   build_ios:
     if: true
     name: Build Flutter (iOS)
-    needs: test_flutter
+    #needs: test_flutter
     runs-on: macOS-latest
     steps:
     - uses: actions/checkout@v1
@@ -165,7 +165,7 @@ jobs:
       run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release
     - name: Build xArchive
       run: |
-        xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release DEVELOPMENT_TEAM=V4969Q592K -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=d28776da-2d3b-41ab-abe1-0d377798f6b5 clean archive CODE_SIGN_IDENTITY="iPhone Distribution: Shane Buckley (V4969Q592K)"
+        xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release DEVELOPMENT_TEAM=V4969Q592K -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=d28776da-2d3b-41ab-abe1-0d377798f6b5 clean archive CODE_SIGN_IDENTITY="iPhone Distribution: Shane Buckley"
     - name: Export IPA
       run: xcodebuild -exportArchive -archivePath build-output/app.xcarchive -exportPath build-output/ios -exportOptionsPlist ios/ExportOptions.plist
       working-directory: .
