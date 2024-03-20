@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:my_therapy_pal/screens/chat_screen.dart';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
 import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';

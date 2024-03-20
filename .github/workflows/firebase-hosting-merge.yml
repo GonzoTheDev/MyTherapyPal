@@ -197,7 +197,7 @@ jobs:
       with:
         appId: ${{secrets.FIREBASE_IOS_APPID}}
         token: ${{secrets.FIREBASE_TOKEN}}
-        file: Runner.ipa
+        file: my_therapy_pal.ipa
   build_macos:
     if: true
     name: Build Flutter (macOS)

@@ -54,6 +54,8 @@ class _ChatScreenState extends State<ChatScreen> {
   late String? email;
   late ChatUser currentUser;
   late ChatUser otherUser;
+  late List<dynamic> currentUserClients = []; 
+  bool isOtherUserAClient = false; 
 
   // Declare chat attributes and controller
   late Chat chat;
@@ -112,6 +114,10 @@ class _ChatScreenState extends State<ChatScreen> {
     } else {
       encryptedAESKey = '';
     }
+
+    // Check if the other user is a client of the current user
+    currentUserClients = userProfileDoc['clients'] ?? [];
+    isOtherUserAClient = currentUserClients.contains(otherUserID);
 
     if(encryptedAESKey != ''){
       decryptedAESKeyString = RSAEncryption().decrypt(key: privateKeyRSA, message: encryptedAESKey);
@@ -216,84 +222,113 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-// Function to update the typing status of the current user
-void updateUserTypingStatus(bool isTyping) {
-  var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
-  String fieldPath = 'typingStatus.${FirebaseAuth.instance.currentUser!.uid}';
-  chatDocRef.update({fieldPath: isTyping});
-
-  // If isTyping is true, wait for 5 seconds then set it to false
-  if (isTyping) {
-    Future.delayed(const Duration(seconds: 5), () {
-      chatDocRef.update({fieldPath: false});
-    });
-  }
-}
-
-// Function to update the typing status of the AI chatbot
-void updateAITypingStatus(bool isTyping) {
-  var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
-  String fieldPath = 'typingStatus.${"ai-mental-health-assistant"}';
-  chatDocRef.update({fieldPath: isTyping});
-}
-
-void _createNewAiChat() async {
-
-  Future<String> aiChatId;
-
-  // Before using `context` or calling `setState`, check if the widget is still mounted
-  if (!mounted) return;
-
-  // Disable the old AI chat by setting active to false
-  await db.collection("chat").doc(chat.chatID).delete();
-
-  // Disable the old AI chat messages by setting active to false
-  await db.collection("messages").where('chatID', isEqualTo: chat.chatID).get().then((snapshot) {
-    for (DocumentSnapshot ds in snapshot.docs){
-      ds.reference.delete();
+  // Function to add the other user as a client
+  void _addClient() async {
+    try {
+      await FirebaseFirestore.instance.collection('profiles').doc(uid).update({
+        'clients': FieldValue.arrayUnion([otherUserID])
+      });
+      setState(() => isOtherUserAClient = true);
+    } catch (e) {
+      print("Error adding client: $e");
     }
-  });
-
-  // Generate an AES key for the ai chat room
-  final aesKey = aesKeyEncryptionService.generateAESKey(32);
-
-  // Encrypt the AES key with the public key
-  final encryptedAESKey = rsaEncryption.encrypt(
-    key: userRSAPubKey,
-    message: aesKey.toString(),
-  );
-
-  // Generate a new chat with the ai chatbot
-  aiChatId = GenerateChat(
-    aesKey: aesKey,
-    encryptedAESKey: encryptedAESKey,
-    fname: fname,
-    uid: uid,
-  ).generateAIChat(); 
-
-
-  if (mounted) {
-    Navigator.pushAndRemoveUntil(
-      context, 
-      MaterialPageRoute(
-        builder: (context) => FutureBuilder<String>(
-          future: aiChatId,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return const Text('Error');
-            } else {
-              return const AccountHomePage(initialIndex: 2);
-              //return ChatScreen(chatID: snapshot.data!);
-            }
-          },
-        ),
-          ),
-          (route) => false,
-        );
   }
-}
+
+  // Function to remove the other user as a client
+  void _removeClient() async {
+    try {
+      await FirebaseFirestore.instance.collection('profiles').doc(uid).update({
+        'clients': FieldValue.arrayRemove([otherUserID])
+      });
+      setState(() => isOtherUserAClient = false);
+    } catch (e) {
+      print("Error removing client: $e");
+    }
+  }
+
+  // Function to issue an invoice (Placeholder for actual implementation)
+  void _issueInvoice() {
+    // TODO: Implement invoice issuing functionality here
+  }
+
+  // Function to update the typing status of the current user
+  void updateUserTypingStatus(bool isTyping) {
+    var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
+    String fieldPath = 'typingStatus.${FirebaseAuth.instance.currentUser!.uid}';
+    chatDocRef.update({fieldPath: isTyping});
+
+    // If isTyping is true, wait for 5 seconds then set it to false
+    if (isTyping) {
+      Future.delayed(const Duration(seconds: 5), () {
+        chatDocRef.update({fieldPath: false});
+      });
+    }
+  }
+
+  // Function to update the typing status of the AI chatbot
+  void updateAITypingStatus(bool isTyping) {
+    var chatDocRef = FirebaseFirestore.instance.collection('chat').doc(widget.chatID);
+    String fieldPath = 'typingStatus.${"ai-mental-health-assistant"}';
+    chatDocRef.update({fieldPath: isTyping});
+  }
+
+  void _createNewAiChat() async {
+
+    Future<String> aiChatId;
+
+    // Before using `context` or calling `setState`, check if the widget is still mounted
+    if (!mounted) return;
+
+    // Disable the old AI chat by setting active to false
+    await db.collection("chat").doc(chat.chatID).delete();
+
+    // Disable the old AI chat messages by setting active to false
+    await db.collection("messages").where('chatID', isEqualTo: chat.chatID).get().then((snapshot) {
+      for (DocumentSnapshot ds in snapshot.docs){
+        ds.reference.delete();
+      }
+    });
+
+    // Generate an AES key for the ai chat room
+    final aesKey = aesKeyEncryptionService.generateAESKey(32);
+
+    // Encrypt the AES key with the public key
+    final encryptedAESKey = rsaEncryption.encrypt(
+      key: userRSAPubKey,
+      message: aesKey.toString(),
+    );
+
+    // Generate a new chat with the ai chatbot
+    aiChatId = GenerateChat(
+      aesKey: aesKey,
+      encryptedAESKey: encryptedAESKey,
+      fname: fname,
+      uid: uid,
+    ).generateAIChat(); 
+
+
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context, 
+        MaterialPageRoute(
+          builder: (context) => FutureBuilder<String>(
+            future: aiChatId,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return const Text('Error');
+              } else {
+                return const AccountHomePage(initialIndex: 2);
+                //return ChatScreen(chatID: snapshot.data!);
+              }
+            },
+          ),
+            ),
+            (route) => false,
+          );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +370,7 @@ void _createNewAiChat() async {
           flashingCircleBrightColor: theme.flashingCircleBrightColor,
           flashingCircleDarkColor: theme.flashingCircleDarkColor,
         ),
-
+        
         // ChatView app bar configuration
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight + 5),
@@ -373,6 +408,7 @@ void _createNewAiChat() async {
               ),
             ),
             actions: [
+              if (userType == 'Admin' || userType == 'Therapist') _buildPopupMenu(),
               Padding(
                 padding: const EdgeInsets.only(top: 5, bottom: 2), 
                 child: ai ? IconButton(
@@ -539,6 +575,45 @@ void _createNewAiChat() async {
     );
   }
 
+  Widget _buildPopupMenu() {
+    return PopupMenuButton<int>(
+      icon: const Icon(Icons.more_vert, color: Colors.black),
+      onSelected: (item) => _handleMenuAction(item),
+      itemBuilder: (context) => [
+        if (!isOtherUserAClient)
+          const PopupMenuItem<int>(
+            value: 0,
+            child: Text('Add Client'),
+          ),
+        if (isOtherUserAClient) ...[
+          const PopupMenuItem<int>(
+            value: 1,
+            child: Text('Remove Client'),
+          ),
+          const PopupMenuItem<int>(
+            value: 2,
+            child: Text('Issue Invoice'),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _handleMenuAction(int item) {
+    switch (item) {
+      case 0:
+        _addClient();
+        break;
+      case 1:
+        _removeClient();
+        break;
+      case 2:
+        _issueInvoice();
+        break;
+      default:
+        break;
+    }
+  }
     
   // Function to send a message
   Future<void> _onSendTap(
