@@ -233,6 +233,18 @@ class _ChatScreenState extends State<ChatScreen> {
       print("Error adding client: $e");
     }
   }
+  
+  // Function to add the other user as a client
+  void _assignTask() async {
+    // TODO: Implement the task assignment feature
+    return;
+  }
+
+  // Function to add the other user as a client
+  void _viewSummary() async {
+    // TODO: Implement the note summary feature
+    return;
+  }
 
   // Function to remove the other user as a client
   void _removeClient() async {
@@ -588,11 +600,19 @@ class _ChatScreenState extends State<ChatScreen> {
         if (isOtherUserAClient) ...[
           const PopupMenuItem<int>(
             value: 1,
-            child: Text('Remove Client'),
+            child: Text('View Summary'),
           ),
           const PopupMenuItem<int>(
             value: 2,
+            child: Text('Assign Task'),
+          ),
+          const PopupMenuItem<int>(
+            value: 3,
             child: Text('Issue Invoice'),
+          ),
+          const PopupMenuItem<int>(
+            value: 4,
+            child: Text('Remove Client'),
           ),
         ],
       ],
@@ -605,10 +625,16 @@ class _ChatScreenState extends State<ChatScreen> {
         _addClient();
         break;
       case 1:
-        _removeClient();
+        _viewSummary();
         break;
       case 2:
+        _assignTask();
+        break;
+      case 3:
         _issueInvoice();
+        break;
+      case 4:
+        _removeClient();
         break;
       default:
         break;
@@ -650,6 +676,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Function to handle the theme icon tap (to be implemented later)
   void _onThemeIconTap() {
+    // TODO: Implement theme change functionality
     if (mounted) {
       setState(() {
         if (isDarkTheme) {
