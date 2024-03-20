@@ -139,17 +139,21 @@ jobs:
       with:
         java-version: '12.x'
     - name: Install Apple Certificate
-      env:
-        IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
-        IOS_CERTIFICATE_PWD: ${{ secrets.IOS_CERTIFICATE_PWD }}
-        KEYCHAIN_NAME: build.keychain
-        KEYCHAIN_PWD: hello
-      run: |
-        echo $IOS_CERTIFICATE | base64 --decode > certificate.p12
-        security create-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
-        security default-keychain -s $KEYCHAIN_NAME
-        security unlock-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
-        security import certificate.p12 -k $KEYCHAIN_NAME -P $IOS_CERTIFICATE_PWD -T /usr/bin/codesign
+      uses: apple-actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.IOS_CERTIFICATE }}
+        p12-password: ${{ secrets.IOS_CERTIFICATE_PWD }}
+      #env:
+      #  IOS_CERTIFICATE: $ {{ secrets.IOS_CERTIFICATE }}
+      #  IOS_CERTIFICATE_PWD: $ {{ secrets.IOS_CERTIFICATE_PWD }}
+      #  KEYCHAIN_NAME: build.keychain
+      #  KEYCHAIN_PWD: hello
+      #run: |
+      #  echo $IOS_CERTIFICATE | base64 --decode > certificate.p12
+      #  security create-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
+      #  security default-keychain -s $KEYCHAIN_NAME
+      #  security unlock-keychain -p $KEYCHAIN_PWD $KEYCHAIN_NAME
+      #  security import certificate.p12 -k $KEYCHAIN_NAME -P $IOS_CERTIFICATE_PWD -T /usr/bin/codesign
     - name: Install Provisioning Profile
       env:
         PROVISIONING_CERTIFICATE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
