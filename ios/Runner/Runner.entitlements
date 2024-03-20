@@ -4,5 +4,9 @@
 <dict>
 	<key>com.apple.developer.networking.wifi-info</key>
 	<true/>
+	<key>com.apple.developer.networking.slicing.appcategory</key>
+	<true/>
+	<key>com.apple.developer.networking.slicing.trafficcategory</key>
+	<true/>
 </dict>
 </plist>
