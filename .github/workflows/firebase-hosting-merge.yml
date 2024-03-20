@@ -176,7 +176,7 @@ jobs:
       run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release
     - name: Build xArchive
       run: |
-        xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release DEVELOPMENT_TEAM=V4969Q592K -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=493d9cbb-740c-49b8-afc9-96c638fba7a7 clean archive CODE_SIGN_IDENTITY="iPhone Distribution: Shane Buckley (V4969Q592K)"
+        xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release DEVELOPMENT_TEAM=V4969Q592K -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=493d9cbb-740c-49b8-afc9-96c638fba7a7 clean archive "
     - name: Export IPA
       run: xcodebuild -exportArchive -archivePath build-output/app.xcarchive -exportPath build-output/ios -exportOptionsPlist ios/ExportOptions.plist
       working-directory: .
