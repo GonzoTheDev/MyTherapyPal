@@ -3,6 +3,7 @@ import 'package:chatview/chatview.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_therapy_pal/models/chat.dart'; 
 import 'package:my_therapy_pal/models/theme.dart';
 import 'package:my_therapy_pal/screens/dashboard_screen.dart';
@@ -56,6 +57,8 @@ class _ChatScreenState extends State<ChatScreen> {
   late ChatUser otherUser;
   late List<dynamic> currentUserClients = []; 
   bool isOtherUserAClient = false; 
+  final TextEditingController _taskTitleController = TextEditingController();
+  final TextEditingController _taskTextController = TextEditingController();
 
   // Declare chat attributes and controller
   late Chat chat;
@@ -619,6 +622,129 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  // Function to display a dialog for adding a task
+  Future<void> _showAddTaskDialog() async {
+    DateTime selectedDate = DateTime.now().add(const Duration(days: 7)); // Default to one week from now
+    TimeOfDay selectedTime = TimeOfDay(hour: selectedDate.hour, minute: selectedDate.minute); // Default time
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add a task'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: _taskTitleController,
+                  decoration: InputDecoration(
+                    hintText: "Task title",
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.teal, width: 1.0),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _taskTextController,
+                  decoration: InputDecoration(
+                    hintText: "Task description",
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.teal, width: 1.0),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  keyboardType: TextInputType.multiline,
+                  minLines: 2,
+                  maxLines: 10,
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Expiry Date:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                ListTile(
+                  title: Text(DateFormat('kk:mm - dd/MM/yyyy').format(selectedDate)),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: () async {
+                    final DateTime pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2101),
+                    ) ?? selectedDate;
+
+                    final TimeOfDay pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime,
+                    ) ?? selectedTime;
+
+                    // Combine the picked date and time into one variable
+                    selectedDate = DateTime(
+                      pickedDate.year,
+                      pickedDate.month,
+                      pickedDate.day,
+                      pickedTime.hour,
+                      pickedTime.minute,
+                    );
+                    // Update the UI
+                    (context as Element).markNeedsBuild();
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _taskTitleController.clear();
+                _taskTextController.clear();
+              },
+            ),
+            TextButton(
+              child: const Text('Add'),
+              onPressed: () async {
+                await _addTaskToFirebase(
+                  _taskTitleController.text,
+                  _taskTextController.text,
+                  Timestamp.fromDate(selectedDate), // Convert to Timestamp
+                );
+                Navigator.of(context).pop();
+                _taskTitleController.clear();
+                _taskTextController.clear();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Function to add a note to Firebase
+  Future<void> _addTaskToFirebase(String title, String task, Timestamp expiryTimestamp) async {
+  
+    final collection = FirebaseFirestore.instance.collection('tasks');
+    final timestamp = Timestamp.now();
+    
+    await collection.add({
+      'therapist_uid': uid,
+      'title': title,
+      'task': task,
+      'status': 'Assigned',
+      'client_uid': otherUserID,
+      'timestamp': timestamp,
+      'expiry': expiryTimestamp,
+    });
+  }
+
   void _handleMenuAction(int item) {
     switch (item) {
       case 0:
@@ -628,7 +754,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _viewSummary();
         break;
       case 2:
-        _assignTask();
+        _showAddTaskDialog();
         break;
       case 3:
         _issueInvoice();
