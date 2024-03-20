@@ -37,23 +37,19 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.home),
             title: const Text('Dashboard'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 0),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AccountHomePage(initialIndex: 0)),
+                (route) => false,
               ),
             },
           ),
           ListTile(
             leading: const Icon(Icons.insert_chart),
-            title: const Text('Statistics'),
+            title: const Text('Reports'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 1),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AccountHomePage(initialIndex: 1)),
+                (route) => false,
               ),
             },
           ),
@@ -61,11 +57,9 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.message),
             title: const Text('Messages'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 2),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AccountHomePage(initialIndex: 2)),
+                (route) => false,
               ),
             },
           ),
@@ -73,11 +67,9 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.message),
             title: const Text('Tasks'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 3),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AccountHomePage(initialIndex: 3)),
+                (route) => false,
               ),
             },
           ),
@@ -85,11 +77,9 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.public),
             title: const Text('Find a Therapist'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 4),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AccountHomePage(initialIndex: 4)),
+                (route) => false,
               ),
             },
           ),
@@ -97,11 +87,9 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.account_circle),
             title: const Text('Profile'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const Profile(),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const Profile()),
+                (route) => false,
               ),
             },
           ),
@@ -109,11 +97,9 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.manage_accounts),
             title: const Text('Account'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const ManageAccount(),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const ManageAccount()),
+                (route) => false,
               ),
             },
           ),
@@ -121,11 +107,9 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AppSettings(),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AppSettings()),
+                (route) => false,
               ),
             },
           ),
@@ -133,11 +117,9 @@ class NavDrawer extends StatelessWidget {
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Logout'),
             onTap: () => {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(
-                  builder: (context) => const AccountHomePage(initialIndex: 5),
-                ),
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const AccountHomePage(initialIndex: 5)),
+                (route) => false,
               ),
             },
           ),
