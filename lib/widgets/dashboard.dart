@@ -86,14 +86,41 @@ class _DashboardState extends State<Dashboard> {
   }
 
   // Function to add a mood to Firebase
-  Future<void> addMoodToFirebase(String emoji) async {
-    if (uid == null) return; 
+  Future<void> addOrUpdateMoodToFirebase(String emoji) async {
+    if (uid == null) return;
     final collection = FirebaseFirestore.instance.collection('moods');
-    final timestamp = Timestamp.now();
+
+    // Query for the most recent mood of the current user
+    final querySnapshot = await collection
+        .where('uid', isEqualTo: uid)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    final currentTime = Timestamp.now();
+    
+    // Check if a recent mood exists and if it's within the last 5 minutes
+    if (querySnapshot.docs.isNotEmpty) {
+      final lastMood = querySnapshot.docs.first;
+      Timestamp lastMoodTimestamp = lastMood['timestamp'];
+      final lastMoodTime = lastMoodTimestamp.toDate();
+      final currentTimeMinus5Mins = DateTime.now().subtract(const Duration(minutes: 5));
+
+      if (lastMoodTime.isAfter(currentTimeMinus5Mins)) {
+        // If the last mood was within the last 5 minutes, update it
+        await collection.doc(lastMood.id).update({
+          'emoji': emoji,
+          'timestamp': currentTime,
+        });
+        return;
+      }
+    }
+
+    // If no recent mood exists or the last mood was not within the last 5 minutes, add a new one
     await collection.add({
       'uid': uid,
       'emoji': emoji,
-      'timestamp': timestamp,
+      'timestamp': currentTime,
     });
   }
 
@@ -334,7 +361,7 @@ class _DashboardState extends State<Dashboard> {
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                               onTap: () {
-                                addMoodToFirebase(mood['emoji']);
+                                addOrUpdateMoodToFirebase(mood['emoji']);
                                 setState(() {
                                   showTick = true;
                                   selectedMood = mood['mood'];

@@ -128,6 +128,7 @@ jobs:
           appId: ${{secrets.FIREBASE_ANDROID_APPID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           file: app-release.apk
+          groups: android-testers
   build_ios:
     if: true
     name: Build Flutter (iOS)
@@ -198,6 +199,7 @@ jobs:
         appId: ${{secrets.FIREBASE_IOS_APPID}}
         token: ${{secrets.FIREBASE_TOKEN}}
         file: my_therapy_pal.ipa
+        groups: ios-testers
   build_macos:
     if: true
     name: Build Flutter (macOS)
@@ -267,7 +269,7 @@ jobs:
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
           MACOS_IDENTITY: ${{secrets.MACOS_IDENTITY}} 
   beta_macos:
-    if: true
+    if: false
     name: Upload macOS Beta to Firebase App Distribution
     needs: [build_macos]
     runs-on: ubuntu-latest
