@@ -336,11 +336,16 @@ jobs:
           flutter-version: '2.10.1'
 
       # Install your project's dependencies
-      - run: flutter pub get
+      - name: Install dependencies
+        run: |
+            flutter clean
+            flutter upgrade
+            flutter pub get
+            flutter pub upgrade
 
       # Build and sign the ipa using a single flutter command
       - name: Building IPA
-        run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist
+        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
 
       # Collect the file and upload as artifact         
       - name: collect ipa artifacts
