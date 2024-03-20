@@ -188,7 +188,7 @@ jobs:
       uses: actions/upload-artifact@v2 
       with:
         name: ios-build
-        path: build/ios/ipa/*.ipa
+        path: build-output/ios/*.ipa
   beta_ios:
     if: true
     name: Upload iOS Beta to Firebase App Distribution
