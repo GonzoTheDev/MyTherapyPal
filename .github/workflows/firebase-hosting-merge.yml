@@ -167,14 +167,14 @@ jobs:
     - run: flutter upgrade
     - run: flutter pub get
     - run: flutter pub upgrade
-    - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
-    #- name: Build resolve Swift dependencies
-    #  run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release
-    #- name: Build xArchive
-    #  run: |
-    #    xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release DEVELOPMENT_TEAM=V4969Q592K -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=d28776da-2d3b-41ab-abe1-0d377798f6b5 clean archive CODE_SIGN_IDENTITY="iPhone Distribution: Shane Buckley (V4969Q592K)"
-    #- name: Export IPA
-    #  run: xcodebuild -exportArchive -archivePath build-output/app.xcarchive -exportPath build-output/ios -exportOptionsPlist ios/ExportOptions.plist
+    #- run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+    - name: Build resolve Swift dependencies
+      run: xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release
+    - name: Build xArchive
+      run: |
+        xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -configuration Release DEVELOPMENT_TEAM=V4969Q592K -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app.xcarchive PROVISIONING_PROFILE=493d9cbb-740c-49b8-afc9-96c638fba7a7 clean archive CODE_SIGN_IDENTITY="iPhone Distribution: Shane Buckley (V4969Q592K)"
+    - name: Export IPA
+      run: xcodebuild -exportArchive -archivePath build-output/app.xcarchive -exportPath build-output/ios -exportOptionsPlist ios/ExportOptions.plist
       working-directory: .
     - name: Upload IPA
       uses: actions/upload-artifact@v2 
