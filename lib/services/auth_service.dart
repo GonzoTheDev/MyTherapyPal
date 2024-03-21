@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_therapy_pal/config/firebase_options.dart';
 import 'package:my_therapy_pal/services/encryption/AES/aes.dart';
 import 'package:my_therapy_pal/services/encryption/RSA/rsa.dart';
 import 'package:my_therapy_pal/services/encryption/AES/encryption_service.dart';
@@ -138,6 +139,14 @@ class AuthService {
           await prefs.setString('notifications_token', 'not_granted');
         }
 
+        // If platform is web, get the web notification token from shared preferences
+        final notificationTokenWeb = prefs.getString('notifications_token_web');
+
+        // If the notifications token is null, set it to 'not_granted'
+        if (notificationTokenWeb == null) {
+          await prefs.setString('notifications_token_web', 'not_granted');
+        }
+
         // Add a new document with the new users uid set as the document ID
         db.collection("profiles").doc(uid).set({
           "fname": fname,
@@ -149,6 +158,7 @@ class AuthService {
           "encryptedRSAKey": encryptedRSAkey,
           "IV": iv.bytes,
           "notifications_token": notificationToken,
+          "notifications_token_web": notificationTokenWeb,
           "last_login": Timestamp.now(),
           });
 
@@ -212,50 +222,96 @@ class AuthService {
       
       // Fetch the user's profile from Firestore
       final profile = await db.collection("profiles").doc(uid).get();
+      if (DefaultFirebaseOptions.currentPlatform == DefaultFirebaseOptions.web) {
+        try{ 
 
-      try{ 
+        // Check if the 'notifications_token' field exists in the user's profile
+        if (profile.data()!.containsKey('notifications_token_web')!=true) {
 
-      // Check if the 'notifications_token' field exists in the user's profile
-      if (profile.data()!.containsKey('notifications_token')!=true) {
+          print("User does not have a web notifications token in their profile..."); 
 
-        print("User does not have a notifications token in their profile..."); 
+          // Try to get the notifications token from shared preferences
+          String? notificationTokenWeb = prefs.getString('notifications_token_web');
 
-        // Try to get the notifications token from shared preferences
-        String? notificationToken = prefs.getString('notifications_token');
+          // If the token is not available in shared preferences, use 'not_granted'
+          notificationTokenWeb ??= 'not_granted';
 
-        // If the token is not available in shared preferences, use 'not_granted'
-        notificationToken ??= 'not_granted';
+          // Update the user's profile in Firestore with the notifications token
+          await db.collection("profiles").doc(uid).update({
+            "notifications_token_web": notificationTokenWeb,
+          });
 
-        // Update the user's profile in Firestore with the notifications token
+          print("Notifications token added to the user's profile...");
+        } else {
+          print("User has a notifications token in their profile...");
+          // Try to get the notifications token from shared preferences
+          String? notificationTokenWeb = prefs.getString('notifications_token_web');
+          // Get the notifications token from the user's profile
+          String fetchedNotificationTokenWeb = profile.get('notifications_token_web');
+          // If the shared preferences token is different from the fetched token, update the user's profile
+          if (notificationTokenWeb != fetchedNotificationTokenWeb) {
+            print("Updating the user's notifications token in their profile...");
+            await db.collection("profiles").doc(uid).update({
+              "notifications_token_web": notificationTokenWeb,
+            });
+          }
+        }
+
+        Timestamp currentTime = Timestamp.now();
+
         await db.collection("profiles").doc(uid).update({
-          "notifications_token": notificationToken,
+            "last_login": currentTime,
         });
 
-        print("Notifications token added to the user's profile...");
+        print("Last login timestamp added to the user's profile...");
+        } catch(firestoreException) {
+          print(firestoreException);
+        }
       } else {
-        print("User has a notifications token in their profile...");
-        // Try to get the notifications token from shared preferences
-        String? notificationToken = prefs.getString('notifications_token');
-        // Get the notifications token from the user's profile
-        String fetchedNotificationToken = profile.get('notifications_token');
-        // If the shared preferences token is different from the fetched token, update the user's profile
-        if (notificationToken != fetchedNotificationToken) {
-          print("Updating the user's notifications token in their profile...");
+        try{ 
+
+        // Check if the 'notifications_token' field exists in the user's profile
+        if (profile.data()!.containsKey('notifications_token')!=true) {
+
+          print("User does not have a notifications token in their profile..."); 
+
+          // Try to get the notifications token from shared preferences
+          String? notificationToken = prefs.getString('notifications_token');
+
+          // If the token is not available in shared preferences, use 'not_granted'
+          notificationToken ??= 'not_granted';
+
+          // Update the user's profile in Firestore with the notifications token
           await db.collection("profiles").doc(uid).update({
             "notifications_token": notificationToken,
           });
+
+          print("Notifications token added to the user's profile...");
+        } else {
+          print("User has a notifications token in their profile...");
+          // Try to get the notifications token from shared preferences
+          String? notificationToken = prefs.getString('notifications_token');
+          // Get the notifications token from the user's profile
+          String fetchedNotificationToken = profile.get('notifications_token');
+          // If the shared preferences token is different from the fetched token, update the user's profile
+          if (notificationToken != fetchedNotificationToken) {
+            print("Updating the user's notifications token in their profile...");
+            await db.collection("profiles").doc(uid).update({
+              "notifications_token": notificationToken,
+            });
+          }
         }
-      }
 
-      Timestamp currentTime = Timestamp.now();
+        Timestamp currentTime = Timestamp.now();
 
-      await db.collection("profiles").doc(uid).update({
-          "last_login": currentTime,
-      });
+        await db.collection("profiles").doc(uid).update({
+            "last_login": currentTime,
+        });
 
-      print("Last login timestamp added to the user's profile...");
-      } catch(firestoreException) {
-        print(firestoreException);
+        print("Last login timestamp added to the user's profile...");
+        } catch(firestoreException) {
+          print(firestoreException);
+        }
       }
       
       
