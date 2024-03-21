@@ -1,6 +1,5 @@
-//import 'package:firebase_messaging/firebase_messaging.dart';
-//import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:my_therapy_pal/models/notifications.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:my_therapy_pal/services/auth_service.dart';
@@ -21,48 +20,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  /*
-  final messaging = FirebaseMessaging.instance;
-
-
-  // Request permission for notifications if supported
-  if (await messaging.isSupported()) {
-
-
-    final settings = await messaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-    );
-
-    // Print permission status
-    if (kDebugMode) {
-      print('Permission granted: ${settings.authorizationStatus}');
-    }
-    
-    // Set vapid key
-    const vapidKey = "BIo28pk5GfuPkYHfZ1du1i_cNJa2Vxw8JpNA5yt0OEtW_uKxMNfBfwBZ0bkpvA3FsSgV2YN_QurC2lkzi4gJ5Hw";
-
-    // use the registration token to send messages to users from your trusted server environment
-    String? token;
-
-    if (DefaultFirebaseOptions.currentPlatform == DefaultFirebaseOptions.web) {
-      token = await messaging.getToken(
-        vapidKey: vapidKey,
-      );
-    } else {
-      token = await messaging.getToken();
-    }
-
-    if (kDebugMode) {
-      print('Registration Token=$token');
-    }
-  }
-*/
+  // Initialize the PushNotificationService
+  PushNotificationService pushNotificationService = PushNotificationService();
+  await pushNotificationService.initialize();
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
@@ -76,6 +36,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   final bool isFirstTime;
   static const String title = 'MyTherapyPal';
+  
   
   const MyApp({super.key, required this.isFirstTime});
 
@@ -130,7 +91,8 @@ class MainApp extends StatelessWidget {
             primarySwatch: Colors.teal,
             scaffoldBackgroundColor: Colors.white,
           ),
-          home: homeScreen);
+          home: homeScreen,
+      );
     });
   }
 }

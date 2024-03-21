@@ -19,6 +19,8 @@ const logger = require("firebase-functions/logger");
 // });
 
 const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp();
 const googleMapsClient = require('@google/maps').createClient({
     key: 'AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI',
     Promise: Promise
@@ -69,3 +71,30 @@ exports.getCoordinatesByAddress = functions.https.onCall(async (data, context) =
         throw new functions.https.HttpsError('unknown', 'Failed to fetch the coordinates.', error);
     }
 });
+
+exports.pushNotification = functions.firestore
+    .document('notifications/{docId}')
+    .onCreate(async (snap, context) => {
+        const newValue = snap.data();
+
+        // Check if notification needs to be pushed
+        if (newValue.notification_type === 'new_message' && !newValue.notification_pushed) {
+            const message = {
+                notification: {
+                    title: 'You have a new message!',
+                    body: 'Tap to view your new message.',
+                },
+                token: newValue.receiver_token,
+            };
+
+            // Send a message to the device corresponding to the provided token
+            try {
+                await admin.messaging().send(message);
+                // Update the document
+                return snap.ref.update({notification_pushed: true});
+            } catch (error) {
+                console.log('Error sending message:', error);
+            }
+        }
+    });
+

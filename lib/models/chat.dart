@@ -273,11 +273,13 @@ class Chat {
 
     try {
 
-        // Reference to the new document in the "messages" collection
+        // Reference to the new document in the "messages" & "notifications" collections
         DocumentReference newMessageRef = db.collection("messages").doc();
+        DocumentReference newNotificationRef = db.collection("notifications").doc();
 
         // Declare map to store the new message data
         Map<String, dynamic> messageData;
+        Map<String, dynamic> notificationData;
 
         Uint8List ivUserGen = aesKeyEncryptionService.generateIVFromDocId(newMessageRef.id);
         final ivUser = encrypt.IV(ivUserGen);
@@ -285,6 +287,11 @@ class Chat {
         final utfToKey = encrypt.Key(aesKey);
 
         final encryptedUserMessageString = AESEncryption(utfToKey, ivUser).encryptData(newMessage);
+
+        // Get the other users notification token from firebase
+        final otherUser = users.firstWhere((user) => user.id != uuid);
+        final otherUserDoc = await db.collection("profiles").doc(otherUser.id).get();
+        final otherUserToken = otherUserDoc.data()?['notifications_token'];
 
         // Prepare the new message data
         messageData = {
@@ -298,6 +305,19 @@ class Chat {
 
         // Add the new message to the batch
         batch.set(newMessageRef, messageData);
+
+        // Prepare the new notification data
+        notificationData = {
+          "notification_pushed": false,
+          "notification_type": "new_message",
+          "sender_uid": uuid,
+          "receiver_uid": otherUser.id,
+          "receiver_token": otherUserToken,
+          "timestamp": Timestamp.now(),
+        };
+
+        // Add the new message to the batch
+        batch.set(newNotificationRef, notificationData);
 
         // Prepare the lastMessage update for the chat with the same details as the new message
         Map<String, dynamic> lastMessageUpdate = {
