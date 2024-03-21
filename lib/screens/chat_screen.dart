@@ -118,9 +118,11 @@ class _ChatScreenState extends State<ChatScreen> {
       encryptedAESKey = '';
     }
 
-    // Check if the other user is a client of the current user
-    currentUserClients = userProfileDoc['clients'] ?? [];
-    isOtherUserAClient = currentUserClients.contains(otherUserID);
+    // If user is a therapist, check if the other user is a client of the current user
+    if(userType == "Therapist"){
+      currentUserClients = userProfileDoc['clients'] ?? [];
+      isOtherUserAClient = currentUserClients.contains(otherUserID);
+    }
 
     if(encryptedAESKey != ''){
       decryptedAESKeyString = RSAEncryption().decrypt(key: privateKeyRSA, message: encryptedAESKey);
