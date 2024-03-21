@@ -292,6 +292,7 @@ class Chat {
         final otherUser = users.firstWhere((user) => user.id != uuid);
         final otherUserDoc = await db.collection("profiles").doc(otherUser.id).get();
         final otherUserToken = otherUserDoc.data()?['notifications_token'];
+        final otherUserTokenWeb = otherUserDoc.data()?['notifications_token_web'];
 
         // Prepare the new message data
         messageData = {
@@ -313,6 +314,7 @@ class Chat {
           "sender_uid": uuid,
           "receiver_uid": otherUser.id,
           "receiver_token": otherUserToken,
+          "receiver_token_web": otherUserTokenWeb,
           "timestamp": Timestamp.now(),
         };
 

@@ -222,6 +222,8 @@ class AuthService {
       
       // Fetch the user's profile from Firestore
       final profile = await db.collection("profiles").doc(uid).get();
+
+      // Check if the user has a notifications token for web in their profile
       if (DefaultFirebaseOptions.currentPlatform == DefaultFirebaseOptions.web) {
         try{ 
 
@@ -256,18 +258,18 @@ class AuthService {
             });
           }
         }
-
         Timestamp currentTime = Timestamp.now();
-
         await db.collection("profiles").doc(uid).update({
             "last_login": currentTime,
         });
-
         print("Last login timestamp added to the user's profile...");
         } catch(firestoreException) {
           print(firestoreException);
         }
-      } else {
+      } 
+
+      // Else if the platform is not web
+      else {
         try{ 
 
         // Check if the 'notifications_token' field exists in the user's profile
@@ -301,13 +303,10 @@ class AuthService {
             });
           }
         }
-
         Timestamp currentTime = Timestamp.now();
-
         await db.collection("profiles").doc(uid).update({
             "last_login": currentTime,
         });
-
         print("Last login timestamp added to the user's profile...");
         } catch(firestoreException) {
           print(firestoreException);

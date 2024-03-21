@@ -86,10 +86,18 @@ exports.pushNotification = functions.firestore
                 },
                 token: newValue.receiver_token,
             };
+            const messageWeb = {
+                notification: {
+                    title: 'You have a new message!',
+                    body: 'Tap to view your new message.',
+                },
+                token: newValue.receiver_token_web,
+            };
 
             // Send a message to the device corresponding to the provided token
             try {
                 await admin.messaging().send(message);
+                await admin.messaging().send(messageWeb);
                 // Update the document
                 return snap.ref.update({notification_pushed: true});
             } catch (error) {
