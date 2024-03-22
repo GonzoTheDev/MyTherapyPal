@@ -7,6 +7,7 @@ class PushNotificationService {
 
   Future<void> initialize() async {
     
+      // Request permission for push notifications
       final settings = await _fcm.requestPermission(
         alert: true,
         announcement: false,
