@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/models/notifications.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
@@ -20,9 +22,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize the PushNotificationService
-  PushNotificationService pushNotificationService = PushNotificationService();
-  await pushNotificationService.initialize();
+  if(!Platform.isIOS){
+    
+    // Initialize the PushNotificationService
+    PushNotificationService pushNotificationService = PushNotificationService();
+    await pushNotificationService.initialize();
+
+  }
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
