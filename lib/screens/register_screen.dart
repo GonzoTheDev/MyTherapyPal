@@ -496,14 +496,14 @@ class _RegisterAccountState extends State<RegisterAccount> {
                       width: double.infinity,
                       height: 50.0,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : () async { // Prevents multiple taps when already loading
+                        onPressed: () async {
                           setState(() {
-                            _isLoading = true;
+                            _isLoading = true; 
                           });
-                          // Show the loading dialog
-                          showGeneratingKeysDialog(context);
-
-                          // Simulate the key generation process
+                          if(_isLoading){
+                            // Show the loading dialog
+                            showGeneratingKeysDialog(context);
+                          }
                           final message = await AuthService().registration(
                             email: _emailController.text,
                             password: _passwordController.text,
@@ -520,35 +520,29 @@ class _RegisterAccountState extends State<RegisterAccount> {
                             longitude: _longitude,
                             latitude: _latitude,
                           );
-
                           if (message!.contains('Success')) {
-                            Navigator.of(context).pushReplacement(
+                            setState(() {
+                              _isLoading = false; 
+                            });
+                            Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(builder: (context) => const Login()),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(message)),
+                              (route) => false,
                             );
                           }
-
-                          // Ensure the loading dialog is dismissed
-                          Navigator.of(context, rootNavigator: true).pop('dialog');
-
-                          setState(() {
-                            _isLoading = false;
-                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(message),
+                            ),
+                          );
                         },
+                        
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                              if (states.contains(MaterialState.disabled)) return Colors.grey;
-                              return Colors.teal; // Use the component's default.
-                            },
-                          ),
+                          minimumSize: MaterialStateProperty.all<Size>(const Size(double.infinity, 36)),
                         ),
-                        child: _isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('SIGN UP', style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          'SIGN UP',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30.0),
