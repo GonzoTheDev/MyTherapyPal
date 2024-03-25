@@ -119,9 +119,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     // If user is a therapist, check if the other user is a client of the current user
-    if(userType == "Therapist"){
+    if(userType == "Therapist" || userType == "Admin"){
       currentUserClients = userProfileDoc['clients'] ?? [];
-      isOtherUserAClient = currentUserClients.contains(otherUserID);
+      if(currentUserClients.contains(otherUserID)){
+        setState(() => isOtherUserAClient = true);
+      }
     }
 
     if(encryptedAESKey != ''){
@@ -238,17 +240,49 @@ class _ChatScreenState extends State<ChatScreen> {
       print("Error adding client: $e");
     }
   }
-  
-  // Function to add the other user as a client
-  void _assignTask() async {
-    // TODO: Implement the task assignment feature
-    return;
-  }
 
-  // Function to add the other user as a client
-  void _viewSummary() async {
-    // TODO: Implement the note summary feature
-    return;
+  // Function to retrieve and display client note summary
+  void _viewSummary(BuildContext context) async {
+    String summary = '';	
+    try {
+      // Fetch the latest document based on timestamp for the specific uid
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('note_summary')
+          .where('uid', isEqualTo: otherUserID)
+          .orderBy('timestamp', descending: true) // Ensures the latest document is fetched first
+          .limit(1) // Limits the query to only fetch the latest document
+          .get();
+
+      // Check if documents exist
+      if (querySnapshot.docs.isNotEmpty) {
+        // Access the therapist_summary from the latest document
+        summary = querySnapshot.docs.first.get('therapist_summary');
+        
+      } else {
+        // Handle the case where no documents are found
+        summary = "No summary found for the user.";
+      }
+    } catch (e) {
+      // Handle any errors that occur during the fetch operation
+      print("Error fetching summary: $e");
+    }
+    showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Note Summary (Past 7 Days)'),
+              content: Text(summary),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Dismiss the dialog
+                  },
+                ),
+              ],
+            );
+          },
+        );
   }
 
   // Function to remove the other user as a client
@@ -611,10 +645,10 @@ class _ChatScreenState extends State<ChatScreen> {
             value: 2,
             child: Text('Assign Task'),
           ),
-          const PopupMenuItem<int>(
+          /*const PopupMenuItem<int>(
             value: 3,
             child: Text('Issue Invoice'),
-          ),
+          ),*/
           const PopupMenuItem<int>(
             value: 4,
             child: Text('Remove Client'),
@@ -753,7 +787,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _addClient();
         break;
       case 1:
-        _viewSummary();
+        _viewSummary(context);
         break;
       case 2:
         _showAddTaskDialog();

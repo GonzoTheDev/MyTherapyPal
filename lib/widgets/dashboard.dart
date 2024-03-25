@@ -21,7 +21,6 @@ class _DashboardState extends State<Dashboard> {
 
   bool showTick = false; 
   bool viewMore = false;
-  bool _showFab = true;
   String selectedMood = '';
   Color selectedMoodColour = Colors.black;
   String selectedMoodEmoji = '';

@@ -1,18 +1,63 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/screens/account_settings_screen.dart';
+import 'package:my_therapy_pal/screens/admin/dashboard_screen.dart';
 import 'package:my_therapy_pal/screens/app_settings_screen.dart';
 import 'package:my_therapy_pal/screens/dashboard_screen.dart';
 import 'package:my_therapy_pal/screens/profile_settings_screen.dart';
 
-class NavDrawer extends StatelessWidget {
+class NavDrawer extends StatefulWidget {
   const NavDrawer({super.key});
+
+  @override
+  _NavDrawerState createState() => _NavDrawerState();
+}
+
+class _NavDrawerState extends State<NavDrawer> {
+  late Future<String> userType;
+
+  @override
+  void initState() {
+    super.initState();
+    userType = _getUserType();
+  }
+
+  Future<String> _getUserType() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
+    return userProfileDoc.data()?['userType'] ?? 'default';
+  }
+
+  Widget _addAdminMenuItem(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.admin_panel_settings),
+      title: const Text('Admin Dashboard'),
+      onTap: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const AdminHomePage(initialIndex: 0)),
+          (route) => false,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
+      child: FutureBuilder<String>(
+        future: userType,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final userType = snapshot.data!;
+          return ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
          DrawerHeader(
             decoration: const BoxDecoration(
                 color: Colors.teal,
@@ -33,6 +78,7 @@ class NavDrawer extends StatelessWidget {
               ),
             ),
           ),
+          if (userType == 'Admin') _addAdminMenuItem(context),
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text('Dashboard'),
@@ -124,7 +170,7 @@ class NavDrawer extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
+      );
+    }));
   }
 }
