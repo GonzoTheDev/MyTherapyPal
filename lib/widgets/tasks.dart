@@ -16,8 +16,6 @@ class _TasksState extends State<Tasks> {
   // Get the uid of the currently logged in user
   final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-  
-
   @override
   void initState() {
     super.initState();
@@ -42,13 +40,13 @@ class _TasksState extends State<Tasks> {
     }
   }
 
-
   Stream<List<Task>> _loadTasks() {
-    return _db.collection('tasks')
-    .where('client_uid', isEqualTo: _uid)
-    .orderBy('timestamp')
-    .snapshots()
-    .map((snapshot) {
+    return _db
+        .collection('tasks')
+        .where('client_uid', isEqualTo: _uid)
+        .orderBy('timestamp')
+        .snapshots()
+        .map((snapshot) {
       print('Tasks loaded: ${snapshot.docs.length}');
       return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
     });
@@ -58,36 +56,51 @@ class _TasksState extends State<Tasks> {
     _db.collection('tasks').doc(taskId).update({'status': newStatus});
   }
 
+  // New Method: Determine the color based on task status
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Assigned':
+        return Colors.purple;
+      case 'In Progress':
+        return Colors.orange;
+      case 'Completed':
+        return Colors.green;
+      case 'Expired':
+        return Colors.red;
+      default:
+        return Colors.black; // Default color for unexpected status
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<List<Task>>(
         stream: _loadTasks(),
         builder: (context, snapshot) {
-          
           if (snapshot.hasError) {
-            print('Error: ${snapshot.error}');
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData) {
             return const Center(child: Text('Loading tasks...'));
           }
-          // Add a check for null or empty list
           final tasks = snapshot.data!;
           if (tasks.isEmpty) {
             return const Center(child: Text('No tasks available.'));
           }
 
           return SingleChildScrollView(
-            
             child: ExpansionPanelList.radio(
-              children: snapshot.data!.map<ExpansionPanelRadio>((Task task) {
+              children: tasks.map<ExpansionPanelRadio>((Task task) {
                 return ExpansionPanelRadio(
                   value: task.id,
                   headerBuilder: (context, isExpanded) {
                     return ListTile(
                       title: Text(task.title),
-                      subtitle: Text('${task.status} - ${DateFormat('dd/MM/yyyy hh:mm a').format(task.timestamp.toDate())}'),
+                      subtitle: Text(
+                        '${task.status} - ${DateFormat('dd/MM/yyyy hh:mm a').format(task.timestamp.toDate())}',
+                        style: TextStyle(color: _getStatusColor(task.status)), // Apply status color
+                      ),
                     );
                   },
                   body: Column(
@@ -115,13 +128,14 @@ class _TasksState extends State<Tasks> {
                             onPressed: () => _updateTaskStatus(task.id, 'Completed'),
                           ),
                         ),
-                      ] else if (task.status == 'Expired') ...[
+                      ] else if (task.status == 'Expired' || task.status == 'Completed') ...[
                         Center(
                           child: ElevatedButton(
                             child: const Text('Delete'),
                             onPressed: () => _db.collection('tasks').doc(task.id).delete(),
                           ),
                         ),
+                        const SizedBox(height: 20),
                       ],
                     ],
                   ),

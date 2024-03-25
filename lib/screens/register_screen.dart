@@ -144,6 +144,28 @@ class _RegisterAccountState extends State<RegisterAccount> {
       return null;
     }
   }
+
+  void showGeneratingKeysDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, 
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text("Generating encryption keys..."),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
   
 
   @override
@@ -474,10 +496,14 @@ class _RegisterAccountState extends State<RegisterAccount> {
                       width: double.infinity,
                       height: 50.0,
                       child: ElevatedButton(
-                        onPressed: () async {
+                        onPressed: _isLoading ? null : () async { // Prevents multiple taps when already loading
                           setState(() {
-                            _isLoading = true; 
+                            _isLoading = true;
                           });
+                          // Show the loading dialog
+                          showGeneratingKeysDialog(context);
+
+                          // Simulate the key generation process
                           final message = await AuthService().registration(
                             email: _emailController.text,
                             password: _passwordController.text,
@@ -494,31 +520,35 @@ class _RegisterAccountState extends State<RegisterAccount> {
                             longitude: _longitude,
                             latitude: _latitude,
                           );
+
                           if (message!.contains('Success')) {
-                            setState(() {
-                              _isLoading = false; 
-                            });
                             Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => 
-                                  const Login()
-                              )
+                              MaterialPageRoute(builder: (context) => const Login()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(message)),
                             );
                           }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(message),
-                            ),
-                          );
+
+                          // Ensure the loading dialog is dismissed
+                          Navigator.of(context, rootNavigator: true).pop('dialog');
+
+                          setState(() {
+                            _isLoading = false;
+                          });
                         },
-                        
                         style: ButtonStyle(
-                          minimumSize: MaterialStateProperty.all<Size>(const Size(double.infinity, 36)),
+                          backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.disabled)) return Colors.grey;
+                              return Colors.teal; // Use the component's default.
+                            },
+                          ),
                         ),
-                        child: const Text(
-                          'SIGN UP',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('SIGN UP', style: TextStyle(color: Colors.white)),
                       ),
                     ),
                     const SizedBox(height: 30.0),

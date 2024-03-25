@@ -22,7 +22,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  if(!Platform.isIOS){
+  if (DefaultFirebaseOptions.currentPlatform != DefaultFirebaseOptions.ios) {
     
     // Initialize the PushNotificationService
     PushNotificationService pushNotificationService = PushNotificationService();

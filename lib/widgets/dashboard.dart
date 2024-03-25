@@ -21,6 +21,7 @@ class _DashboardState extends State<Dashboard> {
 
   bool showTick = false; 
   bool viewMore = false;
+  bool _showFab = true;
   String selectedMood = '';
   Color selectedMoodColour = Colors.black;
   String selectedMoodEmoji = '';
@@ -412,7 +413,7 @@ class _DashboardState extends State<Dashboard> {
                     const SizedBox(
                       height: 20.0,
                     ),
-                    Container(
+                    /*Container(
                       constraints: BoxConstraints(maxWidth: maxWidth / 2),
                       child: 
                       SizedBox(
@@ -429,7 +430,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ),
                       ),
-                    ),
+                    ),*/
                     const SizedBox(
                       height: 60.0,
                     ),
@@ -441,6 +442,15 @@ class _DashboardState extends State<Dashboard> {
             
           ),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Show add note dialog
+            _showAddNoteDialog();
+          },
+          tooltip: 'New Entry',
+          child: const Icon(Icons.add),
+        ), // Hide FAB when not on ChatList
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     }
   }

@@ -79,34 +79,33 @@ class Chat {
       return ""; 
     }
   }
-
-  // Method for making a request to the LLM API
-  // Needs to be HTTPS for production
+// Method for making a request to the LLM API
   Future<String> llmResponse(String text) async {
-  try {
-    final response = await http.post(
-      Uri.parse('https://5059-2a0d-3344-83a-510-2494-bb05-e86e-4d7f.ngrok-free.app/llm_api'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'text': text,
-        'conversation_history': conversationHistory,
-        'username': username,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:5000/llm_api'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'text': text,
+          'conversation_history': conversationHistory,
+          'username': username,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      return response.body;
-    } else {
-      return 'Error: Failed to load response, status code: ${response.statusCode}, please try again.';
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        return 'Error: Failed to load response, status code: ${response.statusCode}, please try again.';
+      }
+    } catch (e, stackTrace) {
+      print('Error: Failed to make a request: $e');
+      print('Stack trace: $stackTrace');
+      return 'Error: Failed to make a request.';
     }
-  } catch (e, stackTrace) {
-    print('Error: Failed to make a request: $e');
-    print('Stack trace: $stackTrace');
-    return 'Error: Failed to make a request.';
   }
-}
+  
 
   // Method that listens for new messages in the chat and stores the latest 10 messages in the conversationHistory list
   void listenToMessages() {
@@ -159,7 +158,6 @@ class Chat {
       String decryptedMessage = "";
 
       // Decrypt the message
-      
       try {
         final utfToKey = encrypt.Key(aesKey);
         Uint8List ivGen = aesKeyEncryptionService.generateIVFromDocId(docSnapshot.id);
