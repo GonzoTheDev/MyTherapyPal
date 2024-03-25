@@ -40,6 +40,7 @@ class MoodChart extends StatelessWidget {
           ),
         ),
         rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, interval: 1)),
         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
       // Assuming you're handling touch interactions with aggregatedData to display tooltips
