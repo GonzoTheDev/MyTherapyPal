@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_therapy_pal/models/mood_chart.dart';
 import 'package:my_therapy_pal/services/note_summary.dart';
 
@@ -133,6 +134,13 @@ class _ReportsState extends State<Reports> {
 
   @override
   Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+    DateTime startDateRaw = DateTime(now.year, now.month, now.day).subtract(Duration(days: 7));
+    DateTime endDateRaw = DateTime(now.year, now.month, now.day);
+
+    // Using DateFormat to format the DateTime objects
+    String startDate = DateFormat('dd/MM/yyyy').format(startDateRaw);
+    String endDate = DateFormat('dd/MM/yyyy').format(endDateRaw);
     return Scaffold(
       body: Center( // Center the content
         child: ConstrainedBox(
@@ -142,15 +150,23 @@ class _ReportsState extends State<Reports> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
+                const SizedBox(height: 24),
+                Center( // Center the text
+                              child:
+                                Text(
+                                  '$startDate - $endDate',
+                                  style: const TextStyle(fontSize: 24, color: Colors.teal),
+                                ),
+                            ),
                 const SizedBox(height: 16),
                 const Center( // Center the text
                               child:
                                 Text(
                                   'Mood Summary',
-                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
                             ),
+                
                 const SizedBox(height: 16),
                 Expanded(
                   flex: 1, // Adjust flex to control chart size
@@ -166,14 +182,15 @@ class _ReportsState extends State<Reports> {
                     },
                   ),
                 ),
+                const SizedBox(height: 24),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(4.0),
                       child: Container(
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
+                          color: const Color.fromARGB(123, 0, 150, 135),
                           borderRadius: BorderRadius.circular(5),
                           boxShadow: [
                             BoxShadow(
@@ -190,14 +207,14 @@ class _ReportsState extends State<Reports> {
                             const Center( // Center the text
                               child:
                                 Text(
-                                  'Notes Summary',
-                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                  'AI Notes Summary',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               summaryText,
-                              style: const TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16, color: Colors.white),
                             ),
                           ],
                         ),
