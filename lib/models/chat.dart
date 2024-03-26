@@ -392,12 +392,12 @@ class Chat {
   // Method to generate a new ai chat room
   Future<void> generateAIChat(String encryptedAESKey, String fname, String uid) async {
     // Generate a chat with the ai chatbot
-        GenerateChat(
-          aesKey: aesKey,
-          encryptedAESKey: encryptedAESKey,
-          fname: fname,
-          uid: uid,
-        ).generateAIChat();
+    GenerateChat(
+      aesKey: aesKey,
+      encryptedAESKey: encryptedAESKey,
+      fname: fname,
+      uid: uid,
+    ).generateAIChat();
   }
 
   

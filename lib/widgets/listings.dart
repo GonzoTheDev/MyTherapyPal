@@ -231,18 +231,47 @@ class _ListingsState extends State<Listings> {
     String firstUid = currentUid;
     String secondUid = tuid;
 
+    // Attempt to find an existing chat room where the 'users' array contains the firstUid
+    final querySnapshotFirst = await FirebaseFirestore.instance.collection('chat')
+        .where('users', arrayContains: firstUid)
+        .get();
+
+    QueryDocumentSnapshot<Map<String, dynamic>>? existingChatDoc;
+
+    // Manually search for a chat document that also contains the secondUid
+    for (var doc in querySnapshotFirst.docs) {
+      var users = doc['users'] as List;
+      if (users.contains(secondUid) && users.length == 2) {
+        existingChatDoc = doc;
+        break;
+      }
+    }
+
+    if (existingChatDoc != null) {
+      // An existing chat room is found, navigate to the chat
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(chatID: existingChatDoc!.id),
+          ),
+        );
+      }
+      return;
+    }
+
     // Get the first user's public RSA key from Firestore
     final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(firstUid).get();
     String firstUserRSAPubKey = userProfileDoc['publicRSAKey'];
 
     // Get the second user's public RSA key from Firestore
-    DocumentSnapshot userDoc = await db.collection("profiles").doc(secondUid).get();
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("profiles").doc(secondUid).get();
     String secondUserRSAPubKey = userDoc.get("publicRSAKey");
 
     // Generate an AES key for the chat room
     final aesKey = aesKeyEncryptionService.generateAESKey(16);
 
-    // Encrypt the AES key with the current user's public RSA key
+    // Encrypt the AES key with the first user's public RSA key
     final firstUserEncryptedAESKey = rsaEncryption.encrypt(
       key: firstUserRSAPubKey,
       message: aesKey.toString(),
@@ -261,7 +290,7 @@ class _ListingsState extends State<Listings> {
       uid: firstUid,
     ).generateUserChat(secondUid, secondUserEncryptedAESKey);
 
-    // If the chat is successfully created, navigate to the chat list
+    // Navigate to the chat list if the chat is successfully created
     if (mounted) {
       Navigator.push(
         context,
@@ -272,6 +301,7 @@ class _ListingsState extends State<Listings> {
     }
   }
 
+
   
 
   @override
@@ -279,7 +309,7 @@ class _ListingsState extends State<Listings> {
       final currentLocation = _currentUserLocation;
       final currentUserLocation = currentLocation != null
           ? LatLng(currentLocation.latitude, currentLocation.longitude)
-          : const LatLng(0, 0);
+          : const LatLng(53.349810243829246, -6.260253061538628);
     return Scaffold(
       body: Column(
         children: [
@@ -406,9 +436,21 @@ class _ListingsState extends State<Listings> {
                               ),
                               const SizedBox(height: 10),
                               ElevatedButton(
-                                onPressed: () {
+                                onPressed: therapistId == currentUid ? null : () {
+                                  print("User ID: $currentUid");
+                                  print("Therapist ID: $therapistId");
                                   _startChat(therapistId);
                                 },
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                                    (Set<MaterialState> states) {
+                                      if (states.contains(MaterialState.disabled)) {
+                                        return Colors.grey; 
+                                      }
+                                      return Theme.of(context).colorScheme.primary; 
+                                    },
+                                  ),
+                                ),
                                 child: const Text('Send Message'),
                               ),
                             ],

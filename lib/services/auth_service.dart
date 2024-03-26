@@ -34,6 +34,50 @@ class AuthService {
     }
   }
 
+  Future<String> startChat(String tuid, String uid, String public) async {
+    String firstUid = uid;
+    String secondUid = tuid;
+
+    if(firstUid == secondUid) {
+      return 'Cannot start chat with yourself';
+    }
+
+    // Get the first user's public RSA key
+    String firstUserRSAPubKey = public;
+
+    // Get the second user's public RSA key from Firestore
+    DocumentSnapshot userDoc = await db.collection("profiles").doc(secondUid).get();
+    String secondUserRSAPubKey = userDoc.get("publicRSAKey");
+
+    // Generate an AES key for the chat room
+    final aesKey = aesKeyEncryptionService.generateAESKey(16);
+
+    // Encrypt the AES key with the current user's public RSA key
+    final firstUserEncryptedAESKey = rsaEncryption.encrypt(
+      key: firstUserRSAPubKey,
+      message: aesKey.toString(),
+    );
+
+    // Encrypt the AES key with the second user's public RSA key
+    final secondUserEncryptedAESKey = rsaEncryption.encrypt(
+      key: secondUserRSAPubKey,
+      message: aesKey.toString(),
+    );
+
+    // Generate a new chat
+    String chatIdValue = await GenerateChat(
+      aesKey: aesKey,
+      encryptedAESKey: firstUserEncryptedAESKey,
+      uid: firstUid,
+    ).generateUserChat(secondUid, secondUserEncryptedAESKey);
+
+    if(chatIdValue != "") {
+      return 'Success';
+    } else {
+      return 'Failed to start chat';
+    }
+  }
+
   Future<String?> registration({
     required String email,
     required String password,
@@ -93,9 +137,9 @@ class AuthService {
         const profilePicture = 'https://firebasestorage.googleapis.com/v0/b/mytherapypal.appspot.com/o/240px-Placeholder_no_text.svg.png?alt=media';
 
         // generate RSA key pair
-        final pair = rsaEncryption.generateRSAKeyPair();
+        final pair = await rsaEncryption.generateRSAKeyPair();
         final public = pair.publicKey;
-        final private = pair.privateKey;
+        final private = pair.privateKey; 
 
         // Obtain shared preferences.
         final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -137,6 +181,7 @@ class AuthService {
         // If the notifications token is null, set it to 'token_not_granted'
         if (notificationToken == null) {
           await prefs.setString('notifications_token', 'not_granted');
+          print("Notifications permission not granted...");
         }
 
         // If platform is web, get the web notification token from shared preferences
@@ -145,6 +190,7 @@ class AuthService {
         // If the notifications token is null, set it to 'not_granted'
         if (notificationTokenWeb == null) {
           await prefs.setString('notifications_token_web', 'not_granted');
+          print("Notifications web permission not granted...");
         }
 
         // Add a new document with the new users uid set as the document ID
@@ -176,7 +222,7 @@ class AuthService {
               "approved": false,
               "uid": uid,
               "pic_url": "https://firebasestorage.googleapis.com/v0/b/mytherapypal.appspot.com/o/240px-Placeholder_no_text.svg.png?alt=media",
-              "clients": [],
+              "clients": [0],
             });
           }
 
@@ -188,6 +234,26 @@ class AuthService {
           uid: uid,
         ).generateAIChat();
 
+        String demoUser;
+
+        if(userType == "Therapist"){
+          // Generate a chat with a demo user
+          demoUser = "DENWmEaRrQT1JpCyUJofevPhJMD2";
+        } else {
+          // Generate a chat with a demo user
+          demoUser = "DENWmEaRrQT1JpCyUJofevPhJMD2";
+        }
+
+        // Generate a chat with a demo user
+        final demoChat = await startChat(demoUser, uid, public);
+
+        if(demoChat == "Success"){
+          print("Demo chat started successfully...");
+        } else {
+          print("Failed to start demo chat...");
+        }
+
+        logoutUser();
 
         return 'Success';
 

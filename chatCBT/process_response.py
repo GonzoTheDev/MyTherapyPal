@@ -23,8 +23,6 @@ pipe = pipeline(
     tokenizer=t,
     batch_size=1,
     max_length=4096,
-    #temperature=0.6,
-    #top_p=0.95,
     repetition_penalty=1.2
 )
 
@@ -35,8 +33,6 @@ summary_pipe = pipeline(
     tokenizer=t,
     batch_size=1,
     max_length=4096,
-    #temperature=0.6,
-    #top_p=0.95,
     repetition_penalty=1.2
 )
 
