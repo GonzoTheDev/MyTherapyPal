@@ -135,7 +135,7 @@ class _ReportsState extends State<Reports> {
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
-    DateTime startDateRaw = DateTime(now.year, now.month, now.day).subtract(Duration(days: 7));
+    DateTime startDateRaw = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
     DateTime endDateRaw = DateTime(now.year, now.month, now.day);
 
     // Using DateFormat to format the DateTime objects
