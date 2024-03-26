@@ -83,7 +83,7 @@ class Chat {
   Future<String> llmResponse(String text) async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:5000/llm_api'),
+        Uri.parse('https://pleased-perch-polite.ngrok-free.app/llm_api'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

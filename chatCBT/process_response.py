@@ -96,16 +96,3 @@ def rephrase_for_client(response):
     response_text = rephrased_response[0]['generated_text']
     final_response = response_text.split("Task: Rephrase the above response as if you are talking directly to the user: ")[1].strip()
     return final_response
-
-# Example usage with the given data structure
-#data = [
-#    {"title": "Rough day", "text": "Today started out great but got pretty tough with my depression rearing it's ugly head. I tried going for a walk, which seemed to help but it only lasted a little while.", "timestamp": "2024-03-21 19:58:07.848"},
-#    {"title": "Better Day", "text": "Today was a much better day than yesterday, and my mental health felt good and I was happy. I went to the cinema with an old friend in the evening and we had a good time.", "timestamp": "2024-03-22 19:58:58.919"},
-#    {"title": "Meh Day", "text": "Today was meh. I wasn't happy and I wasn't sad. Just got through it going into college and just slogging through the day.", "timestamp": "2024-03-23 19:59:34.941"},
-#    {"title": "Feeling down again", "text": "Back to feeling really low today. Been crying on and off all day. Not sure what triggered it but it feels like everything is piling up inside of me.", "timestamp": "2024-03-24 19:56:43.893"},
-#    {"title": "Trying to stay positive", "text": "It's hard when everything seems so bleak right now, but trying to focus on the positives and keep pushing forward. Going to try some new self care techniques this week too.", "timestamp": "2024-03-25 19:57:44.984"},
-#    {"title": "Good day!", "text": "Finally had a good day after weeks of struggling. Went to see a band play live and had a great time. Felt alive and present in the moment. Hopefully this is a turning point.", "timestamp": "2024-03-26 19:58:34.917"}
-#]
-
-#summary = summarize_notes(data)
-#print(summary)

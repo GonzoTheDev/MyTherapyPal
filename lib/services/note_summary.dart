@@ -46,7 +46,7 @@ class NoteSummary {
   Future<String> llmResponse(String data) async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:5000/summary_api'),
+        Uri.parse('https://pleased-perch-polite.ngrok-free.app/summary_api'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

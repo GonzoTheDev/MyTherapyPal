@@ -26,7 +26,7 @@ def llm_api():
         response = jsonify({"llm_response": llm_response})
     
     # Manually setting CORS headers (consider removing if using flask_cors for simplicity)
-    if not ENABLE_CORS:
+    if ENABLE_CORS:
         headers = {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -63,7 +63,7 @@ def summary_api():
     return response
 
 if __name__ == '__main__':
-    ENABLE_CORS = False
+    ENABLE_CORS = True
     if ENABLE_CORS:
         serve(app, host='0.0.0.0', port=5000, url_scheme='https')
     else:
