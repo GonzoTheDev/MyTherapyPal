@@ -1,6 +1,9 @@
 from flask import jsonify
 from transformers import LlamaTokenizer, pipeline
 from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
 
 # Set the quantization configuration
 quantize_config = BaseQuantizeConfig(**{"bits": 4, "damp_percent": 0.01, "desc_act": True, "group_size": 128})
@@ -92,3 +95,29 @@ def rephrase_for_client(response):
     response_text = rephrased_response[0]['generated_text']
     final_response = response_text.split("Task: Rephrase the above response as if you are talking directly to the user: ")[1].strip()
     return final_response
+
+
+def generate_rsa_keypair():
+    # Generate a private key
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=4096,
+        backend=default_backend()
+    )
+    # Generate a public key
+    public_key = private_key.public_key()
+
+    # Serialize the private key to PEM format
+    pem_private_key = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+
+    # Serialize the public key to PEM format
+    pem_public_key = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return pem_private_key, pem_public_key

@@ -79,7 +79,7 @@ class Chat {
       return ""; 
     }
   }
-// Method for making a request to the LLM API
+  // Method for making a request to the LLM API
   Future<String> llmResponse(String text) async {
     try {
       final response = await http.post(

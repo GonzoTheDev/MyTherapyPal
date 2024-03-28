@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-from process_response import process_response, summarize_notes
+from process_response import generate_rsa_keypair, process_response, summarize_notes
 from waitress import serve
+
 
 app = Flask(__name__)
 
@@ -61,6 +62,15 @@ def summary_api():
                 response.headers.add(key, value)
     
     return response
+
+@app.route('/generate_rsa_keys', methods=['POST'])
+def generate_rsa_keys_api():
+    pem_private_key, pem_public_key = generate_rsa_keypair()
+    return jsonify({
+        "publicKey": pem_public_key.decode('utf-8'),
+        "privateKey": pem_private_key.decode('utf-8')
+    })
+
 
 if __name__ == '__main__':
     ENABLE_CORS = True

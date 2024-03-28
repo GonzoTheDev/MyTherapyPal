@@ -253,8 +253,6 @@ class AuthService {
           print("Failed to start demo chat...");
         }
 
-        logoutUser();
-
         return 'Success';
 
       } on FirebaseAuthException catch (e) {
