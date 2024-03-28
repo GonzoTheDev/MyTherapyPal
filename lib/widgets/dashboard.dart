@@ -20,7 +20,8 @@ class _DashboardState extends State<Dashboard> {
   }
 
   bool showTick = false; 
-  bool viewMore = false;
+  bool viewMore = false; 
+  bool profileLoaded = false;
   String selectedMood = '';
   Color selectedMoodColour = Colors.black;
   String selectedMoodEmoji = '';
@@ -71,13 +72,13 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Future<void> _fetchUserFirstName() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       try {
         final documentSnapshot = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
         final fname = documentSnapshot.data()?['fname'] as String? ?? 'User';
         setState(() {
           userFirstName = fname;
+          profileLoaded = fname != "User";
         });
       } catch (e) {
         print("Error fetching user first name: $e");
@@ -315,10 +316,18 @@ class _DashboardState extends State<Dashboard> {
 
     @override
     Widget build(BuildContext context) {
+      if (!profileLoaded) {
+      // Show loading indicator
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
       double screenWidth = MediaQuery.of(context).size.width;
       bool isLargeScreen = screenWidth > 800;
       int columns = isLargeScreen ? 5 : 3;
-      double maxWidth = MediaQuery.of(context).size.width > 414 ? 414 : MediaQuery.of(context).size.width;
+      //double maxWidth = MediaQuery.of(context).size.width > 414 ? 414 : MediaQuery.of(context).size.width;
       var greeting = _getGreeting();
       return Scaffold(
         body: SingleChildScrollView(

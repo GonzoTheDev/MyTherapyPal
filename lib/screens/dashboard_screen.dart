@@ -27,13 +27,12 @@ class AccountHomePage extends StatefulWidget {
 class _AccountHomePageState extends State<AccountHomePage> {
   
   Widget? _child;
-  bool _showFab = false;
   String _appBarSubtitle = "Home";
 
   @override
   void initState() {
     super.initState();
-    checkIsAdmin();
+    checkIsLoggedIn();
     _handleNavigationChange(widget.initialIndex);
   }
   
@@ -43,25 +42,13 @@ class _AccountHomePageState extends State<AccountHomePage> {
   }
 
 
-  void checkIsAdmin() async {
+  void checkIsLoggedIn() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) {
-      final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(uid).get();
-      final userType = userProfileDoc.data()?['userType'];
-      if (userType == "Admin") {
-        if(mounted) {
-          setState(() {
-            _showFab = false;
-          });
-        }
-      } else {
-        if(mounted) {
-          setState(() {
-            _showFab = false;
-          });
-        }
-      }
-    }
+    if (uid == null) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const Login()),
+        (route) => false,
+      );}
   }
 
 
@@ -244,18 +231,6 @@ class _AccountHomePageState extends State<AccountHomePage> {
           ),
         ),
       ),
-      floatingActionButton: _showFab ? FloatingActionButton(
-        onPressed: () {
-          // Navigate to StartChat or the action you want to perform
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AdminHomePage()),
-          );
-        },
-        tooltip: 'Go to Admin Dashboard',
-        child: const Icon(Icons.add),
-      ) : null, // Hide FAB when not on ChatList
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

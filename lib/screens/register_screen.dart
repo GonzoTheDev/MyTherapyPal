@@ -500,10 +500,8 @@ class _RegisterAccountState extends State<RegisterAccount> {
                           setState(() {
                             _isLoading = true; 
                           });
-                          if(_isLoading){
-                            // Show the loading dialog
-                            showGeneratingKeysDialog(context);
-                          }
+                          // Show the loading dialog
+                          showGeneratingKeysDialog(context);
                           final message = await AuthService().registration(
                             email: _emailController.text,
                             password: _passwordController.text,
@@ -520,20 +518,26 @@ class _RegisterAccountState extends State<RegisterAccount> {
                             longitude: _longitude,
                             latitude: _latitude,
                           );
-                          if (message!.contains('Success')) {
+                          // Dismiss the dialog here before checking the result
+                          Navigator.of(context).pop();
+                          if (message! == 'Success') {
                             setState(() {
                               _isLoading = false; 
                             });
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(builder: (context) => const Login()),
-                              (route) => false,
+                              (Route<dynamic> route) => false,
+                            );
+                          } else {
+                            setState(() {
+                              _isLoading = false; 
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(message),
+                              ),
                             );
                           }
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(message),
-                            ),
-                          );
                         },
                         
                         style: ButtonStyle(
@@ -546,13 +550,6 @@ class _RegisterAccountState extends State<RegisterAccount> {
                       ),
                     ),
                     const SizedBox(height: 30.0),
-                    if (_isLoading)
-                      Container(
-                        color: Colors.black.withOpacity(0.5), 
-                        child: const Center(
-                          child: CircularProgressIndicator(), 
-                        ),
-                      ),
                   ],
                 ),
               ),

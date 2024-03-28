@@ -227,7 +227,7 @@ class AuthService {
           }
 
         // Generate a chat with the ai chatbot
-        GenerateChat(
+        await GenerateChat(
           aesKey: aesKey,
           encryptedAESKey: encryptedAESKey,
           fname: fname,
