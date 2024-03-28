@@ -1,9 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluid_bottom_nav_bar/fluid_bottom_nav_bar.dart';
 import 'package:flutter/services.dart';
-import 'package:my_therapy_pal/screens/admin/dashboard_screen.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
 import 'package:my_therapy_pal/services/auth_service.dart';
 import 'package:my_therapy_pal/widgets/nav_drawer.dart';
@@ -32,23 +29,12 @@ class _AccountHomePageState extends State<AccountHomePage> {
   @override
   void initState() {
     super.initState();
-    checkIsLoggedIn();
     _handleNavigationChange(widget.initialIndex);
   }
   
   @override
   void dispose() {
     super.dispose();
-  }
-
-
-  void checkIsLoggedIn() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const Login()),
-        (route) => false,
-      );}
   }
 
 
