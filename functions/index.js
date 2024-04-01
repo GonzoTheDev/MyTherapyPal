@@ -106,3 +106,18 @@ exports.pushNotification = functions.firestore
         }
     });
 
+exports.listAllUsers = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+      // Throwing an HttpsError so that the client gets the error details.
+      throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
+    }
+    
+    try {
+      const listUsersResult = await admin.auth().listUsers();
+      const users = listUsersResult.users.map((userRecord) => userRecord.toJSON());
+      return { users }; 
+    } catch (error) {
+      throw new functions.https.HttpsError('unknown', 'Failed to fetch users.', error);
+    }
+});
+
