@@ -128,7 +128,7 @@ jobs:
           appId: ${{secrets.FIREBASE_ANDROID_APPID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           file: app-release.apk
-          groups: android-testers
+          #groups: android-testers
   build_ios:
     if: true
     name: Build Flutter (iOS)
@@ -199,7 +199,7 @@ jobs:
         appId: ${{secrets.FIREBASE_IOS_APPID}}
         token: ${{secrets.FIREBASE_TOKEN}}
         file: my_therapy_pal.ipa
-        groups: ios-testers
+        #groups: ios-testers
   build_macos:
     if: true
     name: Build Flutter (macOS)
