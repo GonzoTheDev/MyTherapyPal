@@ -44,16 +44,9 @@ def process_response(username, user_prompt, conversation_history):
     labeled_history = [f"{username if i % 2 == 0 else 'Assistant'}: {msg}" for i, msg in enumerate(conversation_history)]
     prompt_with_context = "\n".join(labeled_history + [f"Assistant:"])
     
-    print(f"Prompt with context: {prompt_with_context}")
-    
     # Get generated text and strip the prompt
     generated_text = pipe(prompt_with_context)[0]['generated_text']
-
-    print(f"Generated text: {generated_text}")
-
     assistant_response = generated_text.split("Assistant:")[-1].strip()
-
-    print(f"Assistant response: {assistant_response}")
 
     return assistant_response
 
@@ -69,7 +62,6 @@ def summarize_notes(data):
     
     # Add an explicit request for summary at the end
     summary_request = "\n\nSummary: Please provide a summary of the key points for the therapist."
-    
     prompt_for_model = context + "\n\n" + notes_with_context + summary_request
     
     # Generate summary using the pipeline, with adjusted parameters for focused summarization

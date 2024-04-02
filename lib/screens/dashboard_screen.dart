@@ -122,8 +122,8 @@ class _AccountHomePageState extends State<AccountHomePage> {
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.teal,
           systemNavigationBarColor: Colors.teal,
-          statusBarIconBrightness: Brightness.dark, // For Android
-          statusBarBrightness: Brightness.light, // For iOS
+          statusBarIconBrightness: Brightness.dark, 
+          statusBarBrightness: Brightness.light, 
         ),
         title: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -155,7 +155,7 @@ class _AccountHomePageState extends State<AccountHomePage> {
                   child: Padding(
                     padding: EdgeInsets.only(left: isSmallScreen ? 200 : 0),
                     child: Text(
-                      _appBarSubtitle, // The subtitle
+                      _appBarSubtitle, 
                       style: const TextStyle(fontSize: 14, color: Colors.white),
                     ),
                   ),

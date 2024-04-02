@@ -9,7 +9,7 @@ import 'package:crypto/crypto.dart';
 class AESKeyEncryptionService {
 
   // Generate a random AES key
-  Uint8List generateAESKey(int length) { // Length in bytes, AES commonly uses 16, 24, or 32 bytes keys
+  Uint8List generateAESKey(int length) { 
     var rng = Random.secure();
     return Uint8List.fromList(List.generate(length, (_) => rng.nextInt(256)));
   }
@@ -32,7 +32,7 @@ class AESKeyEncryptionService {
 
   // Generate a random IV from the document ID
   Uint8List generateIVFromDocId(String docId) {
-    var bytes = utf8.encode(docId); // Original document ID as bytes
+    var bytes = utf8.encode(docId); // Convert the document ID to bytes
     var hash = sha256.convert(bytes); // Use SHA-256 hash of the document ID
     return Uint8List.fromList(hash.bytes.sublist(0, 16)); // Take first 16 bytes of the hash
   }

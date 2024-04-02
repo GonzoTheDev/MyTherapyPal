@@ -30,6 +30,7 @@ void main() async {
 
   }
 
+  // Check if the app is being opened for the first time
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
@@ -42,7 +43,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   final bool isFirstTime;
   static const String title = 'MyTherapyPal';
-  
   
   const MyApp({super.key, required this.isFirstTime});
 

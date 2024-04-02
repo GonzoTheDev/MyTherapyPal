@@ -73,7 +73,7 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
     if (isLoading) {
       return Scaffold(
         body: Center(
-          child: isLoading ? CircularProgressIndicator() : Text("User profile not found."),
+          child: isLoading ? const CircularProgressIndicator() : const Text("User profile not found."),
         ),
       );
     }
@@ -92,15 +92,15 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
         children: <Widget>[
           ListTile(
             title: const Text('First Name'),
-            subtitle: Text(data['fname'] ?? 'N/A'), // Provide a default value in case it's null
+            subtitle: Text(data['fname'] ?? 'N/A'), 
           ),
           ListTile(
             title: const Text('Last Name'),
-            subtitle: Text(data['sname'] ?? 'N/A'), // Provide a default value in case it's null
+            subtitle: Text(data['sname'] ?? 'N/A'), 
           ),
           ListTile(
             title: const Text('User Type'),
-            subtitle: Text(data['userType'] ?? 'N/A'), // Provide a default value in case it's null
+            subtitle: Text(data['userType'] ?? 'N/A'), 
           ),
           ListTile(
             title: const Text('Delete User'),

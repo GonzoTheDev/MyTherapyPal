@@ -28,8 +28,7 @@ class _ManageUsersState extends State<ManageUsers> {
       final List<dynamic> usersData = List<dynamic>.from(data['users'] ?? []);
       List<UserRecord> users = usersData.map<UserRecord>((user) => UserRecord.fromJson(Map<String, dynamic>.from(user))).toList();
 
-      // Sort the users by their creation timestamp
-      // Assuming earlier dates should come first, otherwise, swap the comparison operands
+      // Sort the users by their creation timestamp in descending order
       users.sort((a, b) => b.creationTimestamp.compareTo(a.creationTimestamp));
 
       return users;
@@ -60,7 +59,7 @@ class _ManageUsersState extends State<ManageUsers> {
                   title: Text(user.email),
                   subtitle: Text('UUID: ${user.uuid}'),
                   trailing: Wrap(
-                    spacing: 12, // space between two icons
+                    spacing: 12, 
                     children: <Widget>[
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,

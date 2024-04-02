@@ -9,7 +9,7 @@ class NoteSummary {
     // Calculate the date for 7 days ago
     final DateTime sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
 
-    // Reference to the Firestore 'notes' collection
+    // Reference to the Firestore "notes" collection
     final CollectionReference notesCollection = FirebaseFirestore.instance.collection('notes');
 
     // Query to get documents for the specified uid and within the last 7 days
@@ -18,7 +18,7 @@ class NoteSummary {
         .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(sevenDaysAgo))
         .get();
 
-    // Convert the query results to a List of Maps (which is essentially JSON)
+    // Convert the query results to a List of Maps
     final List<Map<String, dynamic>> notes = querySnapshot.docs.map((doc) {
       return {
         'text': doc['text'],
@@ -33,9 +33,6 @@ class NoteSummary {
 
     return notesJson;
   } catch (e) {
-    // Return or handle the error
-    // This could be logging the error or returning a custom error message
-    // Here, we return a JSON string with an 'error' key and the error message
     final String errorJson = jsonEncode({'error': e.toString()});
     print('Error: $e');
     return errorJson;

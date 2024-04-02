@@ -144,37 +144,36 @@ class _ReportsState extends State<Reports> {
     return Scaffold(
       body: Center( // Center the content
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800), // Limit the maximum width to 800 pixels
+          constraints: const BoxConstraints(maxWidth: 800),
           child: Padding( // Apply padding on both sides
-            padding: const EdgeInsets.symmetric(horizontal: 15), // Horizontal padding of 15 pixels
+            padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                Center( // Center the text
-                              child:
-                                Text(
-                                  '$startDate - $endDate',
-                                  style: const TextStyle(fontSize: 24, color: Colors.teal),
-                                ),
-                            ),
+                Center(
+                  child:
+                    Text(
+                      '$startDate - $endDate',
+                      style: const TextStyle(fontSize: 24, color: Colors.teal),
+                    ),
+                ),
                 const SizedBox(height: 16),
-                const Center( // Center the text
-                              child:
-                                Text(
-                                  'Mood Summary',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                ),
-                            ),
-                
+                const Center( 
+                  child:
+                    Text(
+                      'Mood Summary',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                ),
                 const SizedBox(height: 16),
                 Expanded(
-                  flex: 1, // Adjust flex to control chart size
+                  flex: 1, 
                   child: FutureBuilder<Map<DateTime, Map<String, int>>>(
-                    future: aggregateMoodCounts(), // Assume this returns aggregated mood counts
+                    future: aggregateMoodCounts(), 
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                        return MoodChart(snapshot.data!); // Pass aggregated data to the chart widget
+                        return MoodChart(snapshot.data!); 
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       }
@@ -204,7 +203,7 @@ class _ReportsState extends State<Reports> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Center( // Center the text
+                            const Center(
                               child:
                                 Text(
                                   'AI Notes Summary',
@@ -229,7 +228,6 @@ class _ReportsState extends State<Reports> {
       ),
     );
   }
-
 }
 
 class MoodData {

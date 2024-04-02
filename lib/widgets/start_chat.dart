@@ -26,9 +26,6 @@ class _StartChatState extends State<StartChat> {
   // Create a new instance of the RSA encryption
   final rsaEncryption = RSAEncryption();
 
-  // Get the user's profile data
-  //final uid = FirebaseAuth.instance.currentUser!.uid;
-
   @override
   void dispose() {
     _firstUserIdController.dispose();
@@ -57,13 +54,9 @@ class _StartChatState extends State<StartChat> {
         // Check which user is the AI chatbot
         targetUid = firstUid != "ai-mental-health-assistant" ? firstUid : secondUid;
 
-        print("Target UID: $targetUid");
-
         // Get the real user's public RSA key from Firestore
         final userProfileDoc = await FirebaseFirestore.instance.collection('profiles').doc(targetUid).get();
         firstUserRSAPubKey = userProfileDoc['publicRSAKey'];
-
-        print("User RSA Public Key: $firstUserRSAPubKey");
 
       }else {
 

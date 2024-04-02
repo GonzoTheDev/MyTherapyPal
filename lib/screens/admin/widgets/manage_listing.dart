@@ -107,7 +107,7 @@ class _ManageListingScreenState extends State<ManageListingScreen> {
             title: const Text('Update Status'),
             trailing: Switch(
               value: isActive,
-              onChanged: (bool value) {}, // Intentionally blank; toggling is handled by onTap
+              onChanged: (bool value) {}, 
             ),
             onTap: toggleActiveStatus,
           ),
@@ -115,7 +115,7 @@ class _ManageListingScreenState extends State<ManageListingScreen> {
             title: const Text('Approved'),
             trailing: Switch(
               value: isApproved,
-              onChanged: (bool value) {}, // Intentionally blank; toggling is handled by onTap
+              onChanged: (bool value) {}, 
             ),
             onTap: toggleApprovedStatus,
           ),

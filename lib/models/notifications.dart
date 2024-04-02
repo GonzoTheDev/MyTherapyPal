@@ -19,27 +19,22 @@ class PushNotificationService {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        print('User granted permission');
         await _updateUserToken();
       } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
-        print('User declined or has not accepted permission');
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('notifications_token', 'not_granted');
       } else {
-        print('Permission not determined, requesting...');
-        // Handle not determined permission state if needed, it's included in the initial permission request
         await _updateUserToken();
       }
 
+    // Handle messages in the foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
       if (message.notification != null) {
         print('Message also contained a notification: ${message.notification}');
       }
     });
 
+    // Handle messages in the background
     FirebaseMessaging.onBackgroundMessage(backgroundHandler);
   }
 

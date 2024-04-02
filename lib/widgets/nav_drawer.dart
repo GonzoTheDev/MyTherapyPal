@@ -11,7 +11,7 @@ class NavDrawer extends StatefulWidget {
   const NavDrawer({super.key});
 
   @override
-  _NavDrawerState createState() => _NavDrawerState();
+  State<NavDrawer> createState() => _NavDrawerState();
 }
 
 class _NavDrawerState extends State<NavDrawer> {

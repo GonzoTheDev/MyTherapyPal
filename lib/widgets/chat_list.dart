@@ -22,7 +22,7 @@ class _ChatListState extends State<ChatList> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
-  String? _aiChatId; // Store the AI chat ID
+  String? _aiChatId; 
 
   // Create a new instance of the RSA encryption 
   final rsaEncryption = RSAEncryption();
@@ -36,7 +36,7 @@ class _ChatListState extends State<ChatList> {
     getChatbotChatId().then((id) {
       if (mounted) {
         setState(() {
-          _aiChatId = id; // Set the AI chat ID
+          _aiChatId = id; 
         });
       }
     });

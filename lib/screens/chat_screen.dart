@@ -171,7 +171,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Initialize _chatController safely
     setState(() {
       _chatController = ChatController(
-        initialMessageList: [], // Initialize with an empty list or appropriate default
+        initialMessageList: [], 
         scrollController: ScrollController(),
         chatUsers: [currentUser, otherUser],
       );
@@ -249,8 +249,8 @@ class _ChatScreenState extends State<ChatScreen> {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('note_summary')
           .where('uid', isEqualTo: otherUserID)
-          .orderBy('timestamp', descending: true) // Ensures the latest document is fetched first
-          .limit(1) // Limits the query to only fetch the latest document
+          .orderBy('timestamp', descending: true)
+          .limit(1)
           .get();
 
       // Check if documents exist
@@ -276,7 +276,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 TextButton(
                   child: const Text('OK'),
                   onPressed: () {
-                    Navigator.of(context).pop(); // Dismiss the dialog
+                    Navigator.of(context).pop();
                   },
                 ),
               ],
@@ -330,10 +330,10 @@ class _ChatScreenState extends State<ChatScreen> {
     // Before using `context` or calling `setState`, check if the widget is still mounted
     if (!mounted) return;
 
-    // Disable the old AI chat by setting active to false
+    // Delete the old AI chat room
     await db.collection("chat").doc(chat.chatID).delete();
 
-    // Disable the old AI chat messages by setting active to false
+    // Delete all messages belonging to that chat room
     await db.collection("messages").where('chatID', isEqualTo: chat.chatID).get().then((snapshot) {
       for (DocumentSnapshot ds in snapshot.docs){
         ds.reference.delete();
@@ -371,7 +371,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 return const Text('Error');
               } else {
                 return const AccountHomePage(initialIndex: 2);
-                //return ChatScreen(chatID: snapshot.data!);
               }
             },
           ),
@@ -660,8 +659,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Function to display a dialog for adding a task
   Future<void> _showAddTaskDialog() async {
-    DateTime selectedDate = DateTime.now().add(const Duration(days: 7)); // Default to one week from now
-    TimeOfDay selectedTime = TimeOfDay(hour: selectedDate.hour, minute: selectedDate.minute); // Default time
+    DateTime selectedDate = DateTime.now().add(const Duration(days: 7)); 
+    TimeOfDay selectedTime = TimeOfDay(hour: selectedDate.hour, minute: selectedDate.minute); 
 
     return showDialog<void>(
       context: context,

@@ -327,7 +327,6 @@ class _DashboardState extends State<Dashboard> {
       double screenWidth = MediaQuery.of(context).size.width;
       bool isLargeScreen = screenWidth > 800;
       int columns = isLargeScreen ? 5 : 3;
-      //double maxWidth = MediaQuery.of(context).size.width > 414 ? 414 : MediaQuery.of(context).size.width;
       var greeting = _getGreeting();
       return Scaffold(
         body: SingleChildScrollView(
@@ -421,24 +420,6 @@ class _DashboardState extends State<Dashboard> {
                     const SizedBox(
                       height: 20.0,
                     ),
-                    /*Container(
-                      constraints: BoxConstraints(maxWidth: maxWidth / 2),
-                      child: 
-                      SizedBox(
-                        width: double.infinity/2,
-                        height: 50.0,
-                        child: ElevatedButton(
-                          onPressed: _showAddNoteDialog,
-                          style: ButtonStyle(
-                            minimumSize: MaterialStateProperty.all<Size>(const Size(double.infinity, 36)),
-                          ),
-                          child: const Text(
-                            'Add a note',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),*/
                     const SizedBox(
                       height: 60.0,
                     ),

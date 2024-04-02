@@ -26,6 +26,7 @@ const googleMapsClient = require('@google/maps').createClient({
     Promise: Promise
 });
 
+// Cloud function to get address suggestions based on the input using Google Places API
 exports.getAddressSuggestions = functions.https.onCall(async (data, context) => {
     const input = data.input;
     if (!input) {
@@ -45,6 +46,7 @@ exports.getAddressSuggestions = functions.https.onCall(async (data, context) => 
     }
 });
 
+// Cloud function to get coordinates based on the address using Google Geocoding API
 exports.getCoordinatesByAddress = functions.https.onCall(async (data, context) => {
     const address = data.address;
     if (!address) {
@@ -72,6 +74,7 @@ exports.getCoordinatesByAddress = functions.https.onCall(async (data, context) =
     }
 });
 
+// Cloud function to send a push notification when a new message is added to the database
 exports.pushNotification = functions.firestore
     .document('notifications/{docId}')
     .onCreate(async (snap, context) => {
@@ -106,6 +109,7 @@ exports.pushNotification = functions.firestore
         }
     });
 
+// Cloud function to list all users in Firebase Authentication for the MyTherapyPal project
 exports.listAllUsers = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
       // Throwing an HttpsError so that the client gets the error details.

@@ -20,7 +20,6 @@ class _TasksState extends State<Tasks> {
   void initState() {
     super.initState();
     _checkAndExpireTasks();
-    print(_uid);
   }
 
   Future<void> _checkAndExpireTasks() async {
@@ -30,8 +29,6 @@ class _TasksState extends State<Tasks> {
         .where('client_uid', isEqualTo: _uid)
         .where('expiry', isLessThan: now)
         .get();
-
-    print('Tasks checked for expiry: ${querySnapshot.docs.length}');
 
     for (var doc in querySnapshot.docs) {
       if (doc['status'] != 'Expired') {
@@ -99,7 +96,7 @@ class _TasksState extends State<Tasks> {
                       title: Text(task.title),
                       subtitle: Text(
                         '${task.status} - ${DateFormat('dd/MM/yyyy hh:mm a').format(task.timestamp.toDate())}',
-                        style: TextStyle(color: _getStatusColor(task.status)), // Apply status color
+                        style: TextStyle(color: _getStatusColor(task.status)), 
                       ),
                     );
                   },

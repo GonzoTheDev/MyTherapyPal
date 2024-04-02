@@ -22,8 +22,8 @@ class _ResetPasswordState extends State<ResetPassword> {
         systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.teal,
           systemNavigationBarColor: Colors.teal,
-          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-          statusBarBrightness: Brightness.light, // For iOS (dark icons)
+          statusBarIconBrightness: Brightness.dark, 
+          statusBarBrightness: Brightness.light, 
         ),
         title: const Text(
           MainApp.title,

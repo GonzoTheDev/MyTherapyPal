@@ -27,9 +27,9 @@ class MoodChart extends StatelessWidget {
               if (value.toInt() < last7Days.length) {
                 final DateTime date = last7Days[value.toInt()];
                 return Padding(
-                  padding: const EdgeInsets.all(4.0), // Add padding for better alignment
+                  padding: const EdgeInsets.all(4.0), 
                   child: Text(
-                    DateFormat('MMM dd').format(date), // Format date
+                    DateFormat('MMM dd').format(date),
                     style: const TextStyle(color: Colors.black, fontSize: 10),
                     textAlign: TextAlign.center,
                   ),
@@ -43,7 +43,6 @@ class MoodChart extends StatelessWidget {
         leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, interval: 1)),
         topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
-      // Assuming you're handling touch interactions with aggregatedData to display tooltips
       barTouchData: BarTouchData(
         touchTooltipData: BarTouchTooltipData(
           tooltipBgColor: const Color.fromARGB(141, 0, 150, 135),
