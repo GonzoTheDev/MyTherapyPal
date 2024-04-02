@@ -43,6 +43,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '159382536980',
     projectId: 'mytherapypal',
     authDomain: 'mytherapypal.firebaseapp.com',
+    databaseURL: 'https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'mytherapypal.appspot.com',
     measurementId: 'G-BRSDP2FNM2',
   );
@@ -52,6 +53,7 @@ class DefaultFirebaseOptions {
     appId: '1:159382536980:android:48e66458ba74bfb0333801',
     messagingSenderId: '159382536980',
     projectId: 'mytherapypal',
+    databaseURL: 'https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'mytherapypal.appspot.com',
   );
 
@@ -60,6 +62,7 @@ class DefaultFirebaseOptions {
     appId: '1:159382536980:ios:fda062a6a35c217a333801',
     messagingSenderId: '159382536980',
     projectId: 'mytherapypal',
+    databaseURL: 'https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'mytherapypal.appspot.com',
     iosBundleId: 'com.myTherapyPal',
   );
@@ -69,30 +72,30 @@ class DefaultFirebaseOptions {
     appId: '1:159382536980:ios:bed67e6e406d2f1f333801',
     messagingSenderId: '159382536980',
     projectId: 'mytherapypal',
+    databaseURL: 'https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'mytherapypal.appspot.com',
     iosBundleId: 'com.myTherapyPal.RunnerTests',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: "AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI",
-    authDomain: "mytherapypal.firebaseapp.com",
-    databaseURL: "https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "mytherapypal",
-    storageBucket: "mytherapypal.appspot.com",
-    messagingSenderId: "159382536980",
-    appId: "1:159382536980:web:02ca925c12a241af333801",
-    measurementId: "G-R15BC5R56C"
+    apiKey: 'AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI',
+    appId: '1:159382536980:web:02ca925c12a241af333801',
+    messagingSenderId: '159382536980',
+    projectId: 'mytherapypal',
+    authDomain: 'mytherapypal.firebaseapp.com',
+    databaseURL: 'https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'mytherapypal.appspot.com',
+    measurementId: 'G-R15BC5R56C',
   );
 
   static const FirebaseOptions linux = FirebaseOptions(
-    apiKey: "AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI",
-    authDomain: "mytherapypal.firebaseapp.com",
-    databaseURL: "https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "mytherapypal",
-    storageBucket: "mytherapypal.appspot.com",
-    messagingSenderId: "159382536980",
-    appId: "1:159382536980:web:2f745be2c2f17c3d333801",
-    measurementId: "G-7SLG4ERVL2"
+    apiKey: 'AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI',
+    appId: '1:159382536980:web:2f745be2c2f17c3d333801',
+    messagingSenderId: '159382536980',
+    projectId: 'mytherapypal',
+    authDomain: 'mytherapypal.firebaseapp.com',
+    databaseURL: 'https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'mytherapypal.appspot.com',
+    measurementId: 'G-7SLG4ERVL2',
   );
-
 }

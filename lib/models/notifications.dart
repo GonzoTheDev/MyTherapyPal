@@ -57,7 +57,11 @@ class PushNotificationService {
       await prefs.setString('notifications_token_web', token);
       print('Web token saved in SharedPreferences for later use: $token');
     }
-    } else {
+    } else if (DefaultFirebaseOptions.currentPlatform == DefaultFirebaseOptions.windows){
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('notifications_token', "token_not_supported_on_windows");
+    }
+    else {
       token = await _fcm.getToken();
       if (token != null) {
         // Save the token in SharedPreferences for later use

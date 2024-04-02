@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "159382536980",
+    "firebase_url": "https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "mytherapypal",
     "storage_bucket": "mytherapypal.appspot.com"
   },
