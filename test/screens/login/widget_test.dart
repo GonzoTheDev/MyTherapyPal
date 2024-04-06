@@ -6,7 +6,7 @@ import 'package:my_therapy_pal/screens/dashboard_screen.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart'; 
 import 'package:my_therapy_pal/services/auth_service.dart';
 import 'package:provider/provider.dart';
-import '../../../test/services/mock_auth_service.mocks.dart';
+import '../../services/mock_auth_service.mocks.dart';
 import '../../services/mock_firebase.dart';
 
 

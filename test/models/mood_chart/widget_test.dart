@@ -2,6 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_therapy_pal/models/mood_chart.dart';
+import '../../test_settings.dart';
+
+final TestSettings testSettings = TestSettings();
 
 void main() {
   testWidgets('MoodChart renders correctly', (WidgetTester tester) async {
@@ -27,5 +30,5 @@ void main() {
     final barChartGroupData = tester.widget<BarChart>(find.byType(BarChart)).data.barGroups;
     expect(barChartGroupData.length, 7); 
 
-  });
+  }, skip: TestSettings.moodChart[0]['skip'] as bool);
 }

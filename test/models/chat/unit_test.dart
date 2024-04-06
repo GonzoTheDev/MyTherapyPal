@@ -3,7 +3,9 @@ import 'package:chatview/chatview.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_therapy_pal/models/chat.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import '../../test_settings.dart';
 
+final TestSettings testSettings = TestSettings();
 
 void main() async {
 
@@ -32,19 +34,19 @@ void main() async {
     test('Check if the chat is with the AI chatbot', () {
       // Test the checkAI method
       expect(chat.ai, false); 
-    });
+    }, skip: TestSettings.chat[0]['skip'] as bool);
 
     test('Load context from file', () async {
       // Test the loadContext method
       final context = await chat.loadContext();
       expect(context, isNotEmpty);
-    });
+    }, skip: TestSettings.chat[1]['skip'] as bool);
 
     test('Make request to LLM API', () async {
       // Test the llmResponse method
       final response = await chat.llmResponse('Test message');
       expect(response, isNotEmpty);
-    });
+    }, skip: TestSettings.chat[2]['skip'] as bool);
 
     tearDown(() {
       // Dispose of resources, if needed

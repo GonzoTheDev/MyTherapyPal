@@ -19,12 +19,12 @@ class PushNotificationService {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        await _updateUserToken();
+        await updateUserToken();
       } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('notifications_token', 'not_granted');
       } else {
-        await _updateUserToken();
+        await updateUserToken();
       }
 
     // Handle messages in the foreground
@@ -42,7 +42,7 @@ class PushNotificationService {
     print('Handling a background message ${message.messageId}');
   }
 
-  Future<void> _updateUserToken() async {
+  Future<void> updateUserToken() async {
 
     String? token;
     const vapidKey = "BIo28pk5GfuPkYHfZ1du1i_cNJa2Vxw8JpNA5yt0OEtW_uKxMNfBfwBZ0bkpvA3FsSgV2YN_QurC2lkzi4gJ5Hw";
