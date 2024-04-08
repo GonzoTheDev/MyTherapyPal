@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:my_therapy_pal/models/notifications.dart';
 import 'package:my_therapy_pal/screens/login_screen.dart';
@@ -18,6 +16,18 @@ FirebaseAuth auth = FirebaseAuth.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeApp();
+  // Check if the app is being opened for the first time
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
+
+  runApp(MyApp(isFirstTime: isFirstTime));
+  if (isFirstTime) {
+    await prefs.setBool('isFirstTime', false);
+  }
+}
+
+Future<void> initializeApp() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -28,15 +38,6 @@ void main() async {
     PushNotificationService pushNotificationService = PushNotificationService();
     await pushNotificationService.initialize();
 
-  }
-
-  // Check if the app is being opened for the first time
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
-
-  runApp(MyApp(isFirstTime: isFirstTime));
-  if (isFirstTime) {
-    await prefs.setBool('isFirstTime', false);
   }
 }
 

@@ -8,7 +8,7 @@ final TestSettings testSettings = TestSettings();
 void main() {
   group('MoodChart', () {
     test('createEmojiColorMap returns correct mapping', () {
-      final moodChart = MoodChart({});
+      final moodChart = MoodChart(const {});
       final emojiColorMap = moodChart.createEmojiColorMap();
 
       expect(emojiColorMap['😁'], const Color.fromARGB(255, 0, 102, 4));

@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 
+
 class AppSettings extends StatefulWidget {
   const AppSettings({super.key});
 
   @override
-  State<AppSettings> createState() => _AppSettingsState();
+  State<AppSettings> createState() => _AppSettings();
 }
 
-class _AppSettingsState extends State<AppSettings> {
+class _AppSettings extends State<AppSettings> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+      ),
+      body: const Center(
+        child: Text('This page needs to be implemented.'),
+      ),
+    );
   }
 }
-    

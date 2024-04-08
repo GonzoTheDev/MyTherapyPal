@@ -11,8 +11,13 @@ class ManageAccount extends StatefulWidget {
 class _ManageAccount extends State<ManageAccount> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Manage Account'),
+      ),
+      body: const Center(
+        child: Text('This page needs to be implemented.'),
+      ),
+    );
   }
-
 }

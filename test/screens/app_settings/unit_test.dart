@@ -1,20 +1,20 @@
-// Import the Flutter test utilities
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:my_therapy_pal/screens/app_settings_screen.dart';
 
 void main() {
-  // Define a test group
-  group('test/screens/app_settings - Sample Unit Test', () {
-    // Define a single test
-    test('1 should equal 1', () {
-      // Arrange
-      var number = 1;
+  testWidgets('AppSettings renders correctly', (WidgetTester tester) async {
+    // Build the ManageAccount widget
+    await tester.pumpWidget(const MaterialApp(home: AppSettings()));
 
-      // Act
-      // (no action is necessary for this simple test)
+    // Verify that the ManageAccount widget is rendered
+    expect(find.byType(AppSettings), findsOneWidget);
 
-      // Assert that number is equal to 1
-      expect(number, 1);
-    });
+    // Verify the AppBar title
+    expect(find.text('Settings'), findsOneWidget);
+
+    // Verify the body Text widget
+    expect(find.text('This page needs to be implemented.'), findsOneWidget);
   });
 }
 

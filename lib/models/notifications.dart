@@ -4,8 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class PushNotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  bool isInitialized = false;
+  bool backgroundHandlerCalled = false;
 
   Future<void> initialize() async {
+      isInitialized = true;
     
       // Request permission for push notifications
       final settings = await _fcm.requestPermission(
@@ -40,6 +43,7 @@ class PushNotificationService {
 
   Future<void> backgroundHandler(RemoteMessage message) async {
     print('Handling a background message ${message.messageId}');
+    backgroundHandlerCalled = true;
   }
 
   Future<void> updateUserToken() async {

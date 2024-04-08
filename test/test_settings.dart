@@ -4,15 +4,15 @@ class TestSettings {
   static const chat = [
     {
       'description': 'ChatScreen displays loading indicator while fetching data',
-      'skip': true,
+      'skip': false,
     },
     {
       'description': 'ChatScreen displays messages when data is loaded',
-      'skip': true,
+      'skip': false,
     },
     {
       'description': 'Sending a message clears the input and shows the message in the list',
-      'skip': true,
+      'skip': false,
     },
   ];
 
@@ -32,11 +32,11 @@ class TestSettings {
   static const moodChart = [
     {
       'description': 'createEmojiColorMap returns correct mapping',
-      'skip': true,
+      'skip': false,
     },
     {
       'description': 'createEmojiMoodMap returns correct mapping',
-      'skip': true,
+      'skip': false,
     },
     {
       'description': 'MoodChart renders correctly',

@@ -27,21 +27,37 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return linux;
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
         );
     }
   }
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: "AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI",
+    authDomain: "mytherapypal.firebaseapp.com",
+    databaseURL: "https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "mytherapypal",
+    storageBucket: "mytherapypal.appspot.com",
+    messagingSenderId: "159382536980",
+    appId: "1:159382536980:web:02ca925c12a241af333801",
+    measurementId: "G-R15BC5R56C"
+  );
+
+  static const FirebaseOptions linux = FirebaseOptions(
+    apiKey: "AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI",
+    authDomain: "mytherapypal.firebaseapp.com",
+    databaseURL: "https://mytherapypal-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "mytherapypal",
+    storageBucket: "mytherapypal.appspot.com",
+    messagingSenderId: "159382536980",
+    appId: "1:159382536980:web:2f745be2c2f17c3d333801",
+    measurementId: "G-7SLG4ERVL2"
+  );
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDkImHd39IMfQNdytRVxFY3yhzQwcEwvrQ',
