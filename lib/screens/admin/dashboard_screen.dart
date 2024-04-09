@@ -9,7 +9,7 @@ import 'package:my_therapy_pal/screens/admin/widgets/manage_users.dart';
 import 'package:my_therapy_pal/screens/dashboard_screen.dart';
 import 'package:my_therapy_pal/widgets/nav_drawer.dart';
 import 'package:my_therapy_pal/main.dart';
-import 'package:my_therapy_pal/widgets/start_chat.dart';
+import 'package:my_therapy_pal/screens/admin/widgets/start_chat.dart';
 
 
 class AdminHomePage extends StatefulWidget {
