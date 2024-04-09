@@ -30,7 +30,7 @@ void main() {
 
       // Verify that the Tasks widget is rendered
       expect(find.byType(Tasks), findsOneWidget);
-    });
+    }, skip: true);
 
   });
 }

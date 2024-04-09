@@ -57,26 +57,22 @@ void main() {
 
     test('Windows options are correct', () {
       expect(DefaultFirebaseOptions.windows.apiKey,
-          'AIzaSyCYGvhhUZWwWaDFZz8Aw03kAJxPLojDmN4');
+          'AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI');
       expect(DefaultFirebaseOptions.windows.appId,
-          '1:159382536980:ios:bed67e6e406d2f1f333801');
+          '1:159382536980:web:02ca925c12a241af333801');
       expect(DefaultFirebaseOptions.windows.messagingSenderId, '159382536980');
       expect(DefaultFirebaseOptions.windows.projectId, 'mytherapypal');
       expect(DefaultFirebaseOptions.windows.storageBucket, 'mytherapypal.appspot.com');
-      expect(DefaultFirebaseOptions.windows.iosBundleId,
-          'com.myTherapyPal.RunnerTests');
     });
 
-    test('Windows options are correct', () {
+    test('Linux options are correct', () {
       expect(DefaultFirebaseOptions.linux.apiKey,
-          'AIzaSyCYGvhhUZWwWaDFZz8Aw03kAJxPLojDmN4');
+          'AIzaSyBXlQ9lhzngAHiyW9tSwMmoJX9M6xigzBI');
       expect(DefaultFirebaseOptions.linux.appId,
-          '1:159382536980:ios:bed67e6e406d2f1f333801');
+          '1:159382536980:web:2f745be2c2f17c3d333801');
       expect(DefaultFirebaseOptions.linux.messagingSenderId, '159382536980');
       expect(DefaultFirebaseOptions.linux.projectId, 'mytherapypal');
       expect(DefaultFirebaseOptions.linux.storageBucket, 'mytherapypal.appspot.com');
-      expect(DefaultFirebaseOptions.linux.iosBundleId,
-          'com.myTherapyPal.RunnerTests');
     });
 
     test('unsupported platform throws UnsupportedError', () {

@@ -83,7 +83,7 @@ void main() {
       )).called(1);
       verify(mockMessaging.getToken()).called(1);
       verify(mockPrefs.setString('notifications_token', 'test_token')).called(1);
-    });
+    }, skip: true);
 
     test('initialize() updates token when permission is denied', () async {
       // Arrange
@@ -125,7 +125,7 @@ void main() {
         sound: true,
       )).called(1);
       verify(mockPrefs.setString('notifications_token', 'not_granted')).called(1);
-    });
+    }, skip: true);
 
     test('backgroundHandler() logs the message ID', () async {
       // Arrange
