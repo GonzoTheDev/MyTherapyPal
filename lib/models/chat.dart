@@ -23,7 +23,7 @@ class Chat {
   late String username;
   List<ChatUser> users; 
   List<dynamic>? conversationHistory;
-  late bool ai = false;
+  bool ai = false;
 
   // Define the constructor
   Chat({required this.chatID, required this.users, required this.username, this.conversationHistory, required this.aesKey, FirebaseFirestore? db}) {
@@ -35,22 +35,26 @@ class Chat {
       this.db = FirebaseFirestore.instance;
     }
 
+    
+    // Check if the chat is with the AI assistant
+    checkAI();
+
+    if(ai == true) {
+      // Initialize conversationHistory with context if necessary
+      loadContext().then((loadedContext) {
+
+        chatContext = loadedContext;
+        // Initialize conversationHistory with context if necessary
+        conversationHistory ??= [chatContext];
+        
+      }).catchError((error) {
+        print("Error loading context: $error");
+      });
+    }
+
     // Listen for new messages in the chat
     listenToMessages();
     
-    // Initialize conversationHistory with context if necessary
-    loadContext().then((loadedContext) {
-
-      chatContext = loadedContext;
-      // Initialize conversationHistory with context if necessary
-      conversationHistory ??= [chatContext];
-      
-    }).catchError((error) {
-      print("Error loading context: $error");
-    });
-
-    // Check if the chat is with the AI assistant
-    checkAI();
   }
 
   // Method to check if the chat is with the AI assistant

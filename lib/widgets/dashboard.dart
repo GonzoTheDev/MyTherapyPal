@@ -339,7 +339,7 @@ class _DashboardState extends State<Dashboard> {
                     const SizedBox(height: 20.0),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text('$greeting, $userFirstName!', style: Theme.of(context).textTheme.titleLarge),
+                      child: Text('How are you feeling?', style: Theme.of(context).textTheme.titleLarge),
                     ),
                     Visibility(
                       visible: !showTick,

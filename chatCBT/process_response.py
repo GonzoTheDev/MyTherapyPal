@@ -40,7 +40,7 @@ summary_pipe = pipeline(
 )
 
 # Function that takes the user prompt and conversation history (which includes context/task assignment) and returns the ai assistant response
-def process_response(username, user_prompt, conversation_history):
+def process_response(username, conversation_history):
     labeled_history = [f"{username if i % 2 == 0 else 'Assistant'}: {msg}" for i, msg in enumerate(conversation_history)]
     prompt_with_context = "\n".join(labeled_history + [f"Assistant:"])
     
