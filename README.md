@@ -4,11 +4,11 @@ This is the main repository for the final MyTherapyPal application. It consists 
 
 # Application Screenshots
 
-![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/screenshots1.png?raw=true)
+![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/assets/images/screenshots1.png?raw=true)
 
-![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/screenshots2.png?raw=true)
+![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/assets/images/screenshots2.png?raw=true)
 
-![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/screenshots3.png?raw=true)
+![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/assets/images/screenshots3.png?raw=true)
 
 
 # Run debug environment
