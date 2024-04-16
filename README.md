@@ -2,6 +2,15 @@
 
 This is the main repository for the final MyTherapyPal application. It consists of a flutter desktop, mobile & web user interface application with account registration & login functionality, chat functionality and an AI mental health assistant chatbot, which is implemented using a REST API web service powered by Python Flask.
 
+# Application Screenshots
+
+![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/screenshots1.png?raw=true)
+
+![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/screenshots2.png?raw=true)
+
+![alt text](https://github.com/GonzoTheDev/MyTherapyPal/blob/main/screenshots3.png?raw=true)
+
+
 # Run debug environment
 
 ## AI(LLM) Mental Health Assistant API

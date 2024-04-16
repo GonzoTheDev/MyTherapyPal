@@ -20,10 +20,9 @@ def llm_api():
         response = app.make_default_options_response()
     else:
         data = request.get_json()
-        input_text = data['text']
         context = data['conversation_history']
         username = data['username']
-        llm_response = process_response(username, input_text, context)
+        llm_response = process_response(username, context)
         response = jsonify({"llm_response": llm_response})
     
     # Manually setting CORS headers (consider removing if using flask_cors for simplicity)
